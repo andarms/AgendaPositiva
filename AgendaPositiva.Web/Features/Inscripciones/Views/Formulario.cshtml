@@ -1,1 +1,158 @@
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Views;
+
 <h1>Formulario de Inscripción</h1>
+
+<form action="/inscripciones/formulario" method="post">
+
+
+    @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+    {
+        Prefix = "",
+        DisableIdentificacion = true,
+        TipoIdentificacion = Model.TipoIdentificacion.ToString(),
+        NumeroIdentificacion = Model.NumeroIdentificacion.ToString(),
+        ShowRelacion = false
+    })
+
+    <div class="form-control">
+        <input type="checkbox" id="requiereHospedaje" name="RequiereHospedaje" value="true">
+        <label for="requiereHospedaje">¿Requiere hospedaje?</label>
+    </div>
+
+    <div id="detallesHospedaje" style="display: none;">
+
+        @* Esposa/o *@
+        <div class="form-control">
+            <input type="checkbox" id="viajaConEsposa" name="ViajaConEsposa" value="true">
+            <label for="viajaConEsposa">¿Viajas con tu esposo o esposa?</label>
+        </div>
+        <div id="seccionEsposa" style="display: none;">
+            <h3>Datos del cónyuge</h3>
+            @await Html.PartialAsync(partialViewName: "_PersonaFields", new PersonaFieldsViewModel
+            {
+                Prefix = "Esposa",
+                DisableIdentificacion = false,
+                ShowRelacion = false
+            })
+        </div>
+
+        @* Hijos *@
+        <div class="form-control">
+            <input type="checkbox" id="viajaConHijos" name="ViajaConHijos" value="true">
+            <label for="viajaConHijos">¿Viajas con tus hijos?</label>
+        </div>
+        <div id="seccionHijos" style="display: none;">
+            <h3>Datos de los hijos</h3>
+            <div id="listaHijos"></div>
+            <button type="button" onclick="agregarHijo()">+ Agregar hijo</button>
+        </div>
+
+        @* Otros familiares *@
+        <div class="form-control">
+            <input type="checkbox" id="viajaConOtrosFamiliares" name="ViajaConOtrosFamiliares" value="true">
+            <label for="viajaConOtrosFamiliares">¿Viajas con algún otro familiar?</label>
+        </div>
+        <div id="seccionOtrosFamiliares" style="display: none;">
+            <h3>Datos de otros familiares</h3>
+            <div id="listaOtrosFamiliares"></div>
+            <button type="button" onclick="agregarOtroFamiliar()">+ Agregar familiar</button>
+        </div>
+    </div>
+
+    <button type="submit">Enviar Pre-Inscripción</button>
+
+</form>
+
+@* Template oculto para hijo *@
+<template id="templateHijo">
+    <fieldset class="familiar-fieldset">
+        <legend>Hijo #<span class="familiar-index"></span></legend>
+        <input type="hidden" name="Hijos.Index" value="__INDEX__">
+        @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+        {
+            Prefix = "Hijos[__INDEX__]",
+            DisableIdentificacion = false,
+            ShowRelacion = false
+        })
+        <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
+    </fieldset>
+</template>
+
+@* Template oculto para otro familiar *@
+<template id="templateOtroFamiliar">
+    <fieldset class="familiar-fieldset">
+        <legend>Familiar #<span class="familiar-index"></span></legend>
+        <input type="hidden" name="OtrosFamiliares.Index" value="__INDEX__">
+        @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+        {
+            Prefix = "OtrosFamiliares[__INDEX__]",
+            DisableIdentificacion = false,
+            ShowRelacion = true
+        })
+        <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
+    </fieldset>
+</template>
+
+<script>
+    // Toggle secciones — habilita/deshabilita required en inputs ocultos
+    function toggleSection(checkboxId, sectionId) {
+        const cb = document.getElementById(checkboxId);
+        const section = document.getElementById(sectionId);
+        cb.addEventListener('change', function () {
+            const visible = this.checked;
+            section.style.display = visible ? 'block' : 'none';
+            section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
+                el.disabled = !visible;
+            });
+        });
+        // Estado inicial: deshabilitar campos en secciones ocultas
+        section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
+            el.disabled = true;
+        });
+    }
+
+    toggleSection('requiereHospedaje', 'detallesHospedaje');
+    toggleSection('viajaConEsposa', 'seccionEsposa');
+    toggleSection('viajaConHijos', 'seccionHijos');
+    toggleSection('viajaConOtrosFamiliares', 'seccionOtrosFamiliares');
+
+    // Contadores para índices (solo crecen, no se reutilizan — el hidden .Index resuelve el binding)
+    let contadorHijos = 0;
+    let contadorOtros = 0;
+
+    function agregarDesdeTemplate(templateId, containerId, counter) {
+        const template = document.getElementById(templateId);
+        const container = document.getElementById(containerId);
+        const html = template.innerHTML.replaceAll('__INDEX__', counter);
+        container.insertAdjacentHTML('beforeend', html);
+        // Actualizar el número visible en la leyenda
+        const fieldsets = container.querySelectorAll('fieldset');
+        fieldsets.forEach((fs, i) => {
+            const span = fs.querySelector('.familiar-index');
+            if (span) span.textContent = i + 1;
+        });
+    }
+
+    function agregarHijo() {
+        agregarDesdeTemplate('templateHijo', 'listaHijos', contadorHijos);
+        contadorHijos++;
+    }
+
+    function agregarOtroFamiliar() {
+        agregarDesdeTemplate('templateOtroFamiliar', 'listaOtrosFamiliares', contadorOtros);
+        contadorOtros++;
+    }
+
+    function eliminarFamiliar(btn) {
+        const fieldset = btn.closest('fieldset');
+        const container = fieldset.parentElement;
+        fieldset.remove();
+        // Renumerar leyendas visibles
+        container.querySelectorAll('fieldset').forEach((fs, i) => {
+            const span = fs.querySelector('.familiar-index');
+            if (span) span.textContent = i + 1;
+        });
+    }
+</script>

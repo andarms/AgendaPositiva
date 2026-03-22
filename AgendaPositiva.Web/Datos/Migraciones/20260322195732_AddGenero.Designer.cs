@@ -3,6 +3,7 @@ using System;
 using AgendaPositiva.Web.Datos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaPositiva.Web.Datos.Migraciones
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260322195732_AddGenero")]
+    partial class AddGenero
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,8 +122,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LiderGrupoId");
 
                     b.ToTable("GrupoFamiliar");
                 });
@@ -229,15 +230,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .IsUnique();
 
                     b.ToTable("Personas");
-                });
-
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.GrupoFamiliar", b =>
-                {
-                    b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.Persona", "LiderGrupo")
-                        .WithMany()
-                        .HasForeignKey("LiderGrupoId");
-
-                    b.Navigation("LiderGrupo");
                 });
 
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Inscripcion", b =>

@@ -45,3 +45,9 @@ public enum RelacionConLider
     Nuera,
     Otro
 }
+
+public enum Genero
+{
+    Masculino,
+    Femenino,
+}

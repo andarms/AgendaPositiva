@@ -1,1 +1,61 @@
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@model Inscripcion
+
 <h1>Detalles de Inscripción</h1>
+
+<dl>
+    <dt>Nombres</dt>
+    <dd>@Model.Persona.Nombres @Model.Persona.Apellidos</dd>
+    <dt>Identificación</dt>
+    <dd>@Model.Persona.TipoIdentificacion.Humanize() - @Model.Persona.NumeroIdentificacion</dd>
+    <dt>Género</dt>
+    <dd>@Model.Persona.Genero.Humanize()</dd>
+    <dt>Fecha de Nacimiento</dt>
+    <dd>@Model.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
+    <dt>Teléfono</dt>
+    <dd>@Model.Persona.Telefono</dd>
+    <dt>Correo</dt>
+    <dd>@(Model.Persona.Email ?? "—")</dd>
+    <dt>Requiere Hospedaje</dt>
+    <dd>@(Model.RequiereHospedaje ? "Sí" : "No")</dd>
+    <dt>Necesidades Especiales</dt>
+    <dd>@(Model.NecesidadesEspeciales ?? "—")</dd>
+    <dt>Estado</dt>
+    <dd>@Model.Estado.Humanize()</dd>
+    @if (Model.RelacionConLider is not null)
+    {
+        <dt></dt>
+        <dd>@(Model.RelacionConLider?.Humanize()) de @(Model.GrupoAsistencia?.LiderGrupo?.NombreCompleto)</dd>
+    }
+</dl>
+
+@if (Model.GrupoAsistencia?.Inscripciones?.Count > 1)
+{
+    <h2>Grupo Familiar</h2>
+    @foreach (var ins in Model.GrupoAsistencia.Inscripciones.Where(i => i.Id != Model.Id))
+    {
+
+        <dl>
+            <dt>Nombres</dt>
+            <dd>@ins.Persona.NombreCompleto</dd>
+            <dt>Identificación</dt>
+            <dd>@ins.Persona.TipoIdentificacion.Humanize() - @ins.Persona.NumeroIdentificacion</dd>
+            <dt>Género</dt>
+            <dd>@ins.Persona.Genero.Humanize()</dd>
+            <dt>Fecha de Nacimiento</dt>
+            <dd>@ins.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
+            <dt>Teléfono</dt>
+            <dd>@ins.Persona.Telefono</dd>
+            <dt>Correo</dt>
+            <dd>@(ins.Persona.Email ?? "—")</dd>
+            <dt>Necesidades Especiales</dt>
+            <dd>@(ins.NecesidadesEspeciales ?? "—")</dd>
+            @if (ins.RelacionConLider is not null)
+            {
+                <dt></dt>
+                <dd>@(ins.RelacionConLider?.Humanize()) de @(ins.GrupoAsistencia?.LiderGrupo?.NombreCompleto)</dd>
+            }
+        </dl>
+    }
+}

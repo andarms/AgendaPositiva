@@ -9,4 +9,6 @@ public class GrupoFamiliar : EntidadBase
 
     // Navigation properties
     public ICollection<Inscripcion> Inscripciones { get; set; } = [];
+
+    public Persona? LiderGrupo { get; set; }
 }

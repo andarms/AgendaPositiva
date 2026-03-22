@@ -7,10 +7,13 @@ public class Persona : EntidadBase
 {
     public string Nombres { get; set; } = string.Empty;
     public string Apellidos { get; set; } = string.Empty;
+    public Genero Genero { get; set; }
     public DateOnly FechaNacimiento { get; set; }
     public string Telefono { get; set; } = string.Empty;
     public string? Email { get; set; }
     public TipoIdentificacion TipoIdentificacion { get; set; }
     public string NumeroIdentificacion { get; set; } = string.Empty;
     public ICollection<Inscripcion> Inscripciones { get; set; } = [];
+
+    public string NombreCompleto => $"{Nombres} {Apellidos}";
 }

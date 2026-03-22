@@ -9,5 +9,6 @@
         "**/.ruby-lsp": true,
         "**/obj": true,
         "**/bin": true,
-    }
+    },
+    "editor.formatOnSave": true
 }

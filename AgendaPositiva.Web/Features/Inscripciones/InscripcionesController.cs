@@ -1,6 +1,7 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,7 +52,7 @@ public class InscripcionesController : Controller
 
         if (inscripcion == null)
         {
-            return RedirectToAction("Formulario");
+            return RedirectToAction("Formulario", new { numeroIdentificacion = datos.NumeroIdentificacion, tipoIdentificacion = datos.TipoIdentificacion });
         }
         else
         {
@@ -62,7 +63,14 @@ public class InscripcionesController : Controller
     [HttpGet("detalles/{id}")]
     public IActionResult Detalles(int id)
     {
-        Inscripcion? inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == id);
+        Inscripcion? inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .Include(i => i.GrupoAsistencia)
+                .ThenInclude(g => g!.LiderGrupo)
+            .Include(i => i.GrupoAsistencia)
+                .ThenInclude(g => g!.Inscripciones)
+                    .ThenInclude(i => i.Persona)
+            .FirstOrDefault(i => i.Id == id);
 
         if (inscripcion == null)
         {
@@ -73,8 +81,25 @@ public class InscripcionesController : Controller
     }
 
     [HttpGet("formulario")]
-    public IActionResult Formulario()
+    public IActionResult Formulario(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
     {
-        return View();
+        return View(new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
     }
+
+    [HttpPost("formulario")]
+    public async Task<IActionResult> PostFormulario([FromForm] RegistrarPreInscricionCommand request, [FromServices] RegistrarPreInscricion handler)
+    {
+        var result = await handler.Handle(request);
+
+        if (result.IsSuccess)
+        {
+            return RedirectToAction("Detalles", new { id = result.Value });
+        }
+        else
+        {
+            return View("Formulario", request);
+        }
+    }
+
+
 }

@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Inscripciones;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,10 +11,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllersWithViews();
 
 
-builder.Services.AddControllersWithViews().AddRazorOptions(o => {
+builder.Services.AddControllersWithViews().AddRazorOptions(o =>
+{
     o.ViewLocationFormats.Clear();
     o.ViewLocationFormats.Add("/Features/{1}/Views/{0}.cshtml");
 });
+
+builder.Services.AgregarModuloInscripciones();
 
 var app = builder.Build();
 
@@ -45,6 +49,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Landing}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+
 
 
 app.Run();

@@ -29,6 +29,8 @@ public static class InscripcionesDbContextExtensions
             e.Property(p => p.NumeroIdentificacion).HasMaxLength(100).IsRequired();
 
             e.HasIndex(p => new { p.TipoIdentificacion, p.NumeroIdentificacion }).IsUnique();
+
+            e.Ignore(p => p.NombreCompleto);
         });
     }
 
