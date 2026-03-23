@@ -4,29 +4,46 @@
 
 <h1>Detalles de Inscripción</h1>
 
-<dl>
-    <dt class="detail-full">Nombres</dt>
-    <dd class="detail-full">@Model.Persona.NombreCompleto</dd>
-    <dt>Identificación</dt>
-    <dd>@Model.Persona.TipoIdentificacion.Humanize() - @Model.Persona.NumeroIdentificacion</dd>
-    <dt>Género</dt>
-    <dd>@Model.Persona.Genero.Humanize()</dd>
-    <dt>Localidad</dt>
-    <dd>@Model.Localidad</dd>
-    <dt>Fecha de Nacimiento</dt>
-    <dd>@Model.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
-    <dt>Teléfono</dt>
-    <dd>@Model.Persona.Telefono</dd>
-    <dt>Correo</dt>
-    <dd>@(Model.Persona.Email ?? "—")</dd>
-    <dt class="detail-full">Necesidades Especiales</dt>
-    <dd class="detail-full">@((Model.NecesidadesEspeciales ?? "—"))</dd>
+<div class="detail-card">
+    <div class="detail-item detail-item--full">
+        <div class="detail-item__label">Nombres</div>
+        <div class="detail-item__value">@Model.Persona.NombreCompleto</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Identificación</div>
+        <div class="detail-item__value">@Model.Persona.TipoIdentificacion.Humanize() - @Model.Persona.NumeroIdentificacion</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Género</div>
+        <div class="detail-item__value">@Model.Persona.Genero.Humanize()</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Localidad</div>
+        <div class="detail-item__value">@Model.Localidad</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Fecha de Nacimiento</div>
+        <div class="detail-item__value">@Model.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Teléfono</div>
+        <div class="detail-item__value">@Model.Persona.Telefono</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-item__label">Correo</div>
+        <div class="detail-item__value">@(Model.Persona.Email ?? "—")</div>
+    </div>
+    <div class="detail-item detail-item--full">
+        <div class="detail-item__label">Necesidades Especiales</div>
+        <div class="detail-item__value">@(Model.NecesidadesEspeciales ?? "—")</div>
+    </div>
     @if (Model.Relacion is not null)
     {
-        <dt class="detail-full"></dt>
-        <dd class="detail-full">@Model.Relacion?.Humanize() de @Model.RelacionConPersona?.NombreCompleto</dd>
+        <div class="detail-item detail-item--full">
+            <div class="detail-item__value">@Model.Relacion?.Humanize() de @Model.RelacionConPersona?.NombreCompleto</div>
+        </div>
     }
-</dl>
+</div>
 
 <hgroup>
     <h3>Requiere Hospedaje</h3>
@@ -39,29 +56,46 @@
     @foreach (var ins in Model.GrupoFamiliar.Inscripciones.Where(i => i.Id != Model.Id))
     {
 
-        <dl>
-            <dt class="detail-full">Nombres</dt>
-            <dd class="detail-full">@ins.Persona.NombreCompleto</dd>
-            <dt>Identificación</dt>
-            <dd>@ins.Persona.TipoIdentificacion.Humanize() - @ins.Persona.NumeroIdentificacion</dd>
-            <dt>Género</dt>
-            <dd>@ins.Persona.Genero.Humanize()</dd>
-            <dt>Localidad</dt>
-            <dd>@ins.Localidad</dd>
-            <dt>Fecha de Nacimiento</dt>
-            <dd>@ins.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
-            <dt>Teléfono</dt>
-            <dd>@ins.Persona.Telefono</dd>
-            <dt>Correo</dt>
-            <dd>@(ins.Persona.Email ?? "—")</dd>
-            <dt class="detail-full">Necesidades Especiales</dt>
-            <dd class="detail-full">@((ins.NecesidadesEspeciales ?? "—"))</dd>
+        <div class="detail-card">
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Nombres</div>
+                <div class="detail-item__value">@ins.Persona.NombreCompleto</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Identificación</div>
+                <div class="detail-item__value">@ins.Persona.TipoIdentificacion.Humanize() - @ins.Persona.NumeroIdentificacion</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Género</div>
+                <div class="detail-item__value">@ins.Persona.Genero.Humanize()</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Localidad</div>
+                <div class="detail-item__value">@ins.Localidad</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Fecha de Nacimiento</div>
+                <div class="detail-item__value">@ins.Persona.FechaNacimiento.ToString("dd/MM/yyyy")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Teléfono</div>
+                <div class="detail-item__value">@ins.Persona.Telefono</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Correo</div>
+                <div class="detail-item__value">@(ins.Persona.Email ?? "—")</div>
+            </div>
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Necesidades Especiales</div>
+                <div class="detail-item__value">@(ins.NecesidadesEspeciales ?? "—")</div>
+            </div>
             @if (ins.Relacion is not null)
             {
-                <dt class="detail-full"></dt>
-                <dd class="detail-full">@ins.Relacion?.Humanize() de @ins.RelacionConPersona?.NombreCompleto</dd>
+                <div class="detail-item detail-item--full">
+                    <div class="detail-item__value">@ins.Relacion?.Humanize() de @ins.RelacionConPersona?.NombreCompleto</div>
+                </div>
             }
-        </dl>
+        </div>
     }
 }
 

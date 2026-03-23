@@ -13,15 +13,19 @@
     <h2>Familiares agregados</h2>
     @foreach (var familiar in Model.FamiliaresAgregados)
     {
-        <dl>
-            <dt>Nombre</dt>
-            <dd>@familiar.Persona.NombreCompleto</dd>
+        <div class="detail-card">
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Nombre</div>
+                <div class="detail-item__value">@familiar.Persona.NombreCompleto</div>
+            </div>
             @if (familiar.Relacion is not null)
             {
-                <dt>Relación</dt>
-                <dd>@familiar.Relacion?.Humanize() de @familiar.RelacionConPersona?.NombreCompleto</dd>
+                <div class="detail-item detail-item--full">
+                    <div class="detail-item__label">Relación</div>
+                    <div class="detail-item__value">@familiar.Relacion?.Humanize() de @familiar.RelacionConPersona?.NombreCompleto</div>
+                </div>
             }
-        </dl>
+        </div>
         <hr>
     }
 }
@@ -30,20 +34,32 @@
 {
     <div class="persona-encontrada">
         <p><strong>Persona encontrada:</strong></p>
-        <dl>
-            <dt>Nombre</dt>
-            <dd>@Model.PersonaEncontrada.NombreCompleto</dd>
-            <dt>Identificación</dt>
-            <dd>@Model.PersonaEncontrada.TipoIdentificacion.Humanize() - @Model.PersonaEncontrada.NumeroIdentificacion</dd>
-            <dt>Género</dt>
-            <dd>@Model.PersonaEncontrada.Genero.Humanize()</dd>
-            <dt>Fecha de Nacimiento</dt>
-            <dd>@Model.PersonaEncontrada.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
-            <dt>Teléfono</dt>
-            <dd>@Model.PersonaEncontrada.Telefono</dd>
-            <dt>Correo</dt>
-            <dd>@(Model.PersonaEncontrada.Email ?? "—")</dd>
-        </dl>
+        <div class="detail-card">
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Nombre</div>
+                <div class="detail-item__value">@Model.PersonaEncontrada.NombreCompleto</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Identificación</div>
+                <div class="detail-item__value">@Model.PersonaEncontrada.TipoIdentificacion.Humanize() - @Model.PersonaEncontrada.NumeroIdentificacion</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Género</div>
+                <div class="detail-item__value">@Model.PersonaEncontrada.Genero.Humanize()</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Fecha de Nacimiento</div>
+                <div class="detail-item__value">@Model.PersonaEncontrada.FechaNacimiento.ToString("dd/MM/yyyy")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Teléfono</div>
+                <div class="detail-item__value">@Model.PersonaEncontrada.Telefono</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Correo</div>
+                <div class="detail-item__value">@(Model.PersonaEncontrada.Email ?? "—")</div>
+            </div>
+        </div>
         <form action="/inscripciones/agregar-familiar/@Model.InscripcionId" method="post">
             <input type="hidden" name="PersonaExistenteId" value="@Model.PersonaEncontrada.Id">
             <div class="form-control">
@@ -55,7 +71,7 @@
                     }
                 </select>
             </div>
-            <button type="submit">Agregar familiar</button>
+            <button class="btn" type="submit">Agregar familiar</button>
         </form>
         <div class="btn-group">
             <a href="/inscripciones/verificar-familiares/@Model.InscripcionId" class="btn btn-secondary">Buscar otra
