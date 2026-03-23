@@ -7,19 +7,17 @@ public class UbicacionService
     public const string Internacional = "Internacional";
 
     public List<DepartamentoInfo> Departamentos { get; }
+    readonly JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
 
     public UbicacionService(IWebHostEnvironment env)
     {
         var path = Path.Combine(env.WebRootPath, "colombia.min.json");
         var json = File.ReadAllText(path);
-        var datos = JsonSerializer.Deserialize<List<DepartamentoInfo>>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        }) ?? [];
+        var datos = JsonSerializer.Deserialize<List<DepartamentoInfo>>(json, options) ?? [];
 
         // Agregar opción especial "Internacional" sin ciudades
         datos.Add(new DepartamentoInfo { Departamento = Internacional, Ciudades = [] });
-        datos = [.. datos.OrderBy(d => d.Departamento == Internacional ? 1 : 0).ThenBy(d => d.Departamento)];
+        datos = [.. datos.OrderBy(d => d.Departamento == Internacional ? 0 : 1).ThenBy(d => d.Departamento)];
 
         Departamentos = datos;
     }

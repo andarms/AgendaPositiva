@@ -34,6 +34,20 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 });
 
             migrationBuilder.CreateTable(
+                name: "GrupoFamiliar",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GrupoFamiliar", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Personas",
                 columns: table => new
                 {
@@ -70,26 +84,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UsuariosSistema", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GrupoFamiliar",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    LiderGrupoId = table.Column<int>(type: "integer", nullable: true),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GrupoFamiliar", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GrupoFamiliar_Personas_LiderGrupoId",
-                        column: x => x.LiderGrupoId,
-                        principalTable: "Personas",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -145,11 +139,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 table: "Eventos",
                 column: "Slug",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GrupoFamiliar_LiderGrupoId",
-                table: "GrupoFamiliar",
-                column: "LiderGrupoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inscripciones_EventoId",

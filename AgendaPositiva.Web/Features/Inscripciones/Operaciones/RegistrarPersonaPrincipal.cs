@@ -4,7 +4,7 @@ using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 
 namespace AgendaPositiva.Web.Features.Inscripciones.Operaciones;
 
-public record RegistrarPersonaPrincipalCommand(
+public record RegistrarPersonaPrincipalDto(
     string Nombres,
     string Apellidos,
     Genero Genero,
@@ -28,7 +28,7 @@ public class RegistrarPersonaPrincipal
         this.db = db;
     }
 
-    public async Task<Result<int>> Handle(RegistrarPersonaPrincipalCommand command)
+    public async Task<Result<int>> Handle(RegistrarPersonaPrincipalDto command)
     {
         Evento? evento = db.Eventos.FirstOrDefault(e => e.Activo);
         if (evento is null)

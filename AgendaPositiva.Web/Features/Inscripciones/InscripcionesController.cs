@@ -3,18 +3,19 @@ using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
 using AgendaPositiva.Web.Features.Inscripciones.Views;
+using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AgendaPositiva.Web.Features.Inscripciones;
 
-public record VerificacionRequest(string NumeroIdentificacion, TipoIdentificacion TipoIdentificacion)
+public record VerificacionDto(string NumeroIdentificacion, TipoIdentificacion TipoIdentificacion)
 {
-    public VerificacionRequest Sanitize()
+    public VerificacionDto Sanitize()
     {
         // remueve espacio puntos y guiones para estandarizar el número de identificación
         string numero = NumeroIdentificacion.Replace(" ", "").Replace("-", "").Replace(".", "");
-        return new VerificacionRequest(
+        return new VerificacionDto(
             NumeroIdentificacion: numero,
             TipoIdentificacion: TipoIdentificacion
         );
@@ -37,6 +38,11 @@ public class InscripcionesController : Controller
     // Verificación inicial
     // ==========================================
 
+    public IActionResult Index()
+    {
+        return RedirectToAction("Verificacion");
+    }
+
     [HttpGet("verificacion")]
     public IActionResult Verificacion()
     {
@@ -44,9 +50,9 @@ public class InscripcionesController : Controller
     }
 
     [HttpPost("verificacion")]
-    public IActionResult VerificarDocumento([FromForm] VerificacionRequest request)
+    public IActionResult VerificarDocumento([FromForm] VerificacionDto request)
     {
-        VerificacionRequest datos = request.Sanitize();
+        VerificacionDto datos = request.Sanitize();
 
         Inscripcion? inscripcion = store.Inscripciones
             .Include(i => i.Persona)
@@ -72,8 +78,6 @@ public class InscripcionesController : Controller
             .Include(i => i.Persona)
             .Include(i => i.RelacionConPersona)
             .Include(i => i.GrupoFamiliar)
-                .ThenInclude(g => g!.LiderGrupo)
-            .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.Inscripciones)
                     .ThenInclude(i => i.Persona)
             .Include(i => i.GrupoFamiliar)
@@ -92,7 +96,7 @@ public class InscripcionesController : Controller
     [HttpGet("buscar-persona")]
     public IActionResult BuscarPersona([FromQuery] string numeroIdentificacion, [FromQuery] TipoIdentificacion tipoIdentificacion)
     {
-        var datos = new VerificacionRequest(numeroIdentificacion, tipoIdentificacion).Sanitize();
+        var datos = new VerificacionDto(numeroIdentificacion, tipoIdentificacion).Sanitize();
 
         var persona = store.Personas
             .FirstOrDefault(p =>
@@ -128,7 +132,7 @@ public class InscripcionesController : Controller
 
     [HttpPost("formulario-personal")]
     public async Task<IActionResult> PostFormularioPersonal(
-        [FromForm] RegistrarPersonaPrincipalCommand command,
+        [FromForm] RegistrarPersonaPrincipalDto command,
         [FromForm] string? accion,
         [FromServices] RegistrarPersonaPrincipal handler)
     {
@@ -173,7 +177,7 @@ public class InscripcionesController : Controller
     }
 
     [HttpPost("verificar-familiares/{inscripcionId}")]
-    public IActionResult BuscarFamiliarEnGrupo(int inscripcionId, [FromForm] VerificacionRequest request)
+    public IActionResult BuscarFamiliarEnGrupo(int inscripcionId, [FromForm] VerificacionDto request)
     {
         var datos = request.Sanitize();
 
@@ -245,7 +249,7 @@ public class InscripcionesController : Controller
     [HttpPost("formulario-familiar/{inscripcionId}")]
     public async Task<IActionResult> PostFormularioFamiliar(
         int inscripcionId,
-        [FromForm] FamiliarCommand datos,
+        [FromForm] FamiliarDto datos,
         [FromServices] AgregarAlGrupo handler)
     {
         var inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == inscripcionId);
@@ -266,30 +270,5 @@ public class InscripcionesController : Controller
             DepartamentoDefault = datos.Departamento,
             CiudadDefault = datos.Ciudad
         });
-    }
-
-    // ==========================================
-    // Formulario original (compatibilidad)
-    // ==========================================
-
-    [HttpGet("formulario")]
-    public IActionResult Formulario(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
-    {
-        return View(new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
-    }
-
-    [HttpPost("formulario")]
-    public async Task<IActionResult> PostFormulario([FromForm] RegistrarPreInscricionCommand request, [FromServices] RegistrarPreInscricion handler)
-    {
-        var result = await handler.Handle(request);
-
-        if (result.IsSuccess)
-        {
-            return RedirectToAction("Detalles", new { id = result.Value });
-        }
-        else
-        {
-            return View("Formulario", request);
-        }
     }
 }

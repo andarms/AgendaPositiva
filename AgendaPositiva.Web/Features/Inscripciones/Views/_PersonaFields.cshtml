@@ -1,6 +1,6 @@
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Commons.Views;
-@using AgendaPositiva.Web.Features.Inscripciones.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 @using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 @model PersonaFieldsViewModel
 @inject UbicacionService Ubicacion
@@ -87,6 +87,11 @@
 
 <div class="form-control">
     <label for="@id("NecesidadesEspeciales")">Necesidades Especiales:</label>
+    <p>Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se encuentran en recuperación
+        médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí. Esta
+        información nos ayudará a gestionar el hospedaje de la mejor manera posible y, cuando sea necesario, procurar
+        que las personas que requieran apoyo puedan alojarse juntas. Las solicitudes se atenderán según disponibilidad.
+    </p>
     <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
 </div>
 

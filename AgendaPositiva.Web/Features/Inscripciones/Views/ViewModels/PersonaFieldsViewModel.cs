@@ -1,4 +1,4 @@
-namespace AgendaPositiva.Web.Features.Inscripciones.Views;
+namespace AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 
 public class PersonaFieldsViewModel
 {

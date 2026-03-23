@@ -1,6 +1,6 @@
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 
-namespace AgendaPositiva.Web.Features.Inscripciones.Views;
+namespace AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 
 public class VerificarFamiliaresViewModel
 {

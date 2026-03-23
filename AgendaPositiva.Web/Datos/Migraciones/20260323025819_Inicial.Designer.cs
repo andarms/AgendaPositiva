@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaPositiva.Web.Datos.Migraciones
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260323023327_Inicial")]
+    [Migration("20260323025819_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -118,12 +118,7 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("LiderGrupoId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("LiderGrupoId");
 
                     b.ToTable("GrupoFamiliar");
                 });
@@ -242,15 +237,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .IsUnique();
 
                     b.ToTable("Personas");
-                });
-
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.GrupoFamiliar", b =>
-                {
-                    b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.Persona", "LiderGrupo")
-                        .WithMany()
-                        .HasForeignKey("LiderGrupoId");
-
-                    b.Navigation("LiderGrupo");
                 });
 
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Inscripcion", b =>

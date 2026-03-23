@@ -1,6 +1,7 @@
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Commons.Views;
 @using AgendaPositiva.Web.Features.Inscripciones.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 
 <h1>Formulario de Inscripción</h1>
 
@@ -264,7 +265,7 @@
                         <select name="${prefix}.Parentesco" required>
                             @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                             {
-                                        <option value="@rel">@rel.Humanize()</option>
+                                                <option value="@rel">@rel.Humanize()</option>
                             }
                         </select>
                     </div>` : '';

@@ -8,7 +8,6 @@ public static class InscripcionesModule
     public static IServiceCollection AgregarModuloInscripciones(this IServiceCollection services)
     {
         // Data
-        services.AddScoped<RegistrarPreInscricion>();
         services.AddScoped<RegistrarPersonaPrincipal>();
         services.AddScoped<AgregarAlGrupo>();
 
