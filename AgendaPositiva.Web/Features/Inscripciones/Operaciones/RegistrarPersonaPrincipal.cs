@@ -14,7 +14,9 @@ public record RegistrarPersonaPrincipalCommand(
     TipoIdentificacion TipoIdentificacion,
     string NumeroIdentificacion,
     bool RequiereHospedaje,
-    string? NecesidadesEspeciales
+    string? NecesidadesEspeciales,
+    string Ciudad,
+    string Departamento
 );
 
 public class RegistrarPersonaPrincipal
@@ -55,6 +57,8 @@ public class RegistrarPersonaPrincipal
             GrupoFamiliarId = null,
             RequiereHospedaje = command.RequiereHospedaje,
             NecesidadesEspeciales = command.NecesidadesEspeciales,
+            Ciudad = command.Ciudad,
+            Departamento = command.Departamento,
         };
         db.Inscripciones.Add(inscripcion);
         await db.SaveChangesAsync();

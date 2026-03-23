@@ -67,7 +67,9 @@ public static class InscripcionesDbContextExtensions
 
             e.Property(i => i.Estado).IsRequired();
 
-            e.Property(i => i.Localidad).HasMaxLength(255).IsRequired();
+            e.Property(i => i.Ciudad).HasMaxLength(255);
+            e.Property(i => i.Departamento).HasMaxLength(255);
+            e.Ignore(i => i.Localidad);
 
             e.HasOne(i => i.Persona)
                 .WithMany(p => p.Inscripciones)

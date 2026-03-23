@@ -7,4 +7,6 @@ public class PersonaFieldsViewModel
     public bool MostrarRelacion { get; set; }
     public string? TipoIdentificacion { get; set; }
     public string? NumeroIdentificacion { get; set; }
+    public string? DepartamentoDefault { get; set; }
+    public string? CiudadDefault { get; set; }
 }

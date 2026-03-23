@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaPositiva.Web.Datos.Migraciones
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260323020404_Inicial")]
+    [Migration("20260323023327_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -136,6 +136,16 @@ namespace AgendaPositiva.Web.Datos.Migraciones
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Ciudad")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Departamento")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<int>("Estado")
                         .HasColumnType("integer");
 
@@ -150,11 +160,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
 
                     b.Property<int?>("GrupoFamiliarId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Localidad")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NecesidadesEspeciales")
                         .HasColumnType("text");

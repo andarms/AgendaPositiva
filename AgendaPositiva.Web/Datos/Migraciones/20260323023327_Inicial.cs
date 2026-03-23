@@ -106,7 +106,8 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     RelacionConPersonaId = table.Column<int>(type: "integer", nullable: true),
                     Estado = table.Column<int>(type: "integer", nullable: false),
                     NecesidadesEspeciales = table.Column<string>(type: "text", nullable: true),
-                    Localidad = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Ciudad = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Departamento = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },

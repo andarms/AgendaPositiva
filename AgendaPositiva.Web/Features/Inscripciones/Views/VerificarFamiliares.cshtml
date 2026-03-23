@@ -20,7 +20,7 @@
             @if (familiar.Relacion is not null)
             {
                 <dt>Relación</dt>
-                <dd>@familiar.Relacion.Value.Humanize()</dd>
+                <dd>@familiar.Relacion?.Humanize() de @familiar.RelacionConPersona?.NombreCompleto</dd>
             }
         </dl>
         <hr>

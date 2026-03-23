@@ -15,6 +15,8 @@ public record FamiliarCommand(
     string NumeroIdentificacion,
     string? NecesidadesEspeciales,
     Parentesco? Parentesco,
+    string Ciudad,
+    string Departamento,
     int? PersonaExistenteId = null
 );
 
@@ -29,6 +31,8 @@ public record RegistrarPreInscricionCommand(
     string NumeroIdentificacion,
     bool RequiereHospedaje,
     string? NecesidadesEspeciales,
+    string Ciudad,
+    string Departamento,
     bool ViajaConEsposa,
     FamiliarCommand? Esposa,
     bool ViajaConHijos,
@@ -84,6 +88,8 @@ public class RegistrarPreInscricion
             GrupoFamiliarId = grupoId,
             RequiereHospedaje = command.RequiereHospedaje,
             NecesidadesEspeciales = command.NecesidadesEspeciales,
+            Ciudad = command.Ciudad,
+            Departamento = command.Departamento,
         };
         db.Inscripciones.Add(inscripcionLider);
 
@@ -168,6 +174,8 @@ public class RegistrarPreInscricion
                     GrupoFamiliarId = grupoId,
                     RequiereHospedaje = requiereHospedaje,
                     NecesidadesEspeciales = datos.NecesidadesEspeciales,
+                    Ciudad = datos.Ciudad,
+                    Departamento = datos.Departamento,
                     Relacion = relacion,
                     RelacionConPersonaId = relacionConPersonaId,
                 });
@@ -195,6 +203,8 @@ public class RegistrarPreInscricion
                 GrupoFamiliarId = grupoId,
                 RequiereHospedaje = requiereHospedaje,
                 NecesidadesEspeciales = datos.NecesidadesEspeciales,
+                Ciudad = datos.Ciudad,
+                Departamento = datos.Departamento,
                 Relacion = relacion,
                 RelacionConPersonaId = relacionConPersonaId,
             });

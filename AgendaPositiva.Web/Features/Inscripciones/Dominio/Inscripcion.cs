@@ -16,11 +16,14 @@ public class Inscripcion : EntidadBase
     /// <summary>Estado actual de la inscripción. Por defecto, pendiente hasta que luego se registren los pagos.</summary>
     public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
     public string? NecesidadesEspeciales { get; set; }
-    public string Localidad { get; set; } = string.Empty;
+    public string Ciudad { get; set; } = string.Empty;
+    public string Departamento { get; set; } = string.Empty;
 
     // Navigation properties
     public Persona Persona { get; set; } = null!;
     public Evento Evento { get; set; } = null!;
     public GrupoFamiliar? GrupoFamiliar { get; set; }
     public Persona? RelacionConPersona { get; set; }
+
+    public string Localidad => string.IsNullOrEmpty(Ciudad) ? Departamento : $"{Ciudad}, {Departamento}";
 }

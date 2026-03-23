@@ -46,6 +46,8 @@ public class AgregarAlGrupo
                 EventoId = eventoId,
                 GrupoFamiliarId = grupoId,
                 RequiereHospedaje = inscripcion.RequiereHospedaje,
+                Ciudad = inscripcion.Ciudad,
+                Departamento = inscripcion.Departamento,
             });
         }
 
@@ -95,6 +97,8 @@ public class AgregarAlGrupo
             GrupoFamiliarId = grupoId,
             RequiereHospedaje = inscripcion.RequiereHospedaje,
             NecesidadesEspeciales = datos.NecesidadesEspeciales,
+            Ciudad = datos.Ciudad,
+            Departamento = datos.Departamento,
             Relacion = relacion,
             RelacionConPersonaId = relacionConPersonaId,
         });

@@ -1,3 +1,4 @@
+using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
 
 namespace AgendaPositiva.Web.Features.Inscripciones;
@@ -10,6 +11,9 @@ public static class InscripcionesModule
         services.AddScoped<RegistrarPreInscricion>();
         services.AddScoped<RegistrarPersonaPrincipal>();
         services.AddScoped<AgregarAlGrupo>();
+
+        // Servicios
+        services.AddSingleton<UbicacionService>();
 
         return services;
     }

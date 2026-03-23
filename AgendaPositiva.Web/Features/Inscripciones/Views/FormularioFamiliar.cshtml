@@ -13,12 +13,14 @@
         IdentificacionHabilitada = true,
         TipoIdentificacion = Model.TipoIdentificacion,
         NumeroIdentificacion = Model.NumeroIdentificacion,
-        MostrarRelacion = true
+        MostrarRelacion = true,
+        DepartamentoDefault = Model.DepartamentoDefault,
+        CiudadDefault = Model.CiudadDefault
     })
 
     <div style="margin-top: 1rem; display: flex; gap: 1rem;">
         <button type="submit">Guardar familiar y agregar otro</button>
-        <a href="/inscripciones/verificar-familiares/@Model.InscripcionId">Volver al listado</a>
+        <a href="/inscripciones/verificar-familiares/@Model.InscripcionId">Buscar otra persona</a>
         <a href="/inscripciones/detalles/@Model.InscripcionId">Terminar pre-inscripción</a>
     </div>
 

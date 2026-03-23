@@ -231,11 +231,14 @@ public class InscripcionesController : Controller
     [HttpGet("formulario-familiar/{inscripcionId}")]
     public IActionResult FormularioFamiliar(int inscripcionId, string? numeroIdentificacion, TipoIdentificacion? tipoIdentificacion)
     {
+        var inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == inscripcionId);
         return View(new
         {
             InscripcionId = inscripcionId,
             NumeroIdentificacion = numeroIdentificacion ?? "",
-            TipoIdentificacion = tipoIdentificacion?.ToString() ?? ""
+            TipoIdentificacion = tipoIdentificacion?.ToString() ?? "",
+            DepartamentoDefault = inscripcion?.Departamento ?? "",
+            CiudadDefault = inscripcion?.Ciudad ?? ""
         });
     }
 
@@ -259,7 +262,9 @@ public class InscripcionesController : Controller
         {
             InscripcionId = inscripcionId,
             NumeroIdentificacion = datos.NumeroIdentificacion,
-            TipoIdentificacion = datos.TipoIdentificacion.ToString()
+            TipoIdentificacion = datos.TipoIdentificacion.ToString(),
+            DepartamentoDefault = datos.Departamento,
+            CiudadDefault = datos.Ciudad
         });
     }
 

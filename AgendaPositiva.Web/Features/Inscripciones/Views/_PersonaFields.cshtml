@@ -1,12 +1,15 @@
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Commons.Views;
 @using AgendaPositiva.Web.Features.Inscripciones.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 @model PersonaFieldsViewModel
+@inject UbicacionService Ubicacion
 @{
     string prefix = Model.Prefix;
     string dot = string.IsNullOrEmpty(prefix) ? "" : ".";
     string name(string field) => $"{prefix}{dot}{field}";
     string id(string field) => name(field).Replace(".", "_").Replace("[", "_").Replace("]", "_");
+    var departamentos = Ubicacion.ObtenerNombresDepartamentos();
 }
 
 <div class="form-control">
@@ -87,6 +90,24 @@
     <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
 </div>
 
+<div class="form-control">
+    <label for="@id("Departamento")">Departamento:</label>
+    <select id="@id("Departamento")" name="@name("Departamento")" required>
+        <option value="">-- Seleccione --</option>
+        @foreach (var dep in departamentos)
+        {
+            <option value="@dep" selected="@(dep == Model.DepartamentoDefault)">@dep</option>
+        }
+    </select>
+</div>
+
+<div class="form-control" id="@id("Ciudad")_container">
+    <label for="@id("Ciudad")">Ciudad:</label>
+    <select id="@id("Ciudad")" name="@name("Ciudad")">
+        <option value="">-- Seleccione --</option>
+    </select>
+</div>
+
 @if (Model.MostrarRelacion)
 {
     <div class="form-control">
@@ -100,3 +121,53 @@
     </div>
 }
 </div>
+
+<script>
+    (function () {
+        var depSelect = document.getElementById('@id("Departamento")');
+        var ciudadSelect = document.getElementById('@id("Ciudad")');
+        var ciudadContainer = document.getElementById('@id("Ciudad")_container');
+        if (!depSelect || !ciudadSelect) return;
+
+        var ciudadDefault = '@Model.CiudadDefault';
+        var internacional = '@AgendaPositiva.Web.Features.Inscripciones.Dominio.UbicacionService.Internacional';
+
+        function actualizarVisibilidad(dep) {
+            if (dep === internacional) {
+                ciudadContainer.style.display = 'none';
+                ciudadSelect.removeAttribute('required');
+                ciudadSelect.value = '';
+            } else {
+                ciudadContainer.style.display = '';
+                ciudadSelect.setAttribute('required', '');
+            }
+        }
+
+        function cargarCiudades(departamento, ciudadSel) {
+            ciudadSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+            if (!departamento || departamento === internacional) return;
+            fetch('/api/ubicacion/ciudades?departamento=' + encodeURIComponent(departamento))
+                .then(function (r) { return r.json(); })
+                .then(function (ciudades) {
+                    ciudades.forEach(function (c) {
+                        var opt = document.createElement('option');
+                        opt.value = c;
+                        opt.textContent = c;
+                        if (c === ciudadSel) opt.selected = true;
+                        ciudadSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        // Inicializar
+        actualizarVisibilidad(depSelect.value);
+        if (depSelect.value && depSelect.value !== internacional) {
+            cargarCiudades(depSelect.value, ciudadDefault);
+        }
+
+        depSelect.addEventListener('change', function () {
+            actualizarVisibilidad(this.value);
+            cargarCiudades(this.value, '');
+        });
+    })();
+</script>
