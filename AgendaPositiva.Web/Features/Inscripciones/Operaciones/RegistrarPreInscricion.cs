@@ -14,7 +14,7 @@ public record FamiliarCommand(
     TipoIdentificacion TipoIdentificacion,
     string NumeroIdentificacion,
     string? NecesidadesEspeciales,
-    RelacionConLider? RelacionConLider,
+    Parentesco? Parentesco,
     int? PersonaExistenteId = null
 );
 
@@ -76,28 +76,25 @@ public class RegistrarPreInscricion
             grupoId = grupo.Id;
         }
 
-        // 3. Inscripción de la persona principal
-        //    Si se une a un grupo existente, necesita una relación con el líder;
-        //    si es líder de un grupo nuevo, no tiene relación.
-        RelacionConLider? relacionPrincipal = uniendoseAGrupoExistente
-            ? DeterminarRelacionConLiderExistente(command)
-            : null;
-
-        var inscripcionLider = CrearInscripcion(
-            personaPrincipal.Id, evento.Id, grupoId,
-            command.RequiereHospedaje, command.NecesidadesEspeciales,
-            relacionConLider: relacionPrincipal
-        );
+        // 3. Inscripción de la persona principal (sin relación — es líder o se asigna después)
+        var inscripcionLider = new Inscripcion
+        {
+            PersonaId = personaPrincipal.Id,
+            EventoId = evento.Id,
+            GrupoFamiliarId = grupoId,
+            RequiereHospedaje = command.RequiereHospedaje,
+            NecesidadesEspeciales = command.NecesidadesEspeciales,
+        };
         db.Inscripciones.Add(inscripcionLider);
 
         // 4. Esposa/o
         if (command.ViajaConEsposa && command.Esposa is not null)
         {
             var relacion = command.Genero == Genero.Masculino
-                ? RelacionConLider.Esposa
-                : RelacionConLider.Esposo;
+                ? Parentesco.Esposa
+                : Parentesco.Esposo;
 
-            RegistrarFamiliar(command.Esposa, evento.Id, grupoId, command.RequiereHospedaje, relacion, uniendoseAGrupoExistente);
+            RegistrarFamiliar(command.Esposa, evento.Id, grupoId, command.RequiereHospedaje, relacion, personaPrincipal.Id);
         }
 
         // 5. Hijos (0+n)
@@ -106,10 +103,10 @@ public class RegistrarPreInscricion
             foreach (var hijo in command.Hijos)
             {
                 var relacion = hijo.Genero == Genero.Masculino
-                    ? RelacionConLider.Hijo
-                    : RelacionConLider.Hija;
+                    ? Parentesco.Hijo
+                    : Parentesco.Hija;
 
-                RegistrarFamiliar(hijo, evento.Id, grupoId, command.RequiereHospedaje, relacion, uniendoseAGrupoExistente);
+                RegistrarFamiliar(hijo, evento.Id, grupoId, command.RequiereHospedaje, relacion, personaPrincipal.Id);
             }
         }
 
@@ -119,7 +116,7 @@ public class RegistrarPreInscricion
             foreach (var familiar in command.OtrosFamiliares)
             {
                 RegistrarFamiliar(familiar, evento.Id, grupoId, command.RequiereHospedaje,
-                    familiar.RelacionConLider ?? RelacionConLider.Otro, uniendoseAGrupoExistente);
+                    familiar.Parentesco ?? Parentesco.Otro, personaPrincipal.Id);
             }
         }
 
@@ -141,106 +138,12 @@ public class RegistrarPreInscricion
         if (ids.Count == 0) return null;
 
         return db.Inscripciones
-            .Where(i => ids.Contains(i.PersonaId) && i.EventoId == eventoId && i.GrupoAsistenciaId != null)
-            .Select(i => i.GrupoAsistenciaId)
+            .Where(i => ids.Contains(i.PersonaId) && i.EventoId == eventoId && i.GrupoFamiliarId != null)
+            .Select(i => i.GrupoFamiliarId)
             .FirstOrDefault();
     }
 
-    /// <summary>
-    /// Cuando la persona principal se une a un grupo existente,
-    /// determina su relación con el líder de ese grupo usando el inverso
-    /// de la relación declarada y el género de la persona principal.
-    /// Ejemplo: A (Masculino) dice "B es mi Esposa" → A es Esposo de B (el líder).
-    /// </summary>
-    RelacionConLider? DeterminarRelacionConLiderExistente(RegistrarPreInscricionCommand cmd)
-    {
-        // Encontrar la primera relación declarada con una persona existente
-        RelacionConLider? relacionDeclarada = null;
-
-        if (cmd.ViajaConEsposa && cmd.Esposa?.PersonaExistenteId is not null)
-        {
-            relacionDeclarada = cmd.Genero == Genero.Masculino
-                ? RelacionConLider.Esposa
-                : RelacionConLider.Esposo;
-        }
-        else if (cmd.ViajaConHijos && cmd.Hijos is not null)
-        {
-            var hijoExistente = cmd.Hijos.FirstOrDefault(h => h.PersonaExistenteId.HasValue);
-            if (hijoExistente is not null)
-                relacionDeclarada = hijoExistente.Genero == Genero.Masculino
-                    ? RelacionConLider.Hijo
-                    : RelacionConLider.Hija;
-        }
-        else if (cmd.ViajaConOtrosFamiliares && cmd.OtrosFamiliares is not null)
-        {
-            var familiarExistente = cmd.OtrosFamiliares.FirstOrDefault(f => f.PersonaExistenteId.HasValue);
-            if (familiarExistente is not null)
-                relacionDeclarada = familiarExistente.RelacionConLider;
-        }
-
-        if (relacionDeclarada is null) return null;
-
-        return InvertirRelacion(relacionDeclarada.Value, cmd.Genero);
-    }
-
-    /// <summary>
-    /// Dado "A dice que B es su [relacion]", retorna qué es A para B,
-    /// usando el género de A para elegir la variante masculina/femenina.
-    /// </summary>
-    static RelacionConLider InvertirRelacion(RelacionConLider relacion, Genero generoDelNuevo) => relacion switch
-    {
-        // Esposa/o ↔ Esposo/a
-        RelacionConLider.Esposa or RelacionConLider.Esposo
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Esposo : RelacionConLider.Esposa,
-
-        // Hijo/a → Padre/Madre
-        RelacionConLider.Hijo or RelacionConLider.Hija
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Padre : RelacionConLider.Madre,
-
-        // Padre/Madre → Hijo/Hija
-        RelacionConLider.Padre or RelacionConLider.Madre
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Hijo : RelacionConLider.Hija,
-
-        // Hermano/a ↔ Hermano/a
-        RelacionConLider.Hermano or RelacionConLider.Hermana
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Hermano : RelacionConLider.Hermana,
-
-        // Abuelo/a → Nieto/a
-        RelacionConLider.Abuelo or RelacionConLider.Abuela
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Nieto : RelacionConLider.Nieta,
-
-        // Nieto/a → Abuelo/a
-        RelacionConLider.Nieto or RelacionConLider.Nieta
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Abuelo : RelacionConLider.Abuela,
-
-        // Tío/a → Sobrino/a
-        RelacionConLider.Tio or RelacionConLider.Tia
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Sobrino : RelacionConLider.Sobrina,
-
-        // Sobrino/a → Tío/a
-        RelacionConLider.Sobrino or RelacionConLider.Sobrina
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Tio : RelacionConLider.Tia,
-
-        // Primo/a ↔ Primo/a
-        RelacionConLider.Primo or RelacionConLider.Prima
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Primo : RelacionConLider.Prima,
-
-        // Cuñado/a ↔ Cuñado/a
-        RelacionConLider.Cunado or RelacionConLider.Cunada
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Cunado : RelacionConLider.Cunada,
-
-        // Suegro/a → Yerno/Nuera
-        RelacionConLider.Suegro or RelacionConLider.Suegra
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Yerno : RelacionConLider.Nuera,
-
-        // Yerno/Nuera → Suegro/a
-        RelacionConLider.Yerno or RelacionConLider.Nuera
-            => generoDelNuevo == Genero.Masculino ? RelacionConLider.Suegro : RelacionConLider.Suegra,
-
-        _ => RelacionConLider.Otro,
-    };
-
-    void RegistrarFamiliar(FamiliarCommand datos, int eventoId, int grupoId, bool requiereHospedaje, RelacionConLider relacion, bool uniendoseAGrupoExistente)
+    void RegistrarFamiliar(FamiliarCommand datos, int eventoId, int grupoId, bool requiereHospedaje, Parentesco relacion, int relacionConPersonaId)
     {
         if (datos.PersonaExistenteId is int personaId)
         {
@@ -249,16 +152,25 @@ public class RegistrarPreInscricion
 
             if (inscripcionExistente is not null)
             {
-                // Ya está inscrita — asegurar que esté en el grupo correcto.
-                // No modificar su RelacionConLider si nos estamos uniendo a su grupo.
-                inscripcionExistente.GrupoAsistenciaId = grupoId;
-                if (!uniendoseAGrupoExistente)
-                    inscripcionExistente.RelacionConLider = relacion;
+                inscripcionExistente.GrupoFamiliarId = grupoId;
+                if (inscripcionExistente.Relacion is null)
+                {
+                    inscripcionExistente.Relacion = relacion;
+                    inscripcionExistente.RelacionConPersonaId = relacionConPersonaId;
+                }
             }
             else
             {
-                var inscripcion = CrearInscripcion(personaId, eventoId, grupoId, requiereHospedaje, datos.NecesidadesEspeciales, relacion);
-                db.Inscripciones.Add(inscripcion);
+                db.Inscripciones.Add(new Inscripcion
+                {
+                    PersonaId = personaId,
+                    EventoId = eventoId,
+                    GrupoFamiliarId = grupoId,
+                    RequiereHospedaje = requiereHospedaje,
+                    NecesidadesEspeciales = datos.NecesidadesEspeciales,
+                    Relacion = relacion,
+                    RelacionConPersonaId = relacionConPersonaId,
+                });
             }
         }
         else
@@ -276,8 +188,16 @@ public class RegistrarPreInscricion
             };
             db.Personas.Add(persona);
 
-            var inscripcion = CrearInscripcion(persona, eventoId, grupoId, requiereHospedaje, datos.NecesidadesEspeciales, relacion);
-            db.Inscripciones.Add(inscripcion);
+            db.Inscripciones.Add(new Inscripcion
+            {
+                Persona = persona,
+                EventoId = eventoId,
+                GrupoFamiliarId = grupoId,
+                RequiereHospedaje = requiereHospedaje,
+                NecesidadesEspeciales = datos.NecesidadesEspeciales,
+                Relacion = relacion,
+                RelacionConPersonaId = relacionConPersonaId,
+            });
         }
     }
 
@@ -291,25 +211,5 @@ public class RegistrarPreInscricion
         Email = cmd.Email,
         TipoIdentificacion = cmd.TipoIdentificacion,
         NumeroIdentificacion = cmd.NumeroIdentificacion,
-    };
-
-    static Inscripcion CrearInscripcion(int personaId, int eventoId, int grupoId, bool requiereHospedaje, string? necesidades, RelacionConLider? relacionConLider) => new()
-    {
-        PersonaId = personaId,
-        EventoId = eventoId,
-        GrupoAsistenciaId = grupoId,
-        RequiereHospedaje = requiereHospedaje,
-        NecesidadesEspeciales = necesidades,
-        RelacionConLider = relacionConLider,
-    };
-
-    static Inscripcion CrearInscripcion(Persona persona, int eventoId, int grupoId, bool requiereHospedaje, string? necesidades, RelacionConLider? relacionConLider) => new()
-    {
-        Persona = persona,
-        EventoId = eventoId,
-        GrupoAsistenciaId = grupoId,
-        RequiereHospedaje = requiereHospedaje,
-        NecesidadesEspeciales = necesidades,
-        RelacionConLider = relacionConLider,
     };
 }

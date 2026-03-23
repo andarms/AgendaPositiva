@@ -3,7 +3,7 @@
 @using AgendaPositiva.Web.Features.Inscripciones.Views;
 
 <h1>Datos del Familiar</h1>
-<p>Paso 3 de 3 — La persona no se encontró registrada. Complete los datos a continuación.</p>
+<p>Paso 2 de 2 — La persona no se encontró registrada. Complete los datos a continuación.</p>
 
 <form action="/inscripciones/formulario-familiar/@Model.InscripcionId" method="post">
 
@@ -18,6 +18,7 @@
 
     <div style="margin-top: 1rem; display: flex; gap: 1rem;">
         <button type="submit">Guardar familiar y agregar otro</button>
+        <a href="/inscripciones/verificar-familiares/@Model.InscripcionId">Volver al listado</a>
         <a href="/inscripciones/detalles/@Model.InscripcionId">Terminar pre-inscripción</a>
     </div>
 

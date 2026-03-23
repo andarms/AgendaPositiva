@@ -8,12 +8,12 @@ public class Inscripcion : EntidadBase
     public int PersonaId { get; set; }
     public int EventoId { get; set; }
     public bool RequiereHospedaje { get; set; } = false;
-    public int? GrupoAsistenciaId { get; set; }
-
-    /// <summary>Relación con el líder del grupo.</summary>
-    public RelacionConLider? RelacionConLider { get; set; }
-
-    /// <summary>Estado actual de la inscripción.</summary>
+    public int? GrupoFamiliarId { get; set; }
+    /// <summary>Parentesco declarado (ej: Esposa, Hijo, Sobrino).</summary>
+    public Parentesco? Relacion { get; set; }
+    /// <summary>¿Con quién tiene esa relación? (PersonaId)</summary>
+    public int? RelacionConPersonaId { get; set; }
+    /// <summary>Estado actual de la inscripción. Por defecto, pendiente hasta que luego se registren los pagos.</summary>
     public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
     public string? NecesidadesEspeciales { get; set; }
     public string Localidad { get; set; } = string.Empty;
@@ -21,5 +21,6 @@ public class Inscripcion : EntidadBase
     // Navigation properties
     public Persona Persona { get; set; } = null!;
     public Evento Evento { get; set; } = null!;
-    public GrupoFamiliar? GrupoAsistencia { get; set; }
+    public GrupoFamiliar? GrupoFamiliar { get; set; }
+    public Persona? RelacionConPersona { get; set; }
 }

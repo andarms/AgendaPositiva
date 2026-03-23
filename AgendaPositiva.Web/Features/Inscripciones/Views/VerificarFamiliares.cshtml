@@ -4,8 +4,8 @@
 @using AgendaPositiva.Web.Features.Inscripciones.Views;
 @model VerificarFamiliaresViewModel
 
-<h1>¿Viajas con otros familiares?</h1>
-<p>Paso 3 de 3</p>
+<h1>¿Viajas con familiares?</h1>
+<p>Paso 2 de 2</p>
 
 @if (Model.FamiliaresAgregados.Count > 0)
 {
@@ -17,10 +17,10 @@
             <dd>@familiar.Persona.NombreCompleto</dd>
             <dt>Identificación</dt>
             <dd>@familiar.Persona.TipoIdentificacion.Humanize() - @familiar.Persona.NumeroIdentificacion</dd>
-            @if (familiar.RelacionConLider is not null)
+            @if (familiar.Relacion is not null)
             {
                 <dt>Relación</dt>
-                <dd>@familiar.RelacionConLider.Value.Humanize()</dd>
+                <dd>@familiar.Relacion.Value.Humanize()</dd>
             }
         </dl>
         <hr>
@@ -48,9 +48,9 @@
         <form action="/inscripciones/agregar-familiar/@Model.InscripcionId" method="post">
             <input type="hidden" name="PersonaExistenteId" value="@Model.PersonaEncontrada.Id">
             <div class="form-control">
-                <label for="relacionConLider">Parentesco:</label>
-                <select id="relacionConLider" name="RelacionConLider" required>
-                    @foreach (RelacionConLider rel in Enum.GetValues<RelacionConLider>())
+                <label for="parentesco">Parentesco:</label>
+                <select id="parentesco" name="Parentesco" required>
+                    @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                     {
                         <option value="@rel">@rel.Humanize()</option>
                     }

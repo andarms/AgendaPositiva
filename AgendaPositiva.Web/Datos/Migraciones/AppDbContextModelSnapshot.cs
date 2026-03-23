@@ -145,7 +145,7 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("GrupoAsistenciaId")
+                    b.Property<int?>("GrupoFamiliarId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Localidad")
@@ -159,7 +159,10 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.Property<int>("PersonaId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RelacionConLider")
+                    b.Property<int?>("Relacion")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("RelacionConPersonaId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("RequiereHospedaje")
@@ -169,9 +172,11 @@ namespace AgendaPositiva.Web.Datos.Migraciones
 
                     b.HasIndex("EventoId");
 
-                    b.HasIndex("GrupoAsistenciaId");
+                    b.HasIndex("GrupoFamiliarId");
 
                     b.HasIndex("PersonaId");
+
+                    b.HasIndex("RelacionConPersonaId");
 
                     b.ToTable("Inscripciones");
                 });
@@ -248,9 +253,9 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.GrupoFamiliar", "GrupoAsistencia")
+                    b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.GrupoFamiliar", "GrupoFamiliar")
                         .WithMany("Inscripciones")
-                        .HasForeignKey("GrupoAsistenciaId")
+                        .HasForeignKey("GrupoFamiliarId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.Persona", "Persona")
@@ -259,11 +264,18 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.Persona", "RelacionConPersona")
+                        .WithMany()
+                        .HasForeignKey("RelacionConPersonaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Evento");
 
-                    b.Navigation("GrupoAsistencia");
+                    b.Navigation("GrupoFamiliar");
 
                     b.Navigation("Persona");
+
+                    b.Navigation("RelacionConPersona");
                 });
 
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Evento", b =>

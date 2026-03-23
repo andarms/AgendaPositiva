@@ -46,15 +46,13 @@ public class RegistrarPersonaPrincipal
         db.Personas.Add(persona);
         await db.SaveChangesAsync();
 
-        var grupo = new GrupoFamiliar { LiderGrupoId = persona.Id };
-        db.GrupoFamiliar.Add(grupo);
-        await db.SaveChangesAsync();
-
+        // No se crea grupo familiar aún — se creará cuando se agregue un familiar.
+        // Si viaja solo, la inscripción queda sin grupo.
         var inscripcion = new Inscripcion
         {
             PersonaId = persona.Id,
             EventoId = evento.Id,
-            GrupoAsistenciaId = grupo.Id,
+            GrupoFamiliarId = null,
             RequiereHospedaje = command.RequiereHospedaje,
             NecesidadesEspeciales = command.NecesidadesEspeciales,
         };

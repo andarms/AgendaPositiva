@@ -70,11 +70,15 @@ public class InscripcionesController : Controller
     {
         Inscripcion? inscripcion = store.Inscripciones
             .Include(i => i.Persona)
-            .Include(i => i.GrupoAsistencia)
+            .Include(i => i.RelacionConPersona)
+            .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.LiderGrupo)
-            .Include(i => i.GrupoAsistencia)
+            .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.Inscripciones)
                     .ThenInclude(i => i.Persona)
+            .Include(i => i.GrupoFamiliar)
+                .ThenInclude(g => g!.Inscripciones)
+                    .ThenInclude(i => i.RelacionConPersona)
             .FirstOrDefault(i => i.Id == id);
 
         if (inscripcion == null)
@@ -135,124 +139,31 @@ public class InscripcionesController : Controller
             if (accion == "terminar")
                 return RedirectToAction("Detalles", new { id = result.Value });
 
-            return RedirectToAction("VerificarPareja", new { inscripcionId = result.Value });
+            return RedirectToAction("VerificarFamiliares", new { inscripcionId = result.Value });
         }
 
         return View("FormularioPersonal", command);
     }
 
     // ==========================================
-    // PASO 2: Verificar Pareja
-    // ==========================================
-
-    [HttpGet("verificar-pareja/{inscripcionId}")]
-    public IActionResult VerificarPareja(int inscripcionId)
-    {
-        return View(new VerificarParejaViewModel { InscripcionId = inscripcionId });
-    }
-
-    [HttpPost("verificar-pareja/{inscripcionId}")]
-    public IActionResult BuscarPareja(int inscripcionId, [FromForm] VerificacionRequest request)
-    {
-        var datos = request.Sanitize();
-
-        var persona = store.Personas
-            .FirstOrDefault(p =>
-                p.NumeroIdentificacion == datos.NumeroIdentificacion &&
-                p.TipoIdentificacion == datos.TipoIdentificacion);
-
-        if (persona is not null)
-        {
-            return View("VerificarPareja", new VerificarParejaViewModel
-            {
-                InscripcionId = inscripcionId,
-                PersonaEncontrada = persona
-            });
-        }
-
-        return RedirectToAction("FormularioPareja", new
-        {
-            inscripcionId,
-            numeroIdentificacion = datos.NumeroIdentificacion,
-            tipoIdentificacion = datos.TipoIdentificacion
-        });
-    }
-
-    [HttpPost("agregar-pareja/{inscripcionId}")]
-    public async Task<IActionResult> PostAgregarParejaExistente(
-        int inscripcionId,
-        [FromForm] int personaExistenteId,
-        [FromServices] AgregarAlGrupo handler)
-    {
-        var inscripcion = store.Inscripciones
-            .Include(i => i.Persona)
-            .FirstOrDefault(i => i.Id == inscripcionId);
-        if (inscripcion is null) return NotFound();
-
-        var relacion = inscripcion.Persona.Genero == Genero.Masculino
-            ? RelacionConLider.Esposa
-            : RelacionConLider.Esposo;
-
-        await handler.ConPersonaExistente(inscripcionId, personaExistenteId, relacion);
-        return RedirectToAction("VerificarFamiliares", new { inscripcionId });
-    }
-
-    [HttpGet("formulario-pareja/{inscripcionId}")]
-    public IActionResult FormularioPareja(int inscripcionId, string? numeroIdentificacion, TipoIdentificacion? tipoIdentificacion)
-    {
-        return View(new
-        {
-            InscripcionId = inscripcionId,
-            NumeroIdentificacion = numeroIdentificacion ?? "",
-            TipoIdentificacion = tipoIdentificacion?.ToString() ?? ""
-        });
-    }
-
-    [HttpPost("formulario-pareja/{inscripcionId}")]
-    public async Task<IActionResult> PostFormularioPareja(
-        int inscripcionId,
-        [FromForm] FamiliarCommand datos,
-        [FromServices] AgregarAlGrupo handler)
-    {
-        var inscripcion = store.Inscripciones
-            .Include(i => i.Persona)
-            .FirstOrDefault(i => i.Id == inscripcionId);
-        if (inscripcion is null) return NotFound();
-
-        var relacion = inscripcion.Persona.Genero == Genero.Masculino
-            ? RelacionConLider.Esposa
-            : RelacionConLider.Esposo;
-
-        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion);
-
-        if (result.IsSuccess)
-            return RedirectToAction("VerificarFamiliares", new { inscripcionId });
-
-        return View("FormularioPareja", new
-        {
-            InscripcionId = inscripcionId,
-            NumeroIdentificacion = datos.NumeroIdentificacion,
-            TipoIdentificacion = datos.TipoIdentificacion.ToString()
-        });
-    }
-
-    // ==========================================
-    // PASO 3: Verificar Familiares
+    // PASO 2: Verificar Familiares
     // ==========================================
 
     [HttpGet("verificar-familiares/{inscripcionId}")]
     public IActionResult VerificarFamiliares(int inscripcionId)
     {
         var inscripcion = store.Inscripciones
-            .Include(i => i.GrupoAsistencia)
+            .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.Inscripciones)
                     .ThenInclude(i => i.Persona)
             .FirstOrDefault(i => i.Id == inscripcionId);
 
         if (inscripcion is null) return NotFound();
 
-        var familiares = inscripcion.GrupoAsistencia?.Inscripciones
-            .Where(i => i.Id != inscripcionId).ToList() ?? [];
+        var familiares = inscripcion.GrupoFamiliarId is not null
+            ? inscripcion.GrupoFamiliar!.Inscripciones
+                .Where(i => i.Id != inscripcionId).ToList()
+            : [];
 
         return View(new VerificarFamiliaresViewModel
         {
@@ -274,13 +185,14 @@ public class InscripcionesController : Controller
         if (persona is not null)
         {
             var inscripcion = store.Inscripciones
-                .Include(i => i.GrupoAsistencia)
+                .Include(i => i.GrupoFamiliar)
                     .ThenInclude(g => g!.Inscripciones)
                         .ThenInclude(i => i.Persona)
                 .FirstOrDefault(i => i.Id == inscripcionId);
 
-            var familiares = inscripcion?.GrupoAsistencia?.Inscripciones
-                .Where(i => i.Id != inscripcionId).ToList() ?? [];
+            var familiares = inscripcion?.GrupoFamiliarId is not null
+                ? [.. inscripcion.GrupoFamiliar!.Inscripciones.Where(i => i.Id != inscripcionId)]
+                : new List<Inscripcion>();
 
             return View("VerificarFamiliares", new VerificarFamiliaresViewModel
             {
@@ -302,10 +214,17 @@ public class InscripcionesController : Controller
     public async Task<IActionResult> PostAgregarFamiliarExistente(
         int inscripcionId,
         [FromForm] int personaExistenteId,
-        [FromForm] RelacionConLider relacionConLider,
+        [FromForm] Parentesco parentesco,
         [FromServices] AgregarAlGrupo handler)
     {
-        await handler.ConPersonaExistente(inscripcionId, personaExistenteId, relacionConLider);
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
+        if (inscripcion is null) return NotFound();
+
+        // Si elijo "A es mi Tío", C guarda "Sobrino de A"
+        var inverso = parentesco.ObtenerInverso(inscripcion.Persona.Genero);
+        await handler.ConPersonaExistente(inscripcionId, personaExistenteId, inverso, personaExistenteId);
         return RedirectToAction("VerificarFamiliares", new { inscripcionId });
     }
 
@@ -326,9 +245,12 @@ public class InscripcionesController : Controller
         [FromForm] FamiliarCommand datos,
         [FromServices] AgregarAlGrupo handler)
     {
-        var relacion = datos.RelacionConLider ?? RelacionConLider.Otro;
+        var inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == inscripcionId);
+        if (inscripcion is null) return NotFound();
 
-        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion);
+        var relacion = datos.Parentesco ?? Parentesco.Otro;
+
+        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion, inscripcion.PersonaId);
 
         if (result.IsSuccess)
             return RedirectToAction("VerificarFamiliares", new { inscripcionId });

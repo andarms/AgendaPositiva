@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaPositiva.Web.Datos.Migraciones
 {
     /// <inheritdoc />
-    public partial class DatosIniciales : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,21 +34,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 });
 
             migrationBuilder.CreateTable(
-                name: "GrupoFamiliar",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    LiderGrupoId = table.Column<int>(type: "integer", nullable: true),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GrupoFamiliar", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Personas",
                 columns: table => new
                 {
@@ -56,6 +41,7 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nombres = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Apellidos = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Genero = table.Column<int>(type: "integer", nullable: false),
                     FechaNacimiento = table.Column<DateOnly>(type: "date", nullable: false),
                     Telefono = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
@@ -87,6 +73,26 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 });
 
             migrationBuilder.CreateTable(
+                name: "GrupoFamiliar",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LiderGrupoId = table.Column<int>(type: "integer", nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GrupoFamiliar", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GrupoFamiliar_Personas_LiderGrupoId",
+                        column: x => x.LiderGrupoId,
+                        principalTable: "Personas",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Inscripciones",
                 columns: table => new
                 {
@@ -95,8 +101,9 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     PersonaId = table.Column<int>(type: "integer", nullable: false),
                     EventoId = table.Column<int>(type: "integer", nullable: false),
                     RequiereHospedaje = table.Column<bool>(type: "boolean", nullable: false),
-                    GrupoAsistenciaId = table.Column<int>(type: "integer", nullable: true),
-                    RelacionConLider = table.Column<int>(type: "integer", nullable: true),
+                    GrupoFamiliarId = table.Column<int>(type: "integer", nullable: true),
+                    Relacion = table.Column<int>(type: "integer", nullable: true),
+                    RelacionConPersonaId = table.Column<int>(type: "integer", nullable: true),
                     Estado = table.Column<int>(type: "integer", nullable: false),
                     NecesidadesEspeciales = table.Column<string>(type: "text", nullable: true),
                     Localidad = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
@@ -113,8 +120,8 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Inscripciones_GrupoFamiliar_GrupoAsistenciaId",
-                        column: x => x.GrupoAsistenciaId,
+                        name: "FK_Inscripciones_GrupoFamiliar_GrupoFamiliarId",
+                        column: x => x.GrupoFamiliarId,
                         principalTable: "GrupoFamiliar",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -124,6 +131,12 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                         principalTable: "Personas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Inscripciones_Personas_RelacionConPersonaId",
+                        column: x => x.RelacionConPersonaId,
+                        principalTable: "Personas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
@@ -133,19 +146,29 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_GrupoFamiliar_LiderGrupoId",
+                table: "GrupoFamiliar",
+                column: "LiderGrupoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Inscripciones_EventoId",
                 table: "Inscripciones",
                 column: "EventoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inscripciones_GrupoAsistenciaId",
+                name: "IX_Inscripciones_GrupoFamiliarId",
                 table: "Inscripciones",
-                column: "GrupoAsistenciaId");
+                column: "GrupoFamiliarId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inscripciones_PersonaId",
                 table: "Inscripciones",
                 column: "PersonaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Inscripciones_RelacionConPersonaId",
+                table: "Inscripciones",
+                column: "RelacionConPersonaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Personas_TipoIdentificacion_NumeroIdentificacion",

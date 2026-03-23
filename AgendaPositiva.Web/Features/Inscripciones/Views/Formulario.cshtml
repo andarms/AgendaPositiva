@@ -261,10 +261,10 @@
                 const relacionHtml = mostrarRelacion ? `
                     <div class="form-control">
                         <label>Parentesco:</label>
-                        <select name="${prefix}.RelacionConLider" required>
-                            @foreach (RelacionConLider rel in Enum.GetValues<RelacionConLider>())
+                        <select name="${prefix}.Parentesco" required>
+                            @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                             {
-                                    <option value="@rel">@rel.Humanize()</option>
+                                        <option value="@rel">@rel.Humanize()</option>
                             }
                         </select>
                     </div>` : '';

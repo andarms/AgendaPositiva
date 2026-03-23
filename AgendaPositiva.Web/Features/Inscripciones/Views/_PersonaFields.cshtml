@@ -90,9 +90,9 @@
 @if (Model.MostrarRelacion)
 {
     <div class="form-control">
-        <label for="@id("RelacionConLider")">Parentesco:</label>
-        <select id="@id("RelacionConLider")" name="@name("RelacionConLider")" required>
-            @foreach (RelacionConLider rel in Enum.GetValues<RelacionConLider>())
+        <label for="@id("Parentesco")">Parentesco:</label>
+        <select id="@id("Parentesco")" name="@name("Parentesco")" required>
+            @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
             {
                 <option value="@rel">@rel.Humanize()</option>
             }

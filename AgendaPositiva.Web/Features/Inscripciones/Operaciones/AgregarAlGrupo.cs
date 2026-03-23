@@ -1,6 +1,7 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace AgendaPositiva.Web.Features.Inscripciones.Operaciones;
 
@@ -13,22 +14,29 @@ public class AgregarAlGrupo
         this.db = db;
     }
 
-    public async Task<Result> ConPersonaExistente(int inscripcionId, int personaExistenteId, RelacionConLider relacion)
+    /// <summary>
+    /// Agrega una persona existente al grupo de la inscripción principal.
+    /// La relación se establece entre la persona agregada y relacionConPersonaId.
+    /// </summary>
+    public async Task<Result> ConPersonaExistente(int inscripcionId, int personaExistenteId, Parentesco relacion, int relacionConPersonaId)
     {
-        var inscripcion = await db.Inscripciones.FindAsync(inscripcionId);
+        var inscripcion = db.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
         if (inscripcion is null)
             return Result.Failure("Inscripción no encontrada.");
 
-        int grupoId = inscripcion.GrupoAsistenciaId!.Value;
         int eventoId = inscripcion.EventoId;
 
-        var inscExistente = db.Inscripciones
+        var inscFamiliar = db.Inscripciones
             .FirstOrDefault(i => i.PersonaId == personaExistenteId && i.EventoId == eventoId);
 
-        if (inscExistente is not null)
+        var (grupoId, _) = await ObtenerOCrearGrupo(inscripcion, inscFamiliar);
+
+        // Asignar grupo al familiar (sin modificar su relación)
+        if (inscFamiliar is not null)
         {
-            inscExistente.GrupoAsistenciaId = grupoId;
-            inscExistente.RelacionConLider = relacion;
+            inscFamiliar.GrupoFamiliarId = grupoId;
         }
         else
         {
@@ -36,24 +44,36 @@ public class AgregarAlGrupo
             {
                 PersonaId = personaExistenteId,
                 EventoId = eventoId,
-                GrupoAsistenciaId = grupoId,
+                GrupoFamiliarId = grupoId,
                 RequiereHospedaje = inscripcion.RequiereHospedaje,
-                RelacionConLider = relacion,
             });
+        }
+
+        // La relación (ya invertida) se guarda en la inscripción de quien agrega
+        if (inscripcion.Relacion is null)
+        {
+            inscripcion.Relacion = relacion;
+            inscripcion.RelacionConPersonaId = relacionConPersonaId;
         }
 
         await db.SaveChangesAsync();
         return Result.Success();
     }
 
-    public async Task<Result> ConPersonaNueva(int inscripcionId, FamiliarCommand datos, RelacionConLider relacion)
+    /// <summary>
+    /// Agrega una persona nueva al grupo de la inscripción principal.
+    /// </summary>
+    public async Task<Result> ConPersonaNueva(int inscripcionId, FamiliarCommand datos, Parentesco relacion, int relacionConPersonaId)
     {
-        var inscripcion = await db.Inscripciones.FindAsync(inscripcionId);
+        var inscripcion = db.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
         if (inscripcion is null)
             return Result.Failure("Inscripción no encontrada.");
 
-        int grupoId = inscripcion.GrupoAsistenciaId!.Value;
         int eventoId = inscripcion.EventoId;
+
+        var (grupoId, _) = await ObtenerOCrearGrupo(inscripcion, inscFamiliar: null);
 
         var persona = new Persona
         {
@@ -72,13 +92,43 @@ public class AgregarAlGrupo
         {
             Persona = persona,
             EventoId = eventoId,
-            GrupoAsistenciaId = grupoId,
+            GrupoFamiliarId = grupoId,
             RequiereHospedaje = inscripcion.RequiereHospedaje,
             NecesidadesEspeciales = datos.NecesidadesEspeciales,
-            RelacionConLider = relacion,
+            Relacion = relacion,
+            RelacionConPersonaId = relacionConPersonaId,
         });
 
         await db.SaveChangesAsync();
         return Result.Success();
+    }
+
+    /// <summary>
+    /// Obtiene o crea el grupo familiar para la inscripción principal.
+    /// Retorna (grupoId, principalEsLider).
+    /// </summary>
+    async Task<(int GrupoId, bool PrincipalEsLider)> ObtenerOCrearGrupo(Inscripcion inscripcionPrincipal, Inscripcion? inscFamiliar)
+    {
+        // 1. La persona principal ya tiene grupo
+        if (inscripcionPrincipal.GrupoFamiliarId is not null)
+            return (inscripcionPrincipal.GrupoFamiliarId.Value, true);
+
+        // 2. El familiar ya tiene grupo → unirse a ese grupo (principal NO es líder)
+        if (inscFamiliar?.GrupoFamiliarId is not null)
+        {
+            inscripcionPrincipal.GrupoFamiliarId = inscFamiliar.GrupoFamiliarId.Value;
+            await db.SaveChangesAsync();
+            return (inscFamiliar.GrupoFamiliarId.Value, false);
+        }
+
+        // 3. Nadie tiene grupo → crear uno nuevo, persona principal es líder
+        var grupo = new GrupoFamiliar { LiderGrupoId = inscripcionPrincipal.PersonaId };
+        db.GrupoFamiliar.Add(grupo);
+        await db.SaveChangesAsync();
+
+        inscripcionPrincipal.GrupoFamiliarId = grupo.Id;
+        await db.SaveChangesAsync();
+
+        return (grupo.Id, true);
     }
 }

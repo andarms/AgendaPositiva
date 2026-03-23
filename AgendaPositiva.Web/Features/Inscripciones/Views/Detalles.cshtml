@@ -23,17 +23,17 @@
     <dd>@(Model.NecesidadesEspeciales ?? "—")</dd>
     <dt>Estado</dt>
     <dd>@Model.Estado.Humanize()</dd>
-    @if (Model.RelacionConLider is not null)
+    @if (Model.Relacion is not null)
     {
         <dt></dt>
-        <dd>@(Model.RelacionConLider?.Humanize()) de @(Model.GrupoAsistencia?.LiderGrupo?.NombreCompleto)</dd>
+        <dd>@(Model.Relacion?.Humanize()) de @(Model.RelacionConPersona?.NombreCompleto)</dd>
     }
 </dl>
 
-@if (Model.GrupoAsistencia?.Inscripciones?.Count > 1)
+@if (Model.GrupoFamiliar?.Inscripciones?.Count > 1)
 {
     <h2>Grupo Familiar</h2>
-    @foreach (var ins in Model.GrupoAsistencia.Inscripciones.Where(i => i.Id != Model.Id))
+    @foreach (var ins in Model.GrupoFamiliar.Inscripciones.Where(i => i.Id != Model.Id))
     {
 
         <dl>
@@ -51,10 +51,10 @@
             <dd>@(ins.Persona.Email ?? "—")</dd>
             <dt>Necesidades Especiales</dt>
             <dd>@(ins.NecesidadesEspeciales ?? "—")</dd>
-            @if (ins.RelacionConLider is not null)
+            @if (ins.Relacion is not null)
             {
                 <dt></dt>
-                <dd>@(ins.RelacionConLider?.Humanize()) de @(ins.GrupoAsistencia?.LiderGrupo?.NombreCompleto)</dd>
+                <dd>@(ins.Relacion?.Humanize()) de @(ins.RelacionConPersona?.NombreCompleto)</dd>
             }
         </dl>
     }

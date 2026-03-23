@@ -79,9 +79,14 @@ public static class InscripcionesDbContextExtensions
                 .HasForeignKey(i => i.EventoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasOne(i => i.GrupoAsistencia)
+            e.HasOne(i => i.GrupoFamiliar)
                 .WithMany(g => g.Inscripciones)
-                .HasForeignKey(i => i.GrupoAsistenciaId)
+                .HasForeignKey(i => i.GrupoFamiliarId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(i => i.RelacionConPersona)
+                .WithMany()
+                .HasForeignKey(i => i.RelacionConPersonaId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
     }
