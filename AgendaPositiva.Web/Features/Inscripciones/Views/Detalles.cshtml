@@ -5,8 +5,8 @@
 <h1>Detalles de Inscripción</h1>
 
 <dl>
-    <dt>Nombres</dt>
-    <dd>@Model.Persona.Nombres @Model.Persona.Apellidos</dd>
+    <dt class="detail-full">Nombres</dt>
+    <dd class="detail-full">@Model.Persona.NombreCompleto</dd>
     <dt>Identificación</dt>
     <dd>@Model.Persona.TipoIdentificacion.Humanize() - @Model.Persona.NumeroIdentificacion</dd>
     <dt>Género</dt>
@@ -19,18 +19,19 @@
     <dd>@Model.Persona.Telefono</dd>
     <dt>Correo</dt>
     <dd>@(Model.Persona.Email ?? "—")</dd>
-    <dt>Requiere Hospedaje</dt>
-    <dd>@(Model.RequiereHospedaje ? "Sí" : "No")</dd>
-    <dt>Necesidades Especiales</dt>
-    <dd>@(Model.NecesidadesEspeciales ?? "—")</dd>
-    <dt>Estado</dt>
-    <dd>@Model.Estado.Humanize()</dd>
+    <dt class="detail-full">Necesidades Especiales</dt>
+    <dd class="detail-full">@((Model.NecesidadesEspeciales ?? "—"))</dd>
     @if (Model.Relacion is not null)
     {
-        <dt></dt>
-        <dd>@(Model.Relacion?.Humanize()) de @(Model.RelacionConPersona?.NombreCompleto)</dd>
+        <dt class="detail-full"></dt>
+        <dd class="detail-full">@Model.Relacion?.Humanize() de @Model.RelacionConPersona?.NombreCompleto</dd>
     }
 </dl>
+
+<hgroup>
+    <h3>Requiere Hospedaje</h3>
+    <p>@(Model.RequiereHospedaje ? "Sí" : "No")</p>
+</hgroup>
 
 @if (Model.GrupoFamiliar?.Inscripciones?.Count > 1)
 {
@@ -39,8 +40,8 @@
     {
 
         <dl>
-            <dt>Nombres</dt>
-            <dd>@ins.Persona.NombreCompleto</dd>
+            <dt class="detail-full">Nombres</dt>
+            <dd class="detail-full">@ins.Persona.NombreCompleto</dd>
             <dt>Identificación</dt>
             <dd>@ins.Persona.TipoIdentificacion.Humanize() - @ins.Persona.NumeroIdentificacion</dd>
             <dt>Género</dt>
@@ -53,13 +54,53 @@
             <dd>@ins.Persona.Telefono</dd>
             <dt>Correo</dt>
             <dd>@(ins.Persona.Email ?? "—")</dd>
-            <dt>Necesidades Especiales</dt>
-            <dd>@(ins.NecesidadesEspeciales ?? "—")</dd>
+            <dt class="detail-full">Necesidades Especiales</dt>
+            <dd class="detail-full">@((ins.NecesidadesEspeciales ?? "—"))</dd>
             @if (ins.Relacion is not null)
             {
-                <dt></dt>
-                <dd>@(ins.Relacion?.Humanize()) de @(ins.RelacionConPersona?.NombreCompleto)</dd>
+                <dt class="detail-full"></dt>
+                <dd class="detail-full">@ins.Relacion?.Humanize() de @ins.RelacionConPersona?.NombreCompleto</dd>
             }
         </dl>
     }
 }
+
+<div class="notice">
+    <div class="notice__header">
+        <svg class="notice__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+            <h4 class="notice__title">¡Importante!</h4>
+            <p class="notice__text">No estarás completamente inscrito hasta que pagues la totalidad de la cuota de
+                participación. Comunícate con el hermano responsable de tu localidad para gestionar los pagos.</p>
+                <div class="notice__dates">
+                    <p class="notice__dates-label">Fechas límite de pago:</p>
+                    <div class="notice__grid">
+                        <div class="notice__date">
+                            <span class="notice__badge">1</span>
+                            <div>
+                                <p class="notice__date-label">Primera cuota</p>
+                                <p class="notice__date-value">17 de abril</p>
+                            </div>
+                        </div>
+                        <div class="notice__date">
+                            <span class="notice__badge">2</span>
+                            <div>
+                                <p class="notice__date-label">Segunda cuota</p>
+                                <p class="notice__date-value">19 de mayo</p>
+                            </div>
+                        </div>
+                        <div class="notice__date">
+                            <span class="notice__badge">3</span>
+                            <div>
+                                <p class="notice__date-label">Tercera cuota</p>
+                                <p class="notice__date-value">17 de junio</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

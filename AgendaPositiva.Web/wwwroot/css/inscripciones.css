@@ -1,0 +1,380 @@
+/* =============================================
+   Inscripciones – Mobile-first, dark theme
+   ============================================= */
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family:
+    "Montserrat",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 16px;
+  color: #121212;
+  background-color: #f0f0f0;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: url("/images/backgrounds/Fundo 1.png") no-repeat center center
+    fixed;
+  background-size: cover;
+  font-family: "Montserrat", sans-serif;
+}
+
+a {
+  color: #90caf9;
+}
+
+/* --- Header --- */
+.site-header {
+  padding: 1rem;
+  text-align: center;
+}
+
+.site-header__logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.site-header img {
+  max-width: 120px;
+  height: auto;
+}
+
+/* --- Main content --- */
+.site-main {
+  flex: 1;
+  width: 100%;
+  max-width: 896px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+/* --- Footer --- */
+.site-footer {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #999;
+}
+
+/* --- Typography --- */
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 0.75rem;
+}
+
+.narrow-container {
+  max-width: 448px;
+  margin: 0 auto;
+}
+
+/* --- Forms --- */
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #121212;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #90caf9;
+  box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.25);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0 1rem;
+}
+
+.form-grid > .form-control {
+  grid-column: span 2;
+}
+
+.form-grid__half {
+  grid-column: span 3 !important;
+}
+
+.form-grid__full {
+  grid-column: 1 / -1 !important;
+}
+
+.form-control {
+  margin-bottom: 1rem;
+}
+
+.form-control input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+  accent-color: #90caf9;
+}
+
+.form-control input[type="checkbox"] + label {
+  display: inline;
+  font-size: 1rem;
+  color: #121212;
+}
+
+.form-control .helpertext {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* --- Buttons --- */
+button,
+.btn {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #1a1a2e;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.15s ease;
+}
+
+button:hover,
+.btn:hover {
+  background-color: #2d2d44;
+}
+
+button:active,
+.btn:active {
+  background-color: #111122;
+}
+
+.btn-secondary {
+  color: #333;
+  background-color: #e8e8e8;
+  border: 1px solid #ccc;
+}
+
+.btn-secondary:hover {
+  background-color: #d5d5d5;
+}
+
+.btn-secondary:active {
+  background-color: #c0c0c0;
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* --- Definition lists (Detalles) --- */
+dl {
+  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background-color: #f5f5f5;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+dt {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.75rem;
+}
+
+dd {
+  font-size: 1rem;
+  margin-left: 0;
+}
+
+dt.detail-full {
+  grid-column: 1;
+}
+
+dd.detail-full {
+  grid-column: 2 / -1;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 1rem 0;
+}
+
+/* --- Notice / Alert box --- */
+.notice {
+  margin-top: 2rem;
+  border-left: 4px solid #fe9a00;
+  background-color: #fffbeb;
+  padding: 1.25rem;
+  border-radius: 4px;
+}
+
+.notice__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.notice__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: #fff8e6;
+}
+
+.notice__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #973c00;
+  margin: 0 0 0.25rem;
+}
+
+.notice__text {
+  font-size: 0.875rem;
+  color: #bb4d00;
+  margin-bottom: 0.75rem;
+}
+
+.notice__dates {
+  margin-top: 1rem;
+}
+
+.notice__dates-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #973c00;
+  margin-bottom: 0.5rem;
+}
+
+.notice__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.notice__date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #ffd230;
+  background-color: #fef3c6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+.notice__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.notice__date-label {
+  font-size: 0.75rem;
+  color: #e17100;
+  margin-bottom: 0;
+}
+
+.notice__date-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #973c00;
+  margin-bottom: 0;
+}
+
+/* --- Responsive (tablet+) --- */
+@media (min-width: 640px) {
+  .site-main {
+    padding: 2rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  .notice__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

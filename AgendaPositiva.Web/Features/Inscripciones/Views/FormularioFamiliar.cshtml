@@ -19,10 +19,10 @@
         CiudadDefault = Model.CiudadDefault
     })
 
-    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+    <div class="btn-group">
         <button type="submit">Guardar familiar y agregar otro</button>
-        <a href="/inscripciones/verificar-familiares/@Model.InscripcionId">Buscar otra persona</a>
-        <a href="/inscripciones/detalles/@Model.InscripcionId">Terminar pre-inscripción</a>
-    </div>
-
-</form>
+        <a href="/inscripciones/verificar-familiares/@Model.InscripcionId" class="btn btn-secondary">Buscar otra
+            persona</a>
+            <a href="/inscripciones/detalles/@Model.InscripcionId" class="btn btn-secondary">Terminar pre-inscripción</a>
+        </div>
+    </form>

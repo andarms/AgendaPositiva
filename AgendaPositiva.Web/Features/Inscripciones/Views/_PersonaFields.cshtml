@@ -12,105 +12,114 @@
     var departamentos = Ubicacion.ObtenerNombresDepartamentos();
 }
 
-<div class="form-control">
-    <label for="@id("Nombres")">Nombres:</label>
-    <input type="text" id="@id("Nombres")" name="@name("Nombres")" required>
-</div>
+<div class="form-grid">
 
-<div class="form-control">
-    <label for="@id("Apellidos")">Apellidos:</label>
-    <input type="text" id="@id("Apellidos")" name="@name("Apellidos")" required>
-</div>
+    <div class="form-control form-grid__half">
+        <label for="@id("Nombres")">Nombres:</label>
+        <input type="text" id="@id("Nombres")" name="@name("Nombres")" required>
+    </div>
 
-<div class="form-control">
-    <label for="@id("Genero")">Género:</label>
-    <select id="@id("Genero")" name="@name("Genero")" required>
-        @foreach (Genero genero in Enum.GetValues<Genero>())
-        {
-            <option value="@genero">@genero.Humanize()</option>
-        }
-    </select>
-</div>
+    <div class="form-control form-grid__half">
+        <label for="@id("Apellidos")">Apellidos:</label>
+        <input type="text" id="@id("Apellidos")" name="@name("Apellidos")" required>
+    </div>
 
-<div class="form-control">
-    <label for="@id("TipoIdentificacion")">Tipo de Identificación:</label>
-    @if (Model.IdentificacionHabilitada)
-    {
-        <select id="@id("TipoIdentificacion")" disabled>
-            @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+    <div class="form-control">
+        <label for="@id("Genero")">Género:</label>
+        <select id="@id("Genero")" name="@name("Genero")" required>
+            @foreach (Genero genero in Enum.GetValues<Genero>())
             {
-                <option value="@tipo" selected="@(tipo.ToString() == Model.TipoIdentificacion)">@tipo.Humanize()</option>
+                <option value="@genero">@genero.Humanize()</option>
             }
         </select>
-        <input type="hidden" name="@name("TipoIdentificacion")" value="@Model.TipoIdentificacion">
-    }
-    else
-    {
-        <select id="@id("TipoIdentificacion")" name="@name("TipoIdentificacion")" required>
-            @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+    </div>
+
+    <div class="form-control">
+        <label for="@id("TipoIdentificacion")">Tipo de Identificación:</label>
+        @if (Model.IdentificacionHabilitada)
+        {
+            <select id="@id("TipoIdentificacion")" disabled>
+                @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                {
+                    <option value="@tipo" selected="@(tipo.ToString() == Model.TipoIdentificacion)">@tipo.Humanize()</option>
+                }
+            </select>
+            <input type="hidden" name="@name("TipoIdentificacion")" value="@Model.TipoIdentificacion">
+        }
+        else
+        {
+            <select id="@id("TipoIdentificacion")" name="@name("TipoIdentificacion")" required>
+                @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                {
+                    <option value="@tipo">@tipo.Humanize()</option>
+                }
+            </select>
+        }
+    </div>
+
+    <div class="form-control">
+        <label for="@id("NumeroIdentificacion")">Número de Identificación:</label>
+        @if (Model.IdentificacionHabilitada)
+        {
+            <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" disabled
+                   value="@Model.NumeroIdentificacion" required>
+            <input type="hidden" name="@name("NumeroIdentificacion")" value="@Model.NumeroIdentificacion">
+        }
+        else
+        {
+            <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" name="@name("NumeroIdentificacion")"
+                   required>
+        }
+    </div>
+
+    <div class="form-control">
+        <label for="@id("FechaNacimiento")">Fecha de Nacimiento:</label>
+        <input type="date" id="@id("FechaNacimiento")" name="@name("FechaNacimiento")" required>
+    </div>
+
+    <div class="form-control">
+        <label for="@id("Telefono")">Teléfono:</label>
+        <input type="tel" id="@id("Telefono")" name="@name("Telefono")" required>
+    </div>
+
+    <div class="form-control">
+        <label for="@id("Email")">Correo Electrónico:</label>
+        <input type="email" id="@id("Email")" name="@name("Email")">
+    </div>
+
+    <div class="form-control">
+        <label for="@id("Departamento")">Departamento:</label>
+        <select id="@id("Departamento")" name="@name("Departamento")" required>
+            <option value="">-- Seleccione --</option>
+            @foreach (var dep in departamentos)
             {
-                <option value="@tipo">@tipo.Humanize()</option>
+                <option value="@dep" selected="@(dep == Model.DepartamentoDefault)">@dep</option>
             }
         </select>
-    }
-</div>
+    </div>
 
-<div class="form-control">
-    <label for="@id("NumeroIdentificacion")">Número de Identificación:</label>
-    @if (Model.IdentificacionHabilitada)
-    {
-        <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" disabled value="@Model.NumeroIdentificacion"
-               required>
-        <input type="hidden" name="@name("NumeroIdentificacion")" value="@Model.NumeroIdentificacion">
-    }
-    else
-    {
-        <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" name="@name("NumeroIdentificacion")"
-               required>
-    }
-</div>
+    <div class="form-control" id="@id("Ciudad")_container">
+        <label for="@id("Ciudad")">Ciudad:</label>
+        <select id="@id("Ciudad")" name="@name("Ciudad")">
+            <option value="">-- Seleccione --</option>
+        </select>
+    </div>
 
-<div class="form-control">
-    <label for="@id("FechaNacimiento")">Fecha de Nacimiento:</label>
-    <input type="date" id="@id("FechaNacimiento")" name="@name("FechaNacimiento")" required>
-</div>
+    <div class="form-control form-grid__full">
+        <label for="@id("NecesidadesEspeciales")">Necesidades Especiales:</label>
+        <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se
+            encuentran
+            en recuperación
+            médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí.
+            Esta
+            información nos ayudará a gestionar el hospedaje de la mejor manera posible y, cuando sea necesario,
+            procurar
+            que las personas que requieran apoyo puedan alojarse juntas. Las solicitudes se atenderán según
+            disponibilidad.
+        </p>
+        <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
+    </div>
 
-<div class="form-control">
-    <label for="@id("Telefono")">Teléfono:</label>
-    <input type="tel" id="@id("Telefono")" name="@name("Telefono")" required>
-</div>
-
-<div class="form-control">
-    <label for="@id("Email")">Correo Electrónico:</label>
-    <input type="email" id="@id("Email")" name="@name("Email")">
-</div>
-
-<div class="form-control">
-    <label for="@id("NecesidadesEspeciales")">Necesidades Especiales:</label>
-    <p>Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se encuentran en recuperación
-        médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí. Esta
-        información nos ayudará a gestionar el hospedaje de la mejor manera posible y, cuando sea necesario, procurar
-        que las personas que requieran apoyo puedan alojarse juntas. Las solicitudes se atenderán según disponibilidad.
-    </p>
-    <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
-</div>
-
-<div class="form-control">
-    <label for="@id("Departamento")">Departamento:</label>
-    <select id="@id("Departamento")" name="@name("Departamento")" required>
-        <option value="">-- Seleccione --</option>
-        @foreach (var dep in departamentos)
-        {
-            <option value="@dep" selected="@(dep == Model.DepartamentoDefault)">@dep</option>
-        }
-    </select>
-</div>
-
-<div class="form-control" id="@id("Ciudad")_container">
-    <label for="@id("Ciudad")">Ciudad:</label>
-    <select id="@id("Ciudad")" name="@name("Ciudad")">
-        <option value="">-- Seleccione --</option>
-    </select>
 </div>
 
 @if (Model.MostrarRelacion)
