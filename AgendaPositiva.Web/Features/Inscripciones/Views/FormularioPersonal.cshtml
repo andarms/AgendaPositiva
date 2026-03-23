@@ -1,0 +1,29 @@
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Views;
+
+<h1>Formulario de Inscripción - Datos Personales</h1>
+<p>Paso 1 de 3</p>
+
+<form action="/inscripciones/formulario-personal" method="post">
+
+    @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+    {
+        Prefix = "",
+        IdentificacionHabilitada = true,
+        TipoIdentificacion = Model.TipoIdentificacion.ToString(),
+        NumeroIdentificacion = Model.NumeroIdentificacion.ToString(),
+        MostrarRelacion = false
+    })
+
+    <div class="form-control">
+        <input type="checkbox" id="requiereHospedaje" name="RequiereHospedaje" value="true">
+        <label for="requiereHospedaje">¿Requiere hospedaje?</label>
+    </div>
+
+    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+        <button type="submit" name="accion" value="continuar">Continuar</button>
+        <button type="submit" name="accion" value="terminar">Viajo solo - Terminar pre-inscripción</button>
+    </div>
+
+</form>

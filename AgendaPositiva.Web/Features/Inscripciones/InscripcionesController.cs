@@ -2,6 +2,7 @@ using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
+using AgendaPositiva.Web.Features.Inscripciones.Views;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,10 @@ public class InscripcionesController : Controller
         evento = store.Eventos.FirstOrDefault(e => e.Activo) ?? throw new Exception("No hay un evento activo");
     }
 
+    // ==========================================
+    // Verificación inicial
+    // ==========================================
+
     [HttpGet("verificacion")]
     public IActionResult Verificacion()
     {
@@ -52,7 +57,7 @@ public class InscripcionesController : Controller
 
         if (inscripcion == null)
         {
-            return RedirectToAction("Formulario", new { numeroIdentificacion = datos.NumeroIdentificacion, tipoIdentificacion = datos.TipoIdentificacion });
+            return RedirectToAction("FormularioPersonal", new { numeroIdentificacion = datos.NumeroIdentificacion, tipoIdentificacion = datos.TipoIdentificacion });
         }
         else
         {
@@ -107,6 +112,239 @@ public class InscripcionesController : Controller
         });
     }
 
+    // ==========================================
+    // PASO 1: Formulario Personal
+    // ==========================================
+
+    [HttpGet("formulario-personal")]
+    public IActionResult FormularioPersonal(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
+    {
+        return View(new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
+    }
+
+    [HttpPost("formulario-personal")]
+    public async Task<IActionResult> PostFormularioPersonal(
+        [FromForm] RegistrarPersonaPrincipalCommand command,
+        [FromForm] string? accion,
+        [FromServices] RegistrarPersonaPrincipal handler)
+    {
+        var result = await handler.Handle(command);
+
+        if (result.IsSuccess)
+        {
+            if (accion == "terminar")
+                return RedirectToAction("Detalles", new { id = result.Value });
+
+            return RedirectToAction("VerificarPareja", new { inscripcionId = result.Value });
+        }
+
+        return View("FormularioPersonal", command);
+    }
+
+    // ==========================================
+    // PASO 2: Verificar Pareja
+    // ==========================================
+
+    [HttpGet("verificar-pareja/{inscripcionId}")]
+    public IActionResult VerificarPareja(int inscripcionId)
+    {
+        return View(new VerificarParejaViewModel { InscripcionId = inscripcionId });
+    }
+
+    [HttpPost("verificar-pareja/{inscripcionId}")]
+    public IActionResult BuscarPareja(int inscripcionId, [FromForm] VerificacionRequest request)
+    {
+        var datos = request.Sanitize();
+
+        var persona = store.Personas
+            .FirstOrDefault(p =>
+                p.NumeroIdentificacion == datos.NumeroIdentificacion &&
+                p.TipoIdentificacion == datos.TipoIdentificacion);
+
+        if (persona is not null)
+        {
+            return View("VerificarPareja", new VerificarParejaViewModel
+            {
+                InscripcionId = inscripcionId,
+                PersonaEncontrada = persona
+            });
+        }
+
+        return RedirectToAction("FormularioPareja", new
+        {
+            inscripcionId,
+            numeroIdentificacion = datos.NumeroIdentificacion,
+            tipoIdentificacion = datos.TipoIdentificacion
+        });
+    }
+
+    [HttpPost("agregar-pareja/{inscripcionId}")]
+    public async Task<IActionResult> PostAgregarParejaExistente(
+        int inscripcionId,
+        [FromForm] int personaExistenteId,
+        [FromServices] AgregarAlGrupo handler)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
+        if (inscripcion is null) return NotFound();
+
+        var relacion = inscripcion.Persona.Genero == Genero.Masculino
+            ? RelacionConLider.Esposa
+            : RelacionConLider.Esposo;
+
+        await handler.ConPersonaExistente(inscripcionId, personaExistenteId, relacion);
+        return RedirectToAction("VerificarFamiliares", new { inscripcionId });
+    }
+
+    [HttpGet("formulario-pareja/{inscripcionId}")]
+    public IActionResult FormularioPareja(int inscripcionId, string? numeroIdentificacion, TipoIdentificacion? tipoIdentificacion)
+    {
+        return View(new
+        {
+            InscripcionId = inscripcionId,
+            NumeroIdentificacion = numeroIdentificacion ?? "",
+            TipoIdentificacion = tipoIdentificacion?.ToString() ?? ""
+        });
+    }
+
+    [HttpPost("formulario-pareja/{inscripcionId}")]
+    public async Task<IActionResult> PostFormularioPareja(
+        int inscripcionId,
+        [FromForm] FamiliarCommand datos,
+        [FromServices] AgregarAlGrupo handler)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
+        if (inscripcion is null) return NotFound();
+
+        var relacion = inscripcion.Persona.Genero == Genero.Masculino
+            ? RelacionConLider.Esposa
+            : RelacionConLider.Esposo;
+
+        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion);
+
+        if (result.IsSuccess)
+            return RedirectToAction("VerificarFamiliares", new { inscripcionId });
+
+        return View("FormularioPareja", new
+        {
+            InscripcionId = inscripcionId,
+            NumeroIdentificacion = datos.NumeroIdentificacion,
+            TipoIdentificacion = datos.TipoIdentificacion.ToString()
+        });
+    }
+
+    // ==========================================
+    // PASO 3: Verificar Familiares
+    // ==========================================
+
+    [HttpGet("verificar-familiares/{inscripcionId}")]
+    public IActionResult VerificarFamiliares(int inscripcionId)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.GrupoAsistencia)
+                .ThenInclude(g => g!.Inscripciones)
+                    .ThenInclude(i => i.Persona)
+            .FirstOrDefault(i => i.Id == inscripcionId);
+
+        if (inscripcion is null) return NotFound();
+
+        var familiares = inscripcion.GrupoAsistencia?.Inscripciones
+            .Where(i => i.Id != inscripcionId).ToList() ?? [];
+
+        return View(new VerificarFamiliaresViewModel
+        {
+            InscripcionId = inscripcionId,
+            FamiliaresAgregados = familiares
+        });
+    }
+
+    [HttpPost("verificar-familiares/{inscripcionId}")]
+    public IActionResult BuscarFamiliarEnGrupo(int inscripcionId, [FromForm] VerificacionRequest request)
+    {
+        var datos = request.Sanitize();
+
+        var persona = store.Personas
+            .FirstOrDefault(p =>
+                p.NumeroIdentificacion == datos.NumeroIdentificacion &&
+                p.TipoIdentificacion == datos.TipoIdentificacion);
+
+        if (persona is not null)
+        {
+            var inscripcion = store.Inscripciones
+                .Include(i => i.GrupoAsistencia)
+                    .ThenInclude(g => g!.Inscripciones)
+                        .ThenInclude(i => i.Persona)
+                .FirstOrDefault(i => i.Id == inscripcionId);
+
+            var familiares = inscripcion?.GrupoAsistencia?.Inscripciones
+                .Where(i => i.Id != inscripcionId).ToList() ?? [];
+
+            return View("VerificarFamiliares", new VerificarFamiliaresViewModel
+            {
+                InscripcionId = inscripcionId,
+                PersonaEncontrada = persona,
+                FamiliaresAgregados = familiares
+            });
+        }
+
+        return RedirectToAction("FormularioFamiliar", new
+        {
+            inscripcionId,
+            numeroIdentificacion = datos.NumeroIdentificacion,
+            tipoIdentificacion = datos.TipoIdentificacion
+        });
+    }
+
+    [HttpPost("agregar-familiar/{inscripcionId}")]
+    public async Task<IActionResult> PostAgregarFamiliarExistente(
+        int inscripcionId,
+        [FromForm] int personaExistenteId,
+        [FromForm] RelacionConLider relacionConLider,
+        [FromServices] AgregarAlGrupo handler)
+    {
+        await handler.ConPersonaExistente(inscripcionId, personaExistenteId, relacionConLider);
+        return RedirectToAction("VerificarFamiliares", new { inscripcionId });
+    }
+
+    [HttpGet("formulario-familiar/{inscripcionId}")]
+    public IActionResult FormularioFamiliar(int inscripcionId, string? numeroIdentificacion, TipoIdentificacion? tipoIdentificacion)
+    {
+        return View(new
+        {
+            InscripcionId = inscripcionId,
+            NumeroIdentificacion = numeroIdentificacion ?? "",
+            TipoIdentificacion = tipoIdentificacion?.ToString() ?? ""
+        });
+    }
+
+    [HttpPost("formulario-familiar/{inscripcionId}")]
+    public async Task<IActionResult> PostFormularioFamiliar(
+        int inscripcionId,
+        [FromForm] FamiliarCommand datos,
+        [FromServices] AgregarAlGrupo handler)
+    {
+        var relacion = datos.RelacionConLider ?? RelacionConLider.Otro;
+
+        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion);
+
+        if (result.IsSuccess)
+            return RedirectToAction("VerificarFamiliares", new { inscripcionId });
+
+        return View("FormularioFamiliar", new
+        {
+            InscripcionId = inscripcionId,
+            NumeroIdentificacion = datos.NumeroIdentificacion,
+            TipoIdentificacion = datos.TipoIdentificacion.ToString()
+        });
+    }
+
+    // ==========================================
+    // Formulario original (compatibilidad)
+    // ==========================================
+
     [HttpGet("formulario")]
     public IActionResult Formulario(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
     {
@@ -127,6 +365,4 @@ public class InscripcionesController : Controller
             return View("Formulario", request);
         }
     }
-
-
 }

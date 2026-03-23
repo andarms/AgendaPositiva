@@ -1,0 +1,88 @@
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@using AgendaPositiva.Web.Features.Inscripciones.Views;
+@model VerificarFamiliaresViewModel
+
+<h1>¿Viajas con otros familiares?</h1>
+<p>Paso 3 de 3</p>
+
+@if (Model.FamiliaresAgregados.Count > 0)
+{
+    <h2>Familiares agregados</h2>
+    @foreach (var familiar in Model.FamiliaresAgregados)
+    {
+        <dl>
+            <dt>Nombre</dt>
+            <dd>@familiar.Persona.NombreCompleto</dd>
+            <dt>Identificación</dt>
+            <dd>@familiar.Persona.TipoIdentificacion.Humanize() - @familiar.Persona.NumeroIdentificacion</dd>
+            @if (familiar.RelacionConLider is not null)
+            {
+                <dt>Relación</dt>
+                <dd>@familiar.RelacionConLider.Value.Humanize()</dd>
+            }
+        </dl>
+        <hr>
+    }
+}
+
+@if (Model.PersonaEncontrada is not null)
+{
+    <div class="persona-encontrada">
+        <p><strong>Persona encontrada:</strong></p>
+        <dl>
+            <dt>Nombre</dt>
+            <dd>@Model.PersonaEncontrada.NombreCompleto</dd>
+            <dt>Identificación</dt>
+            <dd>@Model.PersonaEncontrada.TipoIdentificacion.Humanize() - @Model.PersonaEncontrada.NumeroIdentificacion</dd>
+            <dt>Género</dt>
+            <dd>@Model.PersonaEncontrada.Genero.Humanize()</dd>
+            <dt>Fecha de Nacimiento</dt>
+            <dd>@Model.PersonaEncontrada.FechaNacimiento.ToString("dd/MM/yyyy")</dd>
+            <dt>Teléfono</dt>
+            <dd>@Model.PersonaEncontrada.Telefono</dd>
+            <dt>Correo</dt>
+            <dd>@(Model.PersonaEncontrada.Email ?? "—")</dd>
+        </dl>
+        <form action="/inscripciones/agregar-familiar/@Model.InscripcionId" method="post">
+            <input type="hidden" name="PersonaExistenteId" value="@Model.PersonaEncontrada.Id">
+            <div class="form-control">
+                <label for="relacionConLider">Parentesco:</label>
+                <select id="relacionConLider" name="RelacionConLider" required>
+                    @foreach (RelacionConLider rel in Enum.GetValues<RelacionConLider>())
+                    {
+                        <option value="@rel">@rel.Humanize()</option>
+                    }
+                </select>
+            </div>
+            <button type="submit">Agregar familiar</button>
+        </form>
+        <p><a href="/inscripciones/verificar-familiares/@Model.InscripcionId">Buscar otra persona</a></p>
+    </div>
+}
+else
+{
+    <p>Busca al familiar por su documento de identidad. Si no está registrado(a), podrás llenar sus datos.</p>
+    <form action="/inscripciones/verificar-familiares/@Model.InscripcionId" method="post">
+        <div class="form-control">
+            <label for="tipoIdentificacion">Tipo de Identificación:</label>
+            <select id="tipoIdentificacion" name="TipoIdentificacion" required>
+                @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                {
+                    <option value="@tipo">@tipo.Humanize()</option>
+                }
+            </select>
+        </div>
+        <div class="form-control">
+            <label for="numeroIdentificacion">Número de Identificación:</label>
+            <input type="text" inputmode="numeric" id="numeroIdentificacion" name="NumeroIdentificacion" required>
+        </div>
+        <button type="submit">Buscar</button>
+    </form>
+}
+
+<hr>
+<div style="margin-top: 1rem; display: flex; gap: 1rem;">
+    <a href="/inscripciones/detalles/@Model.InscripcionId">Terminar pre-inscripción</a>
+</div>

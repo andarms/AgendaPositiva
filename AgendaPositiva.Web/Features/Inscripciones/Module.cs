@@ -8,6 +8,8 @@ public static class InscripcionesModule
     {
         // Data
         services.AddScoped<RegistrarPreInscricion>();
+        services.AddScoped<RegistrarPersonaPrincipal>();
+        services.AddScoped<AgregarAlGrupo>();
 
         return services;
     }

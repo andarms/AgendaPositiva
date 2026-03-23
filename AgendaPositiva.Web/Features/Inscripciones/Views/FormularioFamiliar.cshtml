@@ -1,0 +1,24 @@
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Views;
+
+<h1>Datos del Familiar</h1>
+<p>Paso 3 de 3 — La persona no se encontró registrada. Complete los datos a continuación.</p>
+
+<form action="/inscripciones/formulario-familiar/@Model.InscripcionId" method="post">
+
+    @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+    {
+        Prefix = "",
+        IdentificacionHabilitada = true,
+        TipoIdentificacion = Model.TipoIdentificacion,
+        NumeroIdentificacion = Model.NumeroIdentificacion,
+        MostrarRelacion = true
+    })
+
+    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+        <button type="submit">Guardar familiar y agregar otro</button>
+        <a href="/inscripciones/detalles/@Model.InscripcionId">Terminar pre-inscripción</a>
+    </div>
+
+</form>
