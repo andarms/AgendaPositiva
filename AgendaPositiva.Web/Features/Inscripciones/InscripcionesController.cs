@@ -80,6 +80,33 @@ public class InscripcionesController : Controller
         return View(inscripcion);
     }
 
+    [HttpGet("buscar-persona")]
+    public IActionResult BuscarPersona([FromQuery] string numeroIdentificacion, [FromQuery] TipoIdentificacion tipoIdentificacion)
+    {
+        var datos = new VerificacionRequest(numeroIdentificacion, tipoIdentificacion).Sanitize();
+
+        var persona = store.Personas
+            .FirstOrDefault(p =>
+                p.NumeroIdentificacion == datos.NumeroIdentificacion &&
+                p.TipoIdentificacion == datos.TipoIdentificacion);
+
+        if (persona is null)
+            return NotFound();
+
+        return Json(new
+        {
+            persona.Id,
+            persona.Nombres,
+            persona.Apellidos,
+            Genero = persona.Genero.ToString(),
+            FechaNacimiento = persona.FechaNacimiento.ToString("yyyy-MM-dd"),
+            persona.Telefono,
+            persona.Email,
+            TipoIdentificacion = persona.TipoIdentificacion.ToString(),
+            persona.NumeroIdentificacion
+        });
+    }
+
     [HttpGet("formulario")]
     public IActionResult Formulario(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
     {

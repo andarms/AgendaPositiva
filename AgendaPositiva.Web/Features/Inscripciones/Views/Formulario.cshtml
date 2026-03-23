@@ -10,10 +10,10 @@
     @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
     {
         Prefix = "",
-        DisableIdentificacion = true,
+        IdentificacionHabilitada = true,
         TipoIdentificacion = Model.TipoIdentificacion.ToString(),
         NumeroIdentificacion = Model.NumeroIdentificacion.ToString(),
-        ShowRelacion = false
+        MostrarRelacion = false
     })
 
     <div class="form-control">
@@ -30,12 +30,33 @@
         </div>
         <div id="seccionEsposa" style="display: none;">
             <h3>Datos del cónyuge</h3>
-            @await Html.PartialAsync(partialViewName: "_PersonaFields", new PersonaFieldsViewModel
-            {
-                Prefix = "Esposa",
-                DisableIdentificacion = false,
-                ShowRelacion = false
-            })
+            <div class="buscar-familiar" data-prefix="Esposa">
+                <div class="buscar-familiar__form">
+                    <div class="form-control">
+                        <label>Tipo de Identificación:</label>
+                        <select class="buscar-tipo">
+                            @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                            {
+                                <option value="@tipo">@tipo.Humanize()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label>Número de Identificación:</label>
+                        <input type="text" inputmode="numeric" class="buscar-numero">
+                    </div>
+                    <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                </div>
+                <div class="buscar-familiar__resultado" style="display:none;"></div>
+                <div class="buscar-familiar__campos" style="display:none;">
+                    @await Html.PartialAsync(partialViewName: "_PersonaFields", new PersonaFieldsViewModel
+                    {
+                        Prefix = "Esposa",
+                        IdentificacionHabilitada = false,
+                        MostrarRelacion = false
+                    })
+                </div>
+            </div>
         </div>
 
         @* Hijos *@
@@ -70,12 +91,33 @@
     <fieldset class="familiar-fieldset">
         <legend>Hijo #<span class="familiar-index"></span></legend>
         <input type="hidden" name="Hijos.Index" value="__INDEX__">
-        @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
-        {
-            Prefix = "Hijos[__INDEX__]",
-            DisableIdentificacion = false,
-            ShowRelacion = false
-        })
+        <div class="buscar-familiar" data-prefix="Hijos[__INDEX__]">
+            <div class="buscar-familiar__form">
+                <div class="form-control">
+                    <label>Tipo de Identificación:</label>
+                    <select class="buscar-tipo">
+                        @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                        {
+                            <option value="@tipo">@tipo.Humanize()</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label>Número de Identificación:</label>
+                    <input type="text" inputmode="numeric" class="buscar-numero">
+                </div>
+                <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+            </div>
+            <div class="buscar-familiar__resultado" style="display:none;"></div>
+            <div class="buscar-familiar__campos" style="display:none;">
+                @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+                {
+                    Prefix = "Hijos[__INDEX__]",
+                    IdentificacionHabilitada = false,
+                    MostrarRelacion = false
+                })
+            </div>
+        </div>
         <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
     </fieldset>
 </template>
@@ -85,12 +127,33 @@
     <fieldset class="familiar-fieldset">
         <legend>Familiar #<span class="familiar-index"></span></legend>
         <input type="hidden" name="OtrosFamiliares.Index" value="__INDEX__">
-        @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
-        {
-            Prefix = "OtrosFamiliares[__INDEX__]",
-            DisableIdentificacion = false,
-            ShowRelacion = true
-        })
+        <div class="buscar-familiar" data-prefix="OtrosFamiliares[__INDEX__]" data-mostrar-relacion="true">
+            <div class="buscar-familiar__form">
+                <div class="form-control">
+                    <label>Tipo de Identificación:</label>
+                    <select class="buscar-tipo">
+                        @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                        {
+                            <option value="@tipo">@tipo.Humanize()</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label>Número de Identificación:</label>
+                    <input type="text" inputmode="numeric" class="buscar-numero">
+                </div>
+                <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+            </div>
+            <div class="buscar-familiar__resultado" style="display:none;"></div>
+            <div class="buscar-familiar__campos" style="display:none;">
+                @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+                {
+                    Prefix = "OtrosFamiliares[__INDEX__]",
+                    IdentificacionHabilitada = false,
+                    MostrarRelacion = true
+                })
+            </div>
+        </div>
         <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
     </fieldset>
 </template>
@@ -106,6 +169,15 @@
             section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
                 el.disabled = !visible;
             });
+            // Los campos dentro de .buscar-familiar__campos empiezan ocultos;
+            // mantenerlos deshabilitados hasta que la búsqueda los active.
+            if (visible) {
+                section.querySelectorAll('.buscar-familiar__campos').forEach(c => {
+                    if (c.style.display === 'none') {
+                        c.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => el.disabled = true);
+                    }
+                });
+            }
         });
         // Estado inicial: deshabilitar campos en secciones ocultas
         section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
@@ -154,5 +226,110 @@
             const span = fs.querySelector('.familiar-index');
             if (span) span.textContent = i + 1;
         });
+    }
+
+    // --- Búsqueda de familiar existente ---
+
+    async function buscarFamiliar(container) {
+        const tipoSelect = container.querySelector('.buscar-tipo');
+        const numeroInput = container.querySelector('.buscar-numero');
+        const tipo = tipoSelect.value;
+        const numero = numeroInput.value.trim();
+
+        if (!numero) {
+            alert('Ingrese el número de identificación.');
+            return;
+        }
+
+        const resultadoDiv = container.querySelector('.buscar-familiar__resultado');
+        const camposDiv = container.querySelector('.buscar-familiar__campos');
+        const formDiv = container.querySelector('.buscar-familiar__form');
+        const prefix = container.dataset.prefix;
+
+        try {
+            const resp = await fetch(`/inscripciones/buscar-persona?tipoIdentificacion=${encodeURIComponent(tipo)}&numeroIdentificacion=${encodeURIComponent(numero)}`);
+
+            if (resp.ok) {
+                const persona = await resp.json();
+                // Persona encontrada — mostrar tarjeta resumen
+                formDiv.style.display = 'none';
+                camposDiv.style.display = 'none';
+                // Deshabilitar fields ocultos para que no se envíen como required
+                camposDiv.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => el.disabled = true);
+
+                const mostrarRelacion = container.dataset.mostrarRelacion === 'true';
+                const relacionHtml = mostrarRelacion ? `
+                    <div class="form-control">
+                        <label>Parentesco:</label>
+                        <select name="${prefix}.RelacionConLider" required>
+                            @foreach (RelacionConLider rel in Enum.GetValues<RelacionConLider>())
+                            {
+                                    <option value="@rel">@rel.Humanize()</option>
+                            }
+                        </select>
+                    </div>` : '';
+
+                resultadoDiv.innerHTML = `
+                    <div class="persona-encontrada">
+                        <p><strong>Persona encontrada:</strong></p>
+                        <dl>
+                            <dt>Nombre</dt><dd>${persona.nombres} ${persona.apellidos}</dd>
+                            <dt>Identificación</dt><dd>${persona.tipoIdentificacion} - ${persona.numeroIdentificacion}</dd>
+                            <dt>Género</dt><dd>${persona.genero}</dd>
+                            <dt>Fecha de Nacimiento</dt><dd>${persona.fechaNacimiento}</dd>
+                            <dt>Teléfono</dt><dd>${persona.telefono}</dd>
+                            <dt>Correo</dt><dd>${persona.email || '—'}</dd>
+                        </dl>
+                        ${relacionHtml}
+                        <input type="hidden" name="${prefix}.PersonaExistenteId" value="${persona.id}">
+                        <input type="hidden" name="${prefix}.Nombres" value="${persona.nombres}">
+                        <input type="hidden" name="${prefix}.Apellidos" value="${persona.apellidos}">
+                        <input type="hidden" name="${prefix}.Genero" value="${persona.genero}">
+                        <input type="hidden" name="${prefix}.FechaNacimiento" value="${persona.fechaNacimiento}">
+                        <input type="hidden" name="${prefix}.Telefono" value="${persona.telefono}">
+                        <input type="hidden" name="${prefix}.Email" value="${persona.email || ''}">
+                        <input type="hidden" name="${prefix}.TipoIdentificacion" value="${persona.tipoIdentificacion}">
+                        <input type="hidden" name="${prefix}.NumeroIdentificacion" value="${persona.numeroIdentificacion}">
+                        <button type="button" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Cambiar</button>
+                    </div>`;
+                resultadoDiv.style.display = 'block';
+            } else if (resp.status === 404) {
+                // Persona no encontrada — mostrar formulario de campos
+                formDiv.style.display = 'none';
+                resultadoDiv.innerHTML = `
+                    <p>Persona no registrada. Complete los datos a continuación.</p>
+                    <button type="button" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Buscar otro documento</button>`;
+                resultadoDiv.style.display = 'block';
+                camposDiv.style.display = 'block';
+                // Habilitar campos y pre-llenar identificación
+                camposDiv.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => el.disabled = false);
+                const tipoField = camposDiv.querySelector(`[name="${prefix}.TipoIdentificacion"]`);
+                const numField = camposDiv.querySelector(`[name="${prefix}.NumeroIdentificacion"]`);
+                if (tipoField) tipoField.value = tipo;
+                if (numField) numField.value = numero;
+            } else {
+                alert('Error al buscar. Intente de nuevo.');
+            }
+        } catch {
+            alert('Error de conexión. Intente de nuevo.');
+        }
+    }
+
+    function resetearBusqueda(container) {
+        const formDiv = container.querySelector('.buscar-familiar__form');
+        const resultadoDiv = container.querySelector('.buscar-familiar__resultado');
+        const camposDiv = container.querySelector('.buscar-familiar__campos');
+
+        resultadoDiv.innerHTML = '';
+        resultadoDiv.style.display = 'none';
+        camposDiv.style.display = 'none';
+        // Limpiar y deshabilitar campos del formulario de persona
+        camposDiv.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.type !== 'hidden') el.value = '';
+            el.disabled = true;
+        });
+        // Limpiar campo de búsqueda
+        container.querySelector('.buscar-numero').value = '';
+        formDiv.style.display = 'block';
     }
 </script>

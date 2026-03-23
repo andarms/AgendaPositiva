@@ -31,7 +31,7 @@
 
 <div class="form-control">
     <label for="@id("TipoIdentificacion")">Tipo de Identificación:</label>
-    @if (Model.DisableIdentificacion)
+    @if (Model.IdentificacionHabilitada)
     {
         <select id="@id("TipoIdentificacion")" disabled>
             @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
@@ -54,9 +54,9 @@
 
 <div class="form-control">
     <label for="@id("NumeroIdentificacion")">Número de Identificación:</label>
-    @if (Model.DisableIdentificacion)
+    @if (Model.IdentificacionHabilitada)
     {
-        <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" disabled            value="@Model.NumeroIdentificacion"
+        <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" disabled value="@Model.NumeroIdentificacion"
                required>
         <input type="hidden" name="@name("NumeroIdentificacion")" value="@Model.NumeroIdentificacion">
     }
@@ -87,7 +87,7 @@
     <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
 </div>
 
-@if (Model.ShowRelacion)
+@if (Model.MostrarRelacion)
 {
     <div class="form-control">
         <label for="@id("RelacionConLider")">Parentesco:</label>
@@ -100,4 +100,3 @@
     </div>
 }
 </div>
-}
