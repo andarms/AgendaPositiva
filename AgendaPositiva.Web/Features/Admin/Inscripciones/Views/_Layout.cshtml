@@ -38,6 +38,11 @@
                 font-weight: 600;
             }
 
+            .admin-header nav {
+                display: flex;
+                gap: 1rem;
+            }
+
             .admin-header nav a {
                 color: #ccc;
                 text-decoration: none;
@@ -99,6 +104,10 @@
         <h1>Adminitración</h1>
         <nav>
             <a href="/admin/inscripciones">Inscripciones</a>
+            @if (User.IsInRole("Administrador"))
+            {
+                <a href="/admin/usuarios">Usuarios</a>
+            }
         </nav>
         <div class="admin-header__user">
             <span>@User.Identity?.Name</span>

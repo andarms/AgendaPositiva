@@ -1,0 +1,244 @@
+@using AgendaPositiva.Web.Features.Admin.Auth.Domain
+@using AgendaPositiva.Web.Features.Admin.Usuarios
+@model UsuarioFormViewModel
+
+@{
+    var esEdicion = Model.Id.HasValue;
+    var titulo = esEdicion ? "Editar usuario" : "Nuevo usuario";
+    var action = esEdicion ? $"/admin/usuarios/editar/{Model.Id}" : "/admin/usuarios/crear";
+}
+
+@section Styles {
+    <style>
+        .form-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+            padding: 2rem;
+            max-width: 640px;
+        }
+
+        .form-card h1 {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: .85rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: .3rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: .6rem .75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            color: #121212;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a1a2e;
+            box-shadow: 0 0 0 3px rgba(26, 26, 46, .15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .form-check input {
+            width: auto;
+            accent-color: #1a1a2e;
+        }
+
+        .deptos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: .5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: .75rem;
+            background: #fafafa;
+        }
+
+        .depto-item {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .85rem;
+        }
+
+        .depto-item input {
+            accent-color: #1a1a2e;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .deptos-actions {
+            display: flex;
+            gap: .75rem;
+            margin-bottom: .5rem;
+        }
+
+        .deptos-actions button {
+            background: none;
+            border: none;
+            color: #1a1a2e;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: .75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: .75rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: none;
+            text-align: center;
+            transition: background .15s ease;
+        }
+
+        .btn--primary {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn--primary:hover {
+            background: #2d2d44;
+        }
+
+        .btn--secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn--secondary:hover {
+            background: #e2e2e2;
+        }
+
+        .field-error {
+            color: #e74c3c;
+            font-size: .8rem;
+            margin-top: .25rem;
+        }
+    </style>
+}
+
+<div class="form-card">
+    <h1>@titulo</h1>
+
+    <form method="post" action="@action">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Nombre">Nombre</label>
+                <input type="text" id="Nombre" name="Nombre" value="@Model.Nombre" required />
+            </div>
+            <div class="form-group">
+                <label for="Email">Correo electrónico</label>
+                <input type="email" id="Email" name="Email" value="@Model.Email" required />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Rol">Rol</label>
+                <select id="Rol" name="Rol">
+                    <option value="@RolAdministrador.Administrador"
+                            selected="@(Model.Rol == RolAdministrador.Administrador)">
+                        Administrador — acceso total
+                    </option>
+                    <option value="@RolAdministrador.Colaborador"
+                            selected="@(Model.Rol == RolAdministrador.Colaborador)">
+                        Colaborador — departamentos asignados
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <div class="form-check">
+                    <input type="checkbox" id="Activo" name="Activo" value="true" checked="@Model.Activo" />
+                    <label for="Activo" style="margin:0; font-weight:400;">Usuario activo</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" id="deptos-section">
+            <label>Departamentos con acceso</label>
+            <div class="deptos-actions">
+                <button type="button" onclick="toggleAll(true)">Seleccionar todos</button>
+                <button type="button" onclick="toggleAll(false)">Deseleccionar todos</button>
+            </div>
+            <div class="deptos-grid">
+                @foreach (var depto in Model.DepartamentosDisponibles)
+                {
+                    var isChecked = Model.DepartamentosSeleccionados?.Contains(depto) == true;
+                    <label class="depto-item">
+                        <input type="checkbox" name="DepartamentosSeleccionados" value="@depto" checked="@isChecked" />
+                        @depto
+                    </label>
+                }
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn--primary">@(esEdicion ? "Guardar cambios" : "Crear usuario")</button>
+            <a href="/admin/usuarios" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAll(checked) {
+            document.querySelectorAll('#deptos-section input[type="checkbox"]')
+                .forEach(cb => cb.checked = checked);
+        }
+
+        // Mostrar/ocultar sección de departamentos según rol
+        const rolSelect = document.getElementById('Rol');
+        const deptosSection = document.getElementById('deptos-section');
+
+        function toggleDeptos() {
+            deptosSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' ? 'none' : 'block';
+        }
+
+        rolSelect.addEventListener('change', toggleDeptos);
+        toggleDeptos();
+    </script>
+}

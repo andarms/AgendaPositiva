@@ -1,0 +1,219 @@
+@using AgendaPositiva.Web.Features.Admin.Auth.Domain
+@model List<UsuarioAdministrador>
+
+@section Styles {
+    <style>
+        .usuarios-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .usuarios-header h1 {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+        }
+
+        .btn-crear {
+            padding: .5rem 1.25rem;
+            background: #1a1a2e;
+            color: #fff;
+            border-radius: 6px;
+            font-size: .9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .15s ease;
+        }
+
+        .btn-crear:hover {
+            background: #2d2d44;
+        }
+
+        .tabla-usuarios {
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        .tabla-usuarios th {
+            background: #1a1a2e;
+            color: #fff;
+            padding: .75rem 1rem;
+            text-align: left;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .tabla-usuarios td {
+            padding: .75rem 1rem;
+            border-bottom: 1px solid #eee;
+            font-size: .9rem;
+        }
+
+        .tabla-usuarios tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tabla-usuarios tr:hover td {
+            background: #fafafa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: .2rem .6rem;
+            border-radius: 4px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .badge--admin {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .badge--colab {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .badge--activo {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge--inactivo {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .deptos-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .25rem;
+            max-width: 300px;
+        }
+
+        .deptos-list span {
+            font-size: .75rem;
+            background: #e8e8f0;
+            padding: .15rem .5rem;
+            border-radius: 3px;
+            color: #333;
+        }
+
+        .acciones {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+        .acciones a {
+            font-size: .85rem;
+            color: #1a1a2e;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .acciones a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-eliminar {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-eliminar:hover {
+            text-decoration: underline;
+        }
+    </style>
+}
+
+<div class="usuarios-header">
+    <h1>Usuarios administradores</h1>
+    <a href="/admin/usuarios/crear" class="btn-crear">+ Nuevo usuario</a>
+</div>
+
+<table class="tabla-usuarios">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Departamentos</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@(u.Nombre ?? "—")</td>
+                <td>@u.Email</td>
+                <td>
+                    @if (u.Rol == RolAdministrador.Administrador)
+                    {
+                        <span class="badge badge--admin">Administrador</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge--colab">Colaborador</span>
+                    }
+                </td>
+                <td>
+                    @if (u.Rol == RolAdministrador.Administrador)
+                    {
+                        <span style="color:#666; font-size:.85rem;">Todos</span>
+                    }
+                    else if (u.Departamentos.Any())
+                    {
+                        <div class="deptos-list">
+                            @foreach (var d in u.Departamentos.Take(5))
+                            {
+                                <span>@d</span>
+                            }
+                            @if (u.Departamentos.Count > 5)
+                            {
+                                <span>+@(u.Departamentos.Count - 5) más</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span style="color:#999; font-size:.85rem;">Ninguno</span>
+                    }
+                </td>
+                <td>
+                    @if (u.Activo)
+                    {
+                        <span class="badge badge--activo">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge--inactivo">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    <div class="acciones">
+                        <a href="/admin/usuarios/editar/@u.Id">Editar</a>
+                        <form method="post" action="/admin/usuarios/eliminar/@u.Id"
+                              onsubmit="return confirm('¿Eliminar a @(u.Nombre ?? u.Email)?');" style="margin:0;">
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
