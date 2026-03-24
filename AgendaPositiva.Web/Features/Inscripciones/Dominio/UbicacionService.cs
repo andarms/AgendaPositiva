@@ -33,6 +33,15 @@ public class UbicacionService
     {
         return Departamentos.Select(d => d.Departamento).ToList();
     }
+
+    public static List<string> ObtenerTodosLosDepartamentos(IWebHostEnvironment env)
+    {
+        var path = Path.Combine(env.WebRootPath, "colombia.min.json");
+        var json = File.ReadAllText(path);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var datos = JsonSerializer.Deserialize<List<DepartamentoInfo>>(json, options) ?? [];
+        return datos.Select(d => d.Departamento).ToList();
+    }
 }
 
 public class DepartamentoInfo

@@ -58,13 +58,14 @@ public class AuthAdminController : Controller
                 new AccesoDenegadoViewModel { Email = email });
         }
 
-        // Crear claims con rol de administrador
+        // Crear claims con rol real del usuario
         var claims = new List<Claim>
         {
             new(ClaimTypes.Email, email),
             new(ClaimTypes.Name, nombre ?? usuario.Nombre ?? email),
             new("AdminUsuarioId", usuario.Id.ToString()),
-            new(ClaimTypes.Role, "Administrador")
+            new(ClaimTypes.Role, usuario.Rol.ToString()),
+            new("Departamentos", string.Join(",", usuario.Departamentos))
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

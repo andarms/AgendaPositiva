@@ -7,8 +7,7 @@
 <h1>Inscripciones — @Model.Evento.Nombre</h1>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
     <p style="color: #666; margin: 0;">
-        @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy") ·
-        @Model.Evento.Ubicacion
+        @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
         · <strong>@Model.Inscripciones.Count</strong> inscripciones
     </p>
     <a href="/admin/inscripciones/exportar"

@@ -36,7 +36,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+    .AddPolicy("AdminPanel", policy => policy.RequireRole("Administrador", "Colaborador"));
 
 builder.Services.AgregarModuloInscripciones();
 
@@ -48,7 +48,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    await DatosIniciales.AlimentarAsync(db);
+    await DatosIniciales.AlimentarAsync(db, app.Environment);
 }
 
 // Configure the HTTP request pipeline.

@@ -7,11 +7,12 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
 [Route("admin/inscripciones")]
-[Authorize(Policy = "Administrador")]
+[Authorize(Policy = "AdminPanel")]
 public class InscripcionesAdminController : Controller
 {
     readonly AppDbContext store;
@@ -25,6 +26,11 @@ public class InscripcionesAdminController : Controller
         evento = store.Eventos.FirstOrDefault(e => e.Activo) ?? throw new Exception("No hay un evento activo");
     }
 
+    bool EsAdministrador => User.IsInRole("Administrador");
+
+    List<string> DepartamentosAsignados =>
+        User.FindFirstValue("Departamentos")?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
+
     [HttpGet]
     public IActionResult Index(
         [FromQuery] string? nombre,
@@ -36,6 +42,13 @@ public class InscripcionesAdminController : Controller
         var query = store.Inscripciones
             .Include(i => i.Persona)
             .Where(i => i.EventoId == evento.Id);
+
+        // Colaboradores solo ven sus departamentos asignados
+        if (!EsAdministrador)
+        {
+            var deptos = DepartamentosAsignados;
+            query = query.Where(i => deptos.Contains(i.Departamento));
+        }
 
         if (!string.IsNullOrWhiteSpace(nombre))
         {
@@ -70,7 +83,9 @@ public class InscripcionesAdminController : Controller
         {
             Evento = evento,
             Inscripciones = inscripciones,
-            Departamentos = ubicacionService.ObtenerNombresDepartamentos(),
+            Departamentos = EsAdministrador
+                ? ubicacionService.ObtenerNombresDepartamentos()
+                : DepartamentosAsignados,
             FiltroNombre = nombre,
             FiltroDepartamento = departamento,
             FiltroEstado = estado,
@@ -84,10 +99,18 @@ public class InscripcionesAdminController : Controller
     [HttpGet("exportar")]
     public IActionResult Exportar()
     {
-        var inscripciones = store.Inscripciones
+        var query = store.Inscripciones
             .Include(i => i.Persona)
             .Include(i => i.GrupoFamiliar)
-            .Where(i => i.EventoId == evento.Id)
+            .Where(i => i.EventoId == evento.Id);
+
+        if (!EsAdministrador)
+        {
+            var deptos = DepartamentosAsignados;
+            query = query.Where(i => deptos.Contains(i.Departamento));
+        }
+
+        var inscripciones = query
             .OrderBy(i => i.Departamento)
             .ThenBy(i => i.Ciudad)
             .ThenBy(i => i.GrupoFamiliarId)

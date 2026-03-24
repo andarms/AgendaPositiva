@@ -6,7 +6,7 @@ namespace AgendaPositiva.Web.Datos;
 
 public static class DatosIniciales
 {
-    public static async Task AlimentarAsync(AppDbContext db)
+    public static async Task AlimentarAsync(AppDbContext db, IWebHostEnvironment env)
     {
         if (await db.Eventos.AnyAsync()) return;
 
@@ -22,10 +22,14 @@ public static class DatosIniciales
 
         db.Eventos.Add(evento);
 
+        var todosDepartamentos = UbicacionService.ObtenerTodosLosDepartamentos(env);
+
         var administrador1 = new UsuarioAdministrador
         {
             Email = "and7702@gmail.com",
             Nombre = "Adrian Manjarres",
+            Rol = RolAdministrador.Administrador,
+            Departamentos = todosDepartamentos,
             Activo = true
         };
         db.UsuariosAdministradores.Add(administrador1);
@@ -34,6 +38,8 @@ public static class DatosIniciales
         {
             Email = "adrian.manjarres@avant.com",
             Nombre = "Adrian Manjarres",
+            Rol = RolAdministrador.Colaborador,
+            Departamentos = ["Cundinamarca"],
             Activo = true
         };
         db.UsuariosAdministradores.Add(administrador2);
