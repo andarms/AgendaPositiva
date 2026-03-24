@@ -106,6 +106,18 @@
     </div>
 
     <div class="form-control form-grid__full">
+        <label>¿Requiere hospedaje?</label>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" id="@id("RequiereHospedaje")_si" name="@name("RequiereHospedaje")" value="true" required> Sí
+            </label>
+            <label class="radio-option">
+                <input type="radio" id="@id("RequiereHospedaje")_no" name="@name("RequiereHospedaje")" value="false" checked> No
+            </label>
+        </div>
+    </div>
+
+    <div class="form-control form-grid__full">
         <label for="@id("NecesidadesEspeciales")">Necesidades Especiales:</label>
         <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se
             encuentran
@@ -119,6 +131,8 @@
         </p>
         <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
     </div>
+
+    
 
 </div>
 

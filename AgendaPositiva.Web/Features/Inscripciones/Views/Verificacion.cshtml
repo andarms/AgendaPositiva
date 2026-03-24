@@ -1,5 +1,8 @@
 @using AgendaPositiva.Web.Features.Commons
 @using AgendaPositiva.Web.Features.Commons.Views
+@{
+    ViewData[index: "MainClass"] = "site-main--narrow";
+}
 
 <div class="narrow-container">
     <h1>Verificación de Inscripción</h1>
@@ -9,7 +12,8 @@
         <select id="tipoIdentificacion" name="tipoIdentificacion" required>
             @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
             {
-                <option value="@tipo">@tipo.Humanize()</option>
+                <option value = "@tipo">@tipo.Humanize()</option>
+        
             }
         </select>
 

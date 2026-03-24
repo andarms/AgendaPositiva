@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
             <a href="/inscripciones" class="site-header__logo"><img src="/images/logos/Espanhol Branco@2x.png" alt=""></a>
         </header>
 
-        <main class="site-main">
+        <main class="site-main @(ViewData["MainClass"])">
             @RenderBody()
         </main>
 

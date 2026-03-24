@@ -6,29 +6,9 @@
 @model VerificarFamiliaresViewModel
 
 <h1>¿Viajas con familiares?</h1>
-<p>Paso 2 de 2</p>
-
-@if (Model.FamiliaresAgregados.Count > 0)
-{
-    <h2>Familiares agregados</h2>
-    @foreach (var familiar in Model.FamiliaresAgregados)
-    {
-        <div class="detail-card">
-            <div class="detail-item detail-item--full">
-                <div class="detail-item__label">Nombre</div>
-                <div class="detail-item__value">@familiar.Persona.NombreCompleto</div>
-            </div>
-            @if (familiar.Relacion is not null)
-            {
-                <div class="detail-item detail-item--full">
-                    <div class="detail-item__label">Relación</div>
-                    <div class="detail-item__value">@familiar.Relacion?.Humanize() de @familiar.RelacionConPersona?.NombreCompleto</div>
-                </div>
-            }
-        </div>
-        <hr>
-    }
-}
+<p class="small-text">
+Con el fin de ofrecerte una mejor experiencia y optimizar la organización del hospedaje, te pedimos que nos indiques si viajarás con algún familiar a la conferencia. Esta información no implica que compartirán alojamiento, pero nos permitirá gestionar el proceso de forma más eficiente.
+</p>
 
 @if (Model.PersonaEncontrada is not null)
 {
@@ -71,7 +51,7 @@
                     }
                 </select>
             </div>
-            <button class="btn" type="submit">Agregar familiar</button>
+            <button class="btn btn-primary" type="submit">Agregar familiar</button>
         </form>
         <div class="btn-group">
             <a href="/inscripciones/verificar-familiares/@Model.InscripcionId" class="btn btn-secondary">Buscar otra
@@ -96,11 +76,33 @@ else
                 <label for="numeroIdentificacion">Número de Identificación:</label>
                 <input type="text" inputmode="numeric" id="numeroIdentificacion" name="NumeroIdentificacion" required>
             </div>
-            <button type="submit">Buscar</button>
+            <button class="btn btn-secondary" type="submit">Buscar</button>
         </form>
     }
 
     <hr>
-    <div class="btn-group">
-        <a href="/inscripciones/detalles/@Model.InscripcionId" class="btn">Terminar pre-inscripción</a>
-    </div>
+
+@if (Model.FamiliaresAgregados.Count > 0)
+{
+    <h2>Grupo Familiar</h2>
+    @foreach (var familiar in Model.FamiliaresAgregados)
+    {
+        <div class="detail-card">
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Nombre</div>
+                <div class="detail-item__value">@familiar.Persona.NombreCompleto</div>
+            </div>
+            @if (familiar.Relacion is not null)
+            {
+                <div class="detail-item detail-item--full">
+                    <div class="detail-item__label">Relación</div>
+                    <div class="detail-item__value">@familiar.Relacion?.Humanize() de @familiar.RelacionConPersona?.NombreCompleto</div>
+                </div>
+            }
+        </div>
+    }
+}
+
+<div class="btn-group">
+    <a href="/inscripciones/detalles/@Model.InscripcionId" class="btn">Terminar pre-inscripción</a>
+</div>

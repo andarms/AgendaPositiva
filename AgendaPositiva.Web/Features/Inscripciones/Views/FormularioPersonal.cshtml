@@ -6,7 +6,6 @@
 <hgroup>
     <h1>Formulario de Inscripción</h1>
     <h2>Conferencia International 2026 Genesis</h2>
-    <p>Paso 1 de 2</p>
 </hgroup>
 
 <form action="/inscripciones/formulario-personal" method="post">
@@ -19,11 +18,6 @@
         NumeroIdentificacion = Model.NumeroIdentificacion.ToString(),
         MostrarRelacion = false
     })
-
-    <div class="form-control">
-        <input type="checkbox" id="requiereHospedaje" name="RequiereHospedaje" value="true">
-        <label for="requiereHospedaje">¿Requiere hospedaje?</label>
-    </div>
 
     <div style="margin-top: 1rem; display: flex; gap: 1rem;">
         <button type="submit" name="accion" value="continuar">Continuar</button>

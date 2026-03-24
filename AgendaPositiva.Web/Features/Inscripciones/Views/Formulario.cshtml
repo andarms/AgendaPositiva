@@ -17,11 +17,6 @@
         MostrarRelacion = false
     })
 
-    <div class="form-control">
-        <input type="checkbox" id="requiereHospedaje" name="RequiereHospedaje" value="true">
-        <label for="requiereHospedaje">¿Requiere hospedaje?</label>
-    </div>
-
     <div id="detallesHospedaje" style="display: none;">
 
         @* Esposa/o *@
@@ -161,11 +156,12 @@
 
 <script>
     // Toggle secciones — habilita/deshabilita required en inputs ocultos
-    function toggleSection(checkboxId, sectionId) {
-        const cb = document.getElementById(checkboxId);
+    function toggleSection(controlId, sectionId) {
+        const cb = document.getElementById(controlId);
+        const radios = cb ? null : document.querySelectorAll(`input[name="${controlId}"]`);
         const section = document.getElementById(sectionId);
-        cb.addEventListener('change', function () {
-            const visible = this.checked;
+
+        function handler(visible) {
             section.style.display = visible ? 'block' : 'none';
             section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
                 el.disabled = !visible;
@@ -179,14 +175,20 @@
                     }
                 });
             }
-        });
+        }
+
+        if (radios) {
+            radios.forEach(r => r.addEventListener('change', () => handler(r.value === 'true' && r.checked)));
+        } else {
+            cb.addEventListener('change', function () { handler(this.checked); });
+        }
         // Estado inicial: deshabilitar campos en secciones ocultas
         section.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
             el.disabled = true;
         });
     }
 
-    toggleSection('requiereHospedaje', 'detallesHospedaje');
+    toggleSection('RequiereHospedaje', 'detallesHospedaje');
     toggleSection('viajaConEsposa', 'seccionEsposa');
     toggleSection('viajaConHijos', 'seccionHijos');
     toggleSection('viajaConOtrosFamiliares', 'seccionOtrosFamiliares');

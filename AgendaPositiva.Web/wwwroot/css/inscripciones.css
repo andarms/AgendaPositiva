@@ -61,7 +61,6 @@ a {
 
 /* --- Main content --- */
 .site-main {
-  flex: 1;
   width: 100%;
   max-width: 896px;
   margin: 0 auto;
@@ -69,6 +68,12 @@ a {
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.site-main--transparent {
+  background-color: transparent;
+  box-shadow: none;
+  max-width: 448px;
 }
 
 /* --- Footer --- */
@@ -101,9 +106,8 @@ p {
   margin-bottom: 0.75rem;
 }
 
-.narrow-container {
+.site-main--narrow {
   max-width: 448px;
-  margin: 0 auto;
 }
 
 /* --- Forms --- */
@@ -297,6 +301,31 @@ select {
   display: inline;
   font-size: 1rem;
   color: #121212;
+}
+
+/* --- Radio group --- */
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 1rem;
+  color: #121212;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.radio-option input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: #1a1a2e;
+  cursor: pointer;
 }
 
 .form-control .helpertext {
@@ -521,4 +550,10 @@ hr {
     margin-top: 2rem;
     margin-bottom: 2rem;
   }
+}
+
+.small-text {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 1.25rem;
 }
