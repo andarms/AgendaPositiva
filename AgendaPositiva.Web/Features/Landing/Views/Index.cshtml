@@ -1,1 +1,51 @@
-<a href="/inscripciones/verificacion">Pre-Inscripción</a>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .landing {
+        min-height: 100vh;
+        background: url('/images/backgrounds/Fundo%201.png') no-repeat center center;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .landing__logo {
+        max-width: 380px;
+        width: 80%;
+    }
+
+    .landing__cta {
+        display: inline-block;
+        padding: 0.75rem 2.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: #1a1a2e;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        text-align: center;
+        transition: background-color 0.15s ease;
+    }
+
+    .landing__cta:hover {
+        background-color: #2d2d44;
+    }
+
+    .landing__cta:active {
+        background-color: #111122;
+    }
+</style>
+
+<section class="landing">
+    <img src="/images/logos/Espanhol%20Branco@2x.png" alt="Agenda Positiva" class="landing__logo" />
+    <a href="/inscripciones/verificacion" class="landing__cta">Pre-Inscripción</a>
+</section>
