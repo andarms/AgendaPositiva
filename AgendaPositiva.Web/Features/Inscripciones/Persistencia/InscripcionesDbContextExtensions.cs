@@ -102,9 +102,9 @@ public static class InscripcionesDbContextExtensions
         });
     }
 
-    public static void ConfigurarUsuariosSistema(this ModelBuilder builder)
+    public static void ConfigurarUsuariosAdministradores(this ModelBuilder builder)
     {
-        builder.Entity<UsuarioSistema>(e =>
+        builder.Entity<UsuarioAdministrador>(e =>
         {
             e.HasKey(u => u.Id);
             e.Property(u => u.Id).ValueGeneratedOnAdd();
@@ -112,6 +112,8 @@ public static class InscripcionesDbContextExtensions
             e.Property(u => u.Email)
                 .HasMaxLength(255)
                 .IsRequired();
+
+            e.HasIndex(u => u.Email).IsUnique();
 
             e.Property(u => u.Nombre)
                 .HasMaxLength(255);

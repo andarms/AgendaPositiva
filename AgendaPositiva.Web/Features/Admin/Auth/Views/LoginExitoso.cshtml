@@ -1,0 +1,91 @@
+@* Esta vista ya no se usa — el callback redirige al panel de admin *@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login exitoso — Agenda Positiva</title>
+    <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: system-ui, -apple-system, sans-serif;
+                background: #f5f5f5;
+                color: #333;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .card {
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, .1);
+                padding: 2rem;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .card h1 {
+                color: #1a1a2e;
+                margin-bottom: 1rem;
+                font-size: 1.5rem;
+            }
+
+            .card .email {
+                font-size: 1.2rem;
+                color: #2ecc71;
+                font-weight: 600;
+                margin-bottom: .5rem;
+            }
+
+            .card .nombre {
+                color: #666;
+                margin-bottom: 1.5rem;
+            }
+
+            .card .info {
+                color: #999;
+                font-size: .85rem;
+            }
+
+            .btn-logout {
+                display: inline-block;
+                margin-top: 1rem;
+                padding: .6rem 1.5rem;
+                background: #e74c3c;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: .95rem;
+            }
+
+            .btn-logout:hover {
+                background: #c0392b;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>✅ Login con Google exitoso</h1>
+        <p class="email">@Model.Email</p>
+        <p class="nombre">@Model.Nombre</p>
+        <p class="info">Próximo paso: validar este correo contra los usuarios del sistema.</p>
+        <form method="post" asp-action="Logout" asp-controller="AuthAdmin">
+            <button class="btn-logout" type="submit">Cerrar sesión</button>
+        </form>
+    </div>
+</body>
+
+</html>

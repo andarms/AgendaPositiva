@@ -1,3 +1,4 @@
+using AgendaPositiva.Web.Features.Admin.Auth.Domain;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,24 @@ public static class DatosIniciales
         };
 
         db.Eventos.Add(evento);
+
+        var administrador1 = new UsuarioAdministrador
+        {
+            Email = "and7702@gmail.com",
+            Nombre = "Adrian Manjarres",
+            Activo = true
+        };
+        db.UsuariosAdministradores.Add(administrador1);
+
+        var administrador2 = new UsuarioAdministrador
+        {
+            Email = "adrian.manjarres@avant.com",
+            Nombre = "Adrian Manjarres",
+            Activo = true
+        };
+        db.UsuariosAdministradores.Add(administrador2);
+
         await db.SaveChangesAsync();
+
     }
 }

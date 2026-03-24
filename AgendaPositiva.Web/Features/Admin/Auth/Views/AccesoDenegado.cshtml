@@ -1,0 +1,123 @@
+@model AgendaPositiva.Web.Features.Admin.Auth.AccesoDenegadoViewModel
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
+    <title>Acceso denegado — Agenda Positiva</title>
+    <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+                background: #f5f5f5;
+                color: #333;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .card {
+                background: #fff;
+                border-radius: 6px;
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+                padding: 2.5rem 2rem;
+                max-width: 420px;
+                width: 90%;
+                text-align: center;
+            }
+
+            .card__logo {
+                max-width: 200px;
+                width: 60%;
+                margin-bottom: 1.5rem;
+            }
+
+            .notice {
+                border-left: 4px solid #fe9a00;
+                background: #fffbeb;
+                padding: 1rem 1.25rem;
+                border-radius: 0 6px 6px 0;
+                margin-bottom: 1.5rem;
+                text-align: left;
+            }
+
+            .notice__title {
+                font-size: .875rem;
+                font-weight: 700;
+                color: #973c00;
+                margin-bottom: .25rem;
+            }
+
+            .notice__text {
+                font-size: .8rem;
+                color: #bb4d00;
+            }
+
+            .card .email {
+                font-size: .875rem;
+                color: #1a1a2e;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                word-break: break-all;
+                background: #f5f5f5;
+                padding: .5rem .75rem;
+                border-radius: 4px;
+            }
+
+            .btn {
+                display: inline-block;
+                width: 100%;
+                margin-top: .5rem;
+                padding: .75rem 1.25rem;
+                background: #1a1a2e;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                text-decoration: none;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1rem;
+                font-weight: 600;
+                text-align: center;
+                transition: background-color .15s ease;
+            }
+
+            .btn:hover {
+                background: #2d2d44;
+            }
+
+            .btn:active {
+                background: #111122;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <img src="/images/logos/Espanhol%20Preto@2x.png" alt="Agenda Positiva" class="card__logo" />
+        <div class="notice">
+            <p class="notice__title">Acceso denegado</p>
+            <p class="notice__text">Este correo no tiene permisos de administrador. Contacta al equipo para solicitar
+                acceso.</p>
+            </div>
+            @if (!string.IsNullOrEmpty(Model?.Email))
+            {
+                <p class="email">@Model.Email</p>
+            }
+            <a href="/admin/auth/login" class="btn">Volver al login</a>
+        </div>
+    </body>
+
+</html>

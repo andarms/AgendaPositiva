@@ -14,7 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Evento> Eventos => Set<Evento>();
     public DbSet<Inscripcion> Inscripciones => Set<Inscripcion>();
     public DbSet<GrupoFamiliar> GrupoFamiliar => Set<GrupoFamiliar>();
-    public DbSet<UsuarioSistema> UsuariosSistema => Set<UsuarioSistema>();
+    public DbSet<UsuarioAdministrador> UsuariosAdministradores => Set<UsuarioAdministrador>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,7 +24,7 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarEventos();
         modelBuilder.ConfigurarInscripciones();
         modelBuilder.ConfigurarGrupoFamiliar();
-        modelBuilder.ConfigurarUsuariosSistema();
+        modelBuilder.ConfigurarUsuariosAdministradores();
     }
 
     public override int SaveChanges()

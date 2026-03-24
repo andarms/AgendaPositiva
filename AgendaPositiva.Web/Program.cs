@@ -1,5 +1,7 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Inscripciones;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,25 @@ builder.Services.AddControllersWithViews().AddRazorOptions(o =>
     o.ViewLocationFormats.Clear();
     o.ViewLocationFormats.Add("/Features/{1}/Views/{0}.cshtml");
 });
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = "/admin/auth/login";
+    options.AccessDeniedPath = "/admin/auth/login";
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+});
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
 
 builder.Services.AgregarModuloInscripciones();
 
@@ -41,6 +62,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

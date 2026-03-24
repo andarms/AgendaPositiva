@@ -4,12 +4,14 @@ using AgendaPositiva.Web.Features.Commons.Views;
 using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
 [Route("admin/inscripciones")]
+[Authorize(Policy = "Administrador")]
 public class InscripcionesAdminController : Controller
 {
     readonly AppDbContext store;
