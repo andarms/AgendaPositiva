@@ -5,11 +5,17 @@
 @model ListaInscripcionesViewModel
 
 <h1>Inscripciones — @Model.Evento.Nombre</h1>
-<p style="color: #666; margin-bottom: 1.5rem;">
-    @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy") ·
-    @Model.Evento.Ubicacion
-    · <strong>@Model.Inscripciones.Count</strong> inscripciones
-</p>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <p style="color: #666; margin: 0;">
+        @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy") ·
+        @Model.Evento.Ubicacion
+        · <strong>@Model.Inscripciones.Count</strong> inscripciones
+    </p>
+    <a href="/admin/inscripciones/exportar"
+           style="padding: 0.5rem 1.25rem; background: #27ae60; color: #fff; border-radius: 6px; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+        ⬇ Exportar Excel
+    </a>
+</div>
 
 <form method="get" action="/admin/inscripciones"
       style="background: #fff; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
