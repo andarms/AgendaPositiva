@@ -25,5 +25,5 @@ public class Inscripcion : EntidadBase
     public GrupoFamiliar? GrupoFamiliar { get; set; }
     public Persona? RelacionConPersona { get; set; }
 
-    public string Localidad => string.IsNullOrEmpty(Ciudad) ? Departamento : $"{Ciudad}, {Departamento}";
+    public string Localidad => string.IsNullOrEmpty(Ciudad) ? Departamento : $"{Departamento}, {Ciudad}";
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Agenda Positiva</title>
+    <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: system-ui, -apple-system, sans-serif;
+                background: #f5f5f5;
+                color: #333;
+            }
+
+            .admin-header {
+                background: #1a1a2e;
+                color: #fff;
+                padding: 1rem 2rem;
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            .admin-header nav a {
+                color: #ccc;
+                text-decoration: none;
+                font-size: 0.9rem;
+            }
+
+            .admin-header nav a:hover {
+                color: #fff;
+            }
+
+            .admin-main {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .admin-footer {
+                text-align: center;
+                padding: 2rem;
+                color: #999;
+                font-size: 0.85rem;
+            }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1>Agenda Positiva — Admin</h1>
+        <nav>
+            <a href="/admin/inscripciones">Inscripciones</a>
+        </nav>
+    </header>
+
+    <main class="admin-main">
+        @RenderBody()
+    </main>
+
+    <footer class="admin-footer">
+        Panel de administración
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
