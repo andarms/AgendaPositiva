@@ -123,7 +123,7 @@ public class InscripcionesAdminController : Controller
         var headers = new[] { "#", "Nombres", "Apellidos", "Género",
             "Tipo Identificación", "Número Identificación", "Fecha Nacimiento",
             "Teléfono", "Email", "Departamento", "Ciudad", "Estado", "Hospedaje",
-            "Parentesco", "Necesidades Especiales", "Fecha Registro" };
+            "Grupo Familiar", "Necesidades Especiales", "Fecha Registro" };
 
         for (int i = 0; i < headers.Length; i++)
             ws.Cell(1, i + 1).Value = headers[i];
@@ -157,7 +157,7 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 11).Value = ins.Ciudad;
             ws.Cell(row, 12).Value = ins.Estado.Humanize();
             ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
-            ws.Cell(row, 14).Value = relacion;
+            ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "N/A";
             ws.Cell(row, 15).Value = ins.NecesidadesEspeciales ?? "";
             ws.Cell(row, 16).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
         }
