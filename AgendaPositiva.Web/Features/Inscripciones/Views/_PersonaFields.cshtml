@@ -25,7 +25,7 @@
     </div>
 
     <div class="form-control">
-        <label for="@id("Genero")">Género:</label>
+        <label for="@id("Genero")">Sexo:</label>
         <select id="@id("Genero")" name="@name("Genero")" required>
             @foreach (Genero genero in Enum.GetValues<Genero>())
             {
@@ -109,10 +109,12 @@
         <label>¿Requiere hospedaje?</label>
         <div class="radio-group">
             <label class="radio-option">
-                <input type="radio" id="@id("RequiereHospedaje")_si" name="@name("RequiereHospedaje")" value="true" required> Sí
+                <input type="radio" id="@id("RequiereHospedaje")_si" name="@name("RequiereHospedaje")" value="true"
+                       required> Sí
             </label>
             <label class="radio-option">
-                <input type="radio" id="@id("RequiereHospedaje")_no" name="@name("RequiereHospedaje")" value="false" checked> No
+                <input type="radio" id="@id("RequiereHospedaje")_no" name="@name("RequiereHospedaje")" value="false"
+                       checked> No
             </label>
         </div>
     </div>
