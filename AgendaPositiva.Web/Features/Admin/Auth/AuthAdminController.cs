@@ -20,6 +20,7 @@ public class AuthAdminController : Controller
     }
 
     [HttpGet("login")]
+    [HttpGet("/admin")]
     public IActionResult Login()
     {
         return View("~/Features/Admin/Auth/Views/Login.cshtml");
