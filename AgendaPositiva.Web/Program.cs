@@ -12,6 +12,13 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
+// Diagnóstico temporal — eliminar después del deploy exitoso
+Console.WriteLine("=== DIAGNÓSTICO DE VARIABLES ===");
+Console.WriteLine($"DATABASE_URL presente: {!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_URL"))}");
+Console.WriteLine($"ConnectionStrings__DefaultConnection presente: {!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection"))}");
+Console.WriteLine($"GetConnectionString resultado: {!string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnection"))}");
+Console.WriteLine("================================");
+
 if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException(
         "No se encontró la cadena de conexión. Configure 'ConnectionStrings__DefaultConnection' o 'DATABASE_URL'.");
