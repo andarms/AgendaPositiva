@@ -12,10 +12,10 @@ public static class DatosIniciales
 
         var evento = new Evento
         {
-            Nombre = "Agenda Positiva",
-            Descripcion = "Conferencia Agenda Positiva edición",
-            FechaInicio = new DateTime(2026, 6, 1, 8, 0, 0, DateTimeKind.Utc),
-            FechaFin = new DateTime(2026, 6, 3, 18, 0, 0, DateTimeKind.Utc),
+            Nombre = "Conferencia Internacional Colombia 2026",
+            Descripcion = "Conferencia Internacional Colombia 2026",
+            FechaInicio = new DateTime(2026, 8, 22, 8, 0, 0, DateTimeKind.Utc),
+            FechaFin = new DateTime(2026, 8, 23, 18, 0, 0, DateTimeKind.Utc),
             Ubicacion = "Centro de Convenciones",
             Activo = true
         };
