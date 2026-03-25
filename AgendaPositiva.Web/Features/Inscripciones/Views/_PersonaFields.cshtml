@@ -103,6 +103,8 @@
         <select id="@id("Ciudad")" name="@name("Ciudad")">
             <option value="">-- Seleccione --</option>
         </select>
+        <input type="text" id="@id("Ciudad")_text" name="@name("Ciudad")" placeholder="Ej: Miami, Nueva York..."
+               style="display:none">
     </div>
 
     <div class="form-control form-grid__full">
@@ -156,6 +158,7 @@
     (function () {
         var depSelect = document.getElementById('@id("Departamento")');
         var ciudadSelect = document.getElementById('@id("Ciudad")');
+        var ciudadText = document.getElementById('@id("Ciudad")_text');
         var ciudadContainer = document.getElementById('@id("Ciudad")_container');
         if (!depSelect || !ciudadSelect) return;
 
@@ -164,12 +167,21 @@
 
         function actualizarVisibilidad(dep) {
             if (dep === internacional) {
-                ciudadContainer.style.display = 'none';
+                ciudadSelect.style.display = 'none';
                 ciudadSelect.removeAttribute('required');
+                ciudadSelect.removeAttribute('name');
                 ciudadSelect.value = '';
+                ciudadText.style.display = '';
+                ciudadText.setAttribute('required', '');
+                ciudadText.setAttribute('name', '@name("Ciudad")');
             } else {
-                ciudadContainer.style.display = '';
+                ciudadSelect.style.display = '';
                 ciudadSelect.setAttribute('required', '');
+                ciudadSelect.setAttribute('name', '@name("Ciudad")');
+                ciudadText.style.display = 'none';
+                ciudadText.removeAttribute('required');
+                ciudadText.removeAttribute('name');
+                ciudadText.value = '';
             }
         }
 
@@ -191,7 +203,9 @@
 
         // Inicializar
         actualizarVisibilidad(depSelect.value);
-        if (depSelect.value && depSelect.value !== internacional) {
+        if (depSelect.value === internacional) {
+            ciudadText.value = ciudadDefault;
+        } else if (depSelect.value) {
             cargarCiudades(depSelect.value, ciudadDefault);
         }
 
