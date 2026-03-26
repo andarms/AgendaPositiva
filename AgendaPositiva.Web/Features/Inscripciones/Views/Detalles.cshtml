@@ -88,9 +88,9 @@
     </div>
 </div>
 
+<h2>Grupo Familiar</h2>
 @if (Model.GrupoFamiliar?.Inscripciones?.Count > 1)
 {
-    <h2>Grupo Familiar</h2>
     @foreach (var ins in Model.GrupoFamiliar.Inscripciones.Where(i => i.Id != Model.Id))
     {
 
@@ -141,9 +141,17 @@
         </div>
     }
 }
+else
+{
+    <p class="small-text">No hay otros miembros en el grupo familiar.</p>
+}
 
 <div class="btn-group">
-    <a href="/inscripciones/verificar-familiares/@Model.Id" class="btn btn-primary">Agregar familiar</a>
+    <a href="/inscripciones/verificar-familiares/@Model.Id" class="btn btn-secondary">
+        Agregar al Grupo Familiar
+    </a>
+
+    <hr>
     <a href="/inscripciones/verificacion" class="btn btn-secondary">Verificar otro documento</a>
 </div>
 
