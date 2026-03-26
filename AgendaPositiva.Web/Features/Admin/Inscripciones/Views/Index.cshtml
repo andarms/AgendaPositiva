@@ -1,6 +1,5 @@
 @using AgendaPositiva.Web.Features.Commons.Views;
 @using AgendaPositiva.Web.Features.Commons;
-@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 @model ListaInscripcionesViewModel
 
@@ -80,7 +79,6 @@
                         </th>
                         <th>Estado</th>
                         <th>Hospedaje</th>
-                        <th>Fecha Registro</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,7 +100,6 @@
                             <td>@inscripcion.Localidad</td>
                             <td><span class="badge @badgeCss">@inscripcion.Estado.Humanize()</span></td>
                             <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
-                            <td class="col-date">@inscripcion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
                         </tr>
                     }
                 </tbody>

@@ -152,6 +152,10 @@
   text-decoration: none;
 }
 
+.admin-table .col-name a:hover {
+  text-decoration: underline;
+}
+
 .admin-table .col-date {
   color: #999;
   font-size: 0.85rem;

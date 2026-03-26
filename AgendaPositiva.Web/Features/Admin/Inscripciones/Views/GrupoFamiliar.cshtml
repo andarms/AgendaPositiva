@@ -49,7 +49,8 @@
                     </td>
                     <td><span class="badge @badgeCss">@inscripcion.Estado.Humanize()</span></td>
                     <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
-                    <td>@(string.IsNullOrEmpty(inscripcion.NecesidadesEspeciales) ? "—" : inscripcion.NecesidadesEspeciales)</td>
+                    <td>@(string.IsNullOrEmpty(inscripcion.NecesidadesEspeciales) ? "—" : inscripcion.NecesidadesEspeciales)
+                    </td>
                 </tr>
             }
         </tbody>
