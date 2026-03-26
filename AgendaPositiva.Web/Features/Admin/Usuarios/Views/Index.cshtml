@@ -150,7 +150,7 @@
             <th>Nombre</th>
             <th>Email</th>
             <th>Rol</th>
-            <th>Departamentos</th>
+            <th>Localidades</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
@@ -176,16 +176,25 @@
                     {
                         <span style="color:#666; font-size:.85rem;">Todos</span>
                     }
-                    else if (u.Departamentos.Any())
+                    else if (u.Localidades.Any())
                     {
                         <div class="deptos-list">
-                            @foreach (var d in u.Departamentos.Take(5))
+                            @foreach (var kv in u.Localidades.Take(5))
                             {
-                                <span>@d</span>
+                                if (kv.Value.Count == 0)
+                                {
+                                    <span>@kv.Key</span>
+                                }
+                                else
+                                {
+                                    var ciudadesTexto = string.Join(", ", kv.Value.Take(3));
+                                    if (kv.Value.Count > 3) ciudadesTexto += $" +{kv.Value.Count - 3}";
+                                    <span title="@string.Join(", ", kv.Value)">@kv.Key (@ciudadesTexto)</span>
+                                }
                             }
-                            @if (u.Departamentos.Count > 5)
+                            @if (u.Localidades.Count > 5)
                             {
-                                <span>+@(u.Departamentos.Count - 5) más</span>
+                                <span>+@(u.Localidades.Count - 5) más</span>
                             }
                         </div>
                     }

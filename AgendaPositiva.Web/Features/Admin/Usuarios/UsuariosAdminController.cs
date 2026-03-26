@@ -4,6 +4,7 @@ using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace AgendaPositiva.Web.Features.Admin.Usuarios;
 
@@ -30,13 +31,37 @@ public class UsuariosAdminController : Controller
         return View("~/Features/Admin/Usuarios/Views/Index.cshtml", usuarios);
     }
 
+    UsuarioFormViewModel CrearViewModel(UsuarioAdministrador? usuario = null)
+    {
+        var departamentosInfo = ubicacionService.Departamentos
+            .Select(d => new DepartamentoFormItem
+            {
+                Nombre = d.Departamento,
+                CiudadesDisponibles = d.Ciudades
+            }).ToList();
+
+        var vm = new UsuarioFormViewModel
+        {
+            DepartamentosInfo = departamentosInfo
+        };
+
+        if (usuario is not null)
+        {
+            vm.Id = usuario.Id;
+            vm.Email = usuario.Email;
+            vm.Nombre = usuario.Nombre ?? "";
+            vm.Rol = usuario.Rol;
+            vm.Activo = usuario.Activo;
+            vm.LocalidadesJson = JsonSerializer.Serialize(usuario.Localidades);
+        }
+
+        return vm;
+    }
+
     [HttpGet("crear")]
     public IActionResult Crear()
     {
-        var vm = new UsuarioFormViewModel
-        {
-            DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos()
-        };
+        var vm = CrearViewModel();
         return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
     }
 
@@ -45,16 +70,26 @@ public class UsuariosAdminController : Controller
     {
         if (!ModelState.IsValid)
         {
-            vm.DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos();
-            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
+            var vmErr = CrearViewModel();
+            vmErr.Email = vm.Email;
+            vmErr.Nombre = vm.Nombre;
+            vmErr.Rol = vm.Rol;
+            vmErr.Activo = vm.Activo;
+            vmErr.LocalidadesJson = vm.LocalidadesJson;
+            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vmErr);
         }
 
         var existe = await store.UsuariosAdministradores.AnyAsync(u => u.Email == vm.Email);
         if (existe)
         {
             ModelState.AddModelError("Email", "Ya existe un usuario con este correo.");
-            vm.DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos();
-            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
+            var vmErr = CrearViewModel();
+            vmErr.Email = vm.Email;
+            vmErr.Nombre = vm.Nombre;
+            vmErr.Rol = vm.Rol;
+            vmErr.Activo = vm.Activo;
+            vmErr.LocalidadesJson = vm.LocalidadesJson;
+            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vmErr);
         }
 
         var usuario = new UsuarioAdministrador
@@ -62,7 +97,7 @@ public class UsuariosAdminController : Controller
             Email = vm.Email,
             Nombre = vm.Nombre,
             Rol = vm.Rol,
-            Departamentos = vm.DepartamentosSeleccionados ?? [],
+            Localidades = vm.ParsearLocalidades(),
             Activo = vm.Activo
         };
 
@@ -78,17 +113,7 @@ public class UsuariosAdminController : Controller
         var usuario = await store.UsuariosAdministradores.FindAsync(id);
         if (usuario is null) return NotFound();
 
-        var vm = new UsuarioFormViewModel
-        {
-            Id = usuario.Id,
-            Email = usuario.Email,
-            Nombre = usuario.Nombre ?? "",
-            Rol = usuario.Rol,
-            Activo = usuario.Activo,
-            DepartamentosSeleccionados = usuario.Departamentos,
-            DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos()
-        };
-
+        var vm = CrearViewModel(usuario);
         return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
     }
 
@@ -100,9 +125,13 @@ public class UsuariosAdminController : Controller
 
         if (!ModelState.IsValid)
         {
-            vm.Id = id;
-            vm.DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos();
-            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
+            var vmErr = CrearViewModel(usuario);
+            vmErr.Email = vm.Email;
+            vmErr.Nombre = vm.Nombre;
+            vmErr.Rol = vm.Rol;
+            vmErr.Activo = vm.Activo;
+            vmErr.LocalidadesJson = vm.LocalidadesJson;
+            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vmErr);
         }
 
         var emailDuplicado = await store.UsuariosAdministradores
@@ -110,16 +139,20 @@ public class UsuariosAdminController : Controller
         if (emailDuplicado)
         {
             ModelState.AddModelError("Email", "Ya existe otro usuario con este correo.");
-            vm.Id = id;
-            vm.DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos();
-            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vm);
+            var vmErr = CrearViewModel(usuario);
+            vmErr.Email = vm.Email;
+            vmErr.Nombre = vm.Nombre;
+            vmErr.Rol = vm.Rol;
+            vmErr.Activo = vm.Activo;
+            vmErr.LocalidadesJson = vm.LocalidadesJson;
+            return View("~/Features/Admin/Usuarios/Views/Formulario.cshtml", vmErr);
         }
 
         usuario.Email = vm.Email;
         usuario.Nombre = vm.Nombre;
         usuario.Rol = vm.Rol;
         usuario.Activo = vm.Activo;
-        usuario.Departamentos = vm.DepartamentosSeleccionados ?? [];
+        usuario.Localidades = vm.ParsearLocalidades();
 
         await store.SaveChangesAsync();
 
@@ -139,6 +172,12 @@ public class UsuariosAdminController : Controller
     }
 }
 
+public class DepartamentoFormItem
+{
+    public string Nombre { get; set; } = string.Empty;
+    public List<string> CiudadesDisponibles { get; set; } = [];
+}
+
 public class UsuarioFormViewModel
 {
     public int? Id { get; set; }
@@ -146,6 +185,16 @@ public class UsuarioFormViewModel
     public string Nombre { get; set; } = string.Empty;
     public RolAdministrador Rol { get; set; } = RolAdministrador.Colaborador;
     public bool Activo { get; set; } = true;
-    public List<string>? DepartamentosSeleccionados { get; set; } = [];
-    public List<string> DepartamentosDisponibles { get; set; } = [];
+
+    /// <summary>JSON string del Dictionary&lt;string, List&lt;string&gt;&gt; de localidades seleccionadas.</summary>
+    public string LocalidadesJson { get; set; } = "{}";
+
+    /// <summary>Lista de departamentos con sus ciudades disponibles (para renderizar el formulario).</summary>
+    public List<DepartamentoFormItem> DepartamentosInfo { get; set; } = [];
+
+    public Dictionary<string, List<string>> ParsearLocalidades()
+    {
+        if (string.IsNullOrWhiteSpace(LocalidadesJson)) return [];
+        return JsonSerializer.Deserialize<Dictionary<string, List<string>>>(LocalidadesJson) ?? [];
+    }
 }

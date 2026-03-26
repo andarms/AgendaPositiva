@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
@@ -28,8 +29,43 @@ public class InscripcionesAdminController : Controller
 
     bool EsAdministrador => User.IsInRole("Administrador");
 
-    List<string> DepartamentosAsignados =>
-        User.FindFirstValue("Departamentos")?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
+    Dictionary<string, List<string>> LocalidadesAsignadas
+    {
+        get
+        {
+            var json = User.FindFirstValue("Localidades");
+            if (string.IsNullOrEmpty(json)) return [];
+            return JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json) ?? [];
+        }
+    }
+
+    List<string> DepartamentosAsignados => [.. LocalidadesAsignadas.Keys];
+
+    bool TieneAcceso(string departamento, string ciudad)
+    {
+        var localidades = LocalidadesAsignadas;
+        if (!localidades.TryGetValue(departamento, out var ciudades)) return false;
+        return ciudades.Count == 0 || ciudades.Contains(ciudad);
+    }
+
+    IQueryable<Inscripcion> FiltrarPorLocalidades(IQueryable<Inscripcion> query)
+    {
+        var localidades = LocalidadesAsignadas;
+        var deptosCompletos = localidades.Where(kv => kv.Value.Count == 0).Select(kv => kv.Key).ToList();
+        var deptosParciales = localidades.Where(kv => kv.Value.Count > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
+
+        if (deptosParciales.Count == 0)
+        {
+            return query.Where(i => deptosCompletos.Contains(i.Departamento));
+        }
+
+        var ciudadesPermitidas = deptosParciales.SelectMany(kv => kv.Value).ToList();
+        var deptosParcKeys = deptosParciales.Keys.ToList();
+
+        return query.Where(i =>
+            deptosCompletos.Contains(i.Departamento) ||
+            (deptosParcKeys.Contains(i.Departamento) && ciudadesPermitidas.Contains(i.Ciudad)));
+    }
 
     [HttpGet]
     public IActionResult Index(
@@ -43,11 +79,10 @@ public class InscripcionesAdminController : Controller
             .Include(i => i.Persona)
             .Where(i => i.EventoId == evento.Id);
 
-        // Colaboradores solo ven sus departamentos asignados
+        // Colaboradores solo ven sus localidades asignadas
         if (!EsAdministrador)
         {
-            var deptos = DepartamentosAsignados;
-            query = query.Where(i => deptos.Contains(i.Departamento));
+            query = FiltrarPorLocalidades(query);
         }
 
         if (!string.IsNullOrWhiteSpace(nombre))
@@ -107,7 +142,7 @@ public class InscripcionesAdminController : Controller
 
         if (inscripcion is null) return NotFound();
 
-        if (!EsAdministrador && !DepartamentosAsignados.Contains(inscripcion.Departamento))
+        if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
             return Forbid();
 
         return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", inscripcion);
@@ -124,7 +159,7 @@ public class InscripcionesAdminController : Controller
 
         if (inscripcion is null) return NotFound();
 
-        if (!EsAdministrador && !DepartamentosAsignados.Contains(inscripcion.Departamento))
+        if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
             return Forbid();
 
         inscripcion.Estado = nuevoEstado;
@@ -152,8 +187,7 @@ public class InscripcionesAdminController : Controller
 
         if (!EsAdministrador)
         {
-            var deptos = DepartamentosAsignados;
-            if (!inscripcionesEvento.Any(i => deptos.Contains(i.Departamento)))
+            if (!inscripcionesEvento.Any(i => TieneAcceso(i.Departamento, i.Ciudad)))
                 return Forbid();
         }
 
@@ -170,8 +204,7 @@ public class InscripcionesAdminController : Controller
 
         if (!EsAdministrador)
         {
-            var deptos = DepartamentosAsignados;
-            query = query.Where(i => deptos.Contains(i.Departamento));
+            query = FiltrarPorLocalidades(query);
         }
 
         var inscripciones = query

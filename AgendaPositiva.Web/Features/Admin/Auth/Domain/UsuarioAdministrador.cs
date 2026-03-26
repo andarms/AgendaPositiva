@@ -14,5 +14,9 @@ public class UsuarioAdministrador : EntidadBase
     public string? Nombre { get; set; }
     public bool Activo { get; set; } = true;
     public RolAdministrador Rol { get; set; } = RolAdministrador.Colaborador;
-    public List<string> Departamentos { get; set; } = [];
+    /// <summary>
+    /// Clave = departamento, Valor = lista de ciudades permitidas.
+    /// Lista vacía = acceso a TODAS las ciudades del departamento.
+    /// </summary>
+    public Dictionary<string, List<string>> Localidades { get; set; } = [];
 }

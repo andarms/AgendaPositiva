@@ -122,7 +122,7 @@ public static class InscripcionesDbContextExtensions
                 .HasConversion<string>()
                 .HasMaxLength(50);
 
-            e.Property(u => u.Departamentos)
+            e.Property(u => u.Localidades)
                 .HasColumnType("jsonb");
         });
     }

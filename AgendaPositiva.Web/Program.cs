@@ -3,6 +3,7 @@ using AgendaPositiva.Web.Features.Inscripciones;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +25,12 @@ if (connectionString.StartsWith("postgresql://") || connectionString.StartsWith(
     connectionString = $"Host={uri.Host};Port={(uri.Port > 0 ? uri.Port : 5432)};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
 }
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+dataSourceBuilder.EnableDynamicJson();
+builder.Services.AddSingleton(dataSourceBuilder.Build());
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+    options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>()));
 
 builder.Services.AddControllersWithViews();
 

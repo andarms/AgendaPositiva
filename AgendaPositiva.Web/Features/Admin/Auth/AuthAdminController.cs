@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using AgendaPositiva.Web.Datos;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -66,7 +67,7 @@ public class AuthAdminController : Controller
             new(ClaimTypes.Name, nombre ?? usuario.Nombre ?? email),
             new("AdminUsuarioId", usuario.Id.ToString()),
             new(ClaimTypes.Role, usuario.Rol.ToString()),
-            new("Departamentos", string.Join(",", usuario.Departamentos))
+            new("Localidades", JsonSerializer.Serialize(usuario.Localidades))
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

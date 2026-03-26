@@ -22,14 +22,15 @@ public static class DatosIniciales
 
         db.Eventos.Add(evento);
 
-        var todosDepartamentos = UbicacionService.ObtenerTodosLosDepartamentos(env);
+        var todosDeptos = UbicacionService.ObtenerTodosLosDepartamentos(env);
+        var todasLocalidades = todosDeptos.ToDictionary(d => d, _ => new List<string>());
 
         var administrador1 = new UsuarioAdministrador
         {
             Email = "and7702@gmail.com",
             Nombre = "Adrian Manjarres",
             Rol = RolAdministrador.Administrador,
-            Departamentos = todosDepartamentos,
+            Localidades = todasLocalidades,
             Activo = true
         };
         db.UsuariosAdministradores.Add(administrador1);
@@ -39,7 +40,7 @@ public static class DatosIniciales
             Email = "adrian.manjarres@avant.com",
             Nombre = "Adrian Manjarres",
             Rol = RolAdministrador.Colaborador,
-            Departamentos = ["Cundinamarca"],
+            Localidades = new() { ["Cundinamarca"] = [] },
             Activo = true
         };
         db.UsuariosAdministradores.Add(administrador2);

@@ -1,5 +1,6 @@
 @using AgendaPositiva.Web.Features.Admin.Auth.Domain
 @using AgendaPositiva.Web.Features.Admin.Usuarios
+@using System.Text.Json
 @model UsuarioFormViewModel
 
 @{
@@ -15,7 +16,7 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
             padding: 2rem;
-            max-width: 640px;
+            max-width: 780px;
         }
 
         .form-card h1 {
@@ -71,38 +72,21 @@
             accent-color: #1a1a2e;
         }
 
-        .deptos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: .5rem;
-            max-height: 300px;
+        .localidades-section {
+            max-height: 500px;
             overflow-y: auto;
             border: 1px solid #eee;
             border-radius: 4px;
-            padding: .75rem;
             background: #fafafa;
         }
 
-        .depto-item {
-            display: flex;
-            align-items: center;
-            gap: .4rem;
-            font-size: .85rem;
-        }
-
-        .depto-item input {
-            accent-color: #1a1a2e;
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .deptos-actions {
+        .localidades-actions {
             display: flex;
             gap: .75rem;
             margin-bottom: .5rem;
         }
 
-        .deptos-actions button {
+        .localidades-actions button {
             background: none;
             border: none;
             color: #1a1a2e;
@@ -111,6 +95,111 @@
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
             text-decoration: underline;
+        }
+
+        .depto-block {
+            border-bottom: 1px solid #eee;
+        }
+
+        .depto-block:last-child {
+            border-bottom: none;
+        }
+
+        .depto-header {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .6rem .75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .depto-header:hover {
+            background: #f0f0f5;
+        }
+
+        .depto-header input[type="checkbox"] {
+            accent-color: #1a1a2e;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .depto-header .depto-name {
+            font-size: .85rem;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .depto-header .depto-badge {
+            font-size: .7rem;
+            color: #888;
+            background: #e8e8f0;
+            padding: .1rem .4rem;
+            border-radius: 3px;
+        }
+
+        .depto-header .depto-toggle {
+            font-size: .7rem;
+            color: #999;
+            transition: transform .15s;
+        }
+
+        .depto-block.expanded .depto-toggle {
+            transform: rotate(90deg);
+        }
+
+        .ciudades-panel {
+            display: none;
+            padding: .25rem .75rem .75rem 2.25rem;
+            background: #fff;
+        }
+
+        .depto-block.expanded .ciudades-panel {
+            display: block;
+        }
+
+        .ciudades-actions {
+            display: flex;
+            gap: .75rem;
+            margin-bottom: .35rem;
+        }
+
+        .ciudades-actions button {
+            background: none;
+            border: none;
+            color: #1a1a2e;
+            font-size: .75rem;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: underline;
+        }
+
+        .ciudades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: .25rem;
+        }
+
+        .ciudad-item {
+            display: flex;
+            align-items: center;
+            gap: .3rem;
+            font-size: .8rem;
+            color: #444;
+        }
+
+        .ciudad-item input {
+            accent-color: #1a1a2e;
+            width: .85rem;
+            height: .85rem;
+        }
+
+        .ciudades-note {
+            font-size: .75rem;
+            color: #888;
+            font-style: italic;
+            margin-bottom: .35rem;
         }
 
         .form-actions {
@@ -162,7 +251,7 @@
 <div class="form-card">
     <h1>@titulo</h1>
 
-    <form method="post" action="@action">
+    <form method="post" action="@action" id="usuario-form">
         <div class="form-row">
             <div class="form-group">
                 <label for="Nombre">Nombre</label>
@@ -185,7 +274,7 @@
                     </option>
                     <option value="@RolAdministrador.Colaborador"
                             selected="@(Model.Rol == RolAdministrador.Colaborador)">
-                        Colaborador — departamentos asignados
+                        Colaborador — localidades asignadas
                     </option>
                 </select>
             </div>
@@ -198,23 +287,53 @@
             </div>
         </div>
 
-        <div class="form-group" id="deptos-section">
-            <label>Departamentos con acceso</label>
-            <div class="deptos-actions">
-                <button type="button" onclick="toggleAll(true)">Seleccionar todos</button>
-                <button type="button" onclick="toggleAll(false)">Deseleccionar todos</button>
+        <div class="form-group" id="localidades-section">
+            <label>Localidades con acceso</label>
+            <div class="localidades-actions">
+                <button type="button" onclick="toggleAllDeptos(true)">Seleccionar todos</button>
+                <button type="button" onclick="toggleAllDeptos(false)">Deseleccionar todos</button>
             </div>
-            <div class="deptos-grid">
-                @foreach (var depto in Model.DepartamentosDisponibles)
+            <div class="localidades-section">
+                @foreach (var depto in Model.DepartamentosInfo)
                 {
-                    var isChecked = Model.DepartamentosSeleccionados?.Contains(depto) == true;
-                    <label class="depto-item">
-                        <input type="checkbox" name="DepartamentosSeleccionados" value="@depto" checked="@isChecked" />
-                        @depto
-                    </label>
+                    var ciudadesJson = JsonSerializer.Serialize(depto.CiudadesDisponibles);
+                    <div class="depto-block" data-depto="@depto.Nombre" data-ciudades="@ciudadesJson">
+                        <div class="depto-header" onclick="toggleDepto(this)">
+                            <input type="checkbox" class="depto-cb"
+                                   onclick="event.stopPropagation(); onDeptoCbChange(this)" />
+                            <span class="depto-name">@depto.Nombre</span>
+                            @if (depto.CiudadesDisponibles.Count > 0)
+                            {
+                                <span class="depto-badge ciudades-count"></span>
+                                <span class="depto-toggle">▶</span>
+                            }
+                        </div>
+                        @if (depto.CiudadesDisponibles.Count > 0)
+                        {
+                            <div class="ciudades-panel">
+                                <div class="ciudades-note">Sin ciudades seleccionadas = acceso a todas</div>
+                                <div class="ciudades-actions">
+                                    <button type="button" onclick="toggleCiudades(this, true)">Todas</button>
+                                    <button type="button" onclick="toggleCiudades(this, false)">Ninguna</button>
+                                </div>
+                                <div class="ciudades-grid">
+                                    @foreach (var ciudad in depto.CiudadesDisponibles)
+                                    {
+                                        <label class="ciudad-item">
+                                            <input type="checkbox" class="ciudad-cb" value="@ciudad"
+                                                   onchange="onCiudadChange(this)" />
+                                            @ciudad
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 }
             </div>
         </div>
+
+        <input type="hidden" name="LocalidadesJson" id="LocalidadesJson" value="@Model.LocalidadesJson" />
 
         <div class="form-actions">
             <button type="submit" class="btn btn--primary">@(esEdicion ? "Guardar cambios" : "Crear usuario")</button>
@@ -225,20 +344,110 @@
 
 @section Scripts {
     <script>
-        function toggleAll(checked) {
-            document.querySelectorAll('#deptos-section input[type="checkbox"]')
-                .forEach(cb => cb.checked = checked);
+        const localidadesData = JSON.parse(document.getElementById('LocalidadesJson').value || '{}');
+
+        // Inicializar estado desde localidadesData
+        document.querySelectorAll('.depto-block').forEach(block => {
+            const deptoName = block.dataset.depto;
+            const deptoCb = block.querySelector('.depto-cb');
+            if (localidadesData[deptoName] !== undefined) {
+                deptoCb.checked = true;
+                const ciudadesSeleccionadas = localidadesData[deptoName];
+                if (ciudadesSeleccionadas.length > 0) {
+                    block.querySelectorAll('.ciudad-cb').forEach(cb => {
+                        cb.checked = ciudadesSeleccionadas.includes(cb.value);
+                    });
+                }
+            }
+            actualizarBadge(block);
+        });
+
+        function toggleDepto(header) {
+            const block = header.closest('.depto-block');
+            if (!block.querySelector('.ciudades-panel')) return;
+            block.classList.toggle('expanded');
         }
 
-        // Mostrar/ocultar sección de departamentos según rol
+        function onDeptoCbChange(cb) {
+            const block = cb.closest('.depto-block');
+            if (!cb.checked) {
+                block.querySelectorAll('.ciudad-cb').forEach(c => c.checked = false);
+                block.classList.remove('expanded');
+            }
+            actualizarBadge(block);
+            sincronizarJson();
+        }
+
+        function onCiudadChange(cb) {
+            const block = cb.closest('.depto-block');
+            const deptoCb = block.querySelector('.depto-cb');
+            const anyChecked = block.querySelectorAll('.ciudad-cb:checked').length > 0;
+            if (anyChecked && !deptoCb.checked) deptoCb.checked = true;
+            actualizarBadge(block);
+            sincronizarJson();
+        }
+
+        function toggleCiudades(btn, checked) {
+            const panel = btn.closest('.ciudades-panel');
+            const block = panel.closest('.depto-block');
+            panel.querySelectorAll('.ciudad-cb').forEach(cb => cb.checked = checked);
+            if (checked) block.querySelector('.depto-cb').checked = true;
+            actualizarBadge(block);
+            sincronizarJson();
+        }
+
+        function toggleAllDeptos(checked) {
+            document.querySelectorAll('.depto-cb').forEach(cb => {
+                cb.checked = checked;
+            });
+            if (!checked) {
+                document.querySelectorAll('.ciudad-cb').forEach(cb => cb.checked = false);
+                document.querySelectorAll('.depto-block').forEach(b => b.classList.remove('expanded'));
+            }
+            document.querySelectorAll('.depto-block').forEach(actualizarBadge);
+            sincronizarJson();
+        }
+
+        function actualizarBadge(block) {
+            const badge = block.querySelector('.ciudades-count');
+            if (!badge) return;
+            const deptoCb = block.querySelector('.depto-cb');
+            const total = block.querySelectorAll('.ciudad-cb').length;
+            const selected = block.querySelectorAll('.ciudad-cb:checked').length;
+
+            if (!deptoCb.checked) {
+                badge.textContent = '';
+            } else if (selected === 0) {
+                badge.textContent = `Todas (${total})`;
+            } else {
+                badge.textContent = `${selected} de ${total}`;
+            }
+        }
+
+        function sincronizarJson() {
+            const result = {};
+            document.querySelectorAll('.depto-block').forEach(block => {
+                const deptoCb = block.querySelector('.depto-cb');
+                if (!deptoCb.checked) return;
+                const deptoName = block.dataset.depto;
+                const ciudadesChecked = [...block.querySelectorAll('.ciudad-cb:checked')].map(c => c.value);
+                result[deptoName] = ciudadesChecked;
+            });
+            document.getElementById('LocalidadesJson').value = JSON.stringify(result);
+        }
+
+        // Mostrar/ocultar sección según rol
         const rolSelect = document.getElementById('Rol');
-        const deptosSection = document.getElementById('deptos-section');
+        const localidadesSection = document.getElementById('localidades-section');
 
-        function toggleDeptos() {
-            deptosSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' ? 'none' : 'block';
+        function toggleLocalidades() {
+            localidadesSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' ? 'none' : 'block';
         }
 
-        rolSelect.addEventListener('change', toggleDeptos);
-        toggleDeptos();
+        rolSelect.addEventListener('change', toggleLocalidades);
+        toggleLocalidades();
+
+        // Sincronizar JSON antes de enviar
+        document.getElementById('usuario-form').addEventListener('submit', sincronizarJson);
     </script>
 }
