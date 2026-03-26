@@ -61,8 +61,8 @@ Con el fin de ofrecerte una mejor experiencia y optimizar la organización del h
     }
 else
     {
-        <p>Busca al familiar por su documento de identidad. Si no está registrado(a), podrás llenar sus datos.</p>
-        <form action="/inscripciones/verificar-familiares/@Model.InscripcionId" method="post">
+        <p class="small-text">Busca al familiar por su documento de identidad. Si no está registrado(a), podrás llenar sus datos.</p>
+        <form action="/inscripciones/verificar-familiares/@Model.InscripcionId" method="post" class="search-inline">
             <div class="form-control">
                 <label for="tipoIdentificacion">Tipo de Identificación:</label>
                 <select id="tipoIdentificacion" name="TipoIdentificacion" required>
@@ -72,7 +72,7 @@ else
                     }
                 </select>
             </div>
-            <div class="form-control">
+            <div class="form-control search-inline__input">
                 <label for="numeroIdentificacion">Número de Identificación:</label>
                 <input type="text" inputmode="numeric" id="numeroIdentificacion" name="NumeroIdentificacion" required>
             </div>
@@ -104,5 +104,7 @@ else
 }
 
 <div class="btn-group">
-    <a href="/inscripciones/detalles/@Model.InscripcionId" class="btn">Terminar pre-inscripción</a>
+    <a href="/inscripciones/detalles/@Model.InscripcionId" class="btn">
+        @(Model.FamiliaresAgregados.Count > 0 ? "Listo, terminar pre-inscripción" : "Continuar sin agregar familiares")
+    </a>
 </div>

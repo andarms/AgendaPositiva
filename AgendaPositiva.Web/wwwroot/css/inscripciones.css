@@ -557,3 +557,28 @@ hr {
   color: #555;
   margin-bottom: 1.25rem;
 }
+
+/* --- Inline search form --- */
+.search-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.search-inline .form-control {
+  margin-bottom: 0;
+}
+
+.search-inline .form-control input,
+.search-inline .form-control select {
+  margin-bottom: 0;
+}
+
+.search-inline__input {
+  flex: 1;
+}
+
+.search-inline button {
+  white-space: nowrap;
+  width: auto;
+}
