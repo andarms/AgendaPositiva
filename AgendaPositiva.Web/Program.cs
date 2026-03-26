@@ -88,6 +88,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+app.UseStatusCodePagesWithReExecute("/no-encontrado");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();

@@ -8,4 +8,11 @@ public class LandingController : Controller
     {
         return View();
     }
+
+    [Route("no-encontrado")]
+    public IActionResult NoEncontrado()
+    {
+        Response.StatusCode = 404;
+        return View("~/Features/Landing/Views/NoEncontrado.cshtml");
+    }
 }
