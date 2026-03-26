@@ -96,6 +96,70 @@ public class InscripcionesAdminController : Controller
         return View("~/Features/Admin/Inscripciones/Views/Index.cshtml", vm);
     }
 
+    [HttpGet("{id:int}")]
+    public IActionResult Detalle(int id)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .Include(i => i.GrupoFamiliar)
+            .Include(i => i.RelacionConPersona)
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        if (!EsAdministrador && !DepartamentosAsignados.Contains(inscripcion.Departamento))
+            return Forbid();
+
+        return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", inscripcion);
+    }
+
+    [HttpPost("{id:int}/cambiar-estado")]
+    public IActionResult CambiarEstado(int id, [FromForm] EstadoInscripcion nuevoEstado)
+    {
+        if (nuevoEstado != EstadoInscripcion.NoVaAsistir && nuevoEstado != EstadoInscripcion.Pendiente)
+            return BadRequest("Estado no permitido.");
+
+        var inscripcion = store.Inscripciones
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        if (!EsAdministrador && !DepartamentosAsignados.Contains(inscripcion.Departamento))
+            return Forbid();
+
+        inscripcion.Estado = nuevoEstado;
+        inscripcion.FechaActualizacion = DateTime.UtcNow;
+        store.SaveChanges();
+
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    [HttpGet("grupo/{grupoId:int}")]
+    public IActionResult GrupoFamiliar(int grupoId)
+    {
+        var grupo = store.GrupoFamiliar
+            .Include(g => g.Inscripciones)
+                .ThenInclude(i => i.Persona)
+            .Include(g => g.Inscripciones)
+                .ThenInclude(i => i.RelacionConPersona)
+            .FirstOrDefault(g => g.Id == grupoId);
+
+        if (grupo is null) return NotFound();
+
+        // Verificar que al menos una inscripción pertenece al evento activo
+        var inscripcionesEvento = grupo.Inscripciones.Where(i => i.EventoId == evento.Id).ToList();
+        if (inscripcionesEvento.Count == 0) return NotFound();
+
+        if (!EsAdministrador)
+        {
+            var deptos = DepartamentosAsignados;
+            if (!inscripcionesEvento.Any(i => deptos.Contains(i.Departamento)))
+                return Forbid();
+        }
+
+        return View("~/Features/Admin/Inscripciones/Views/GrupoFamiliar.cshtml", grupo);
+    }
+
     [HttpGet("exportar")]
     public IActionResult Exportar()
     {

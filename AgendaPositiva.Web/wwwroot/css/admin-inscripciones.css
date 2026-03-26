@@ -1,0 +1,225 @@
+/* ── Shared ── */
+.back-link {
+  color: #1a1a2e;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card__title {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #1a1a2e;
+}
+
+.badge {
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.badge--success {
+  background: #27ae60;
+}
+.badge--warning {
+  background: #f39c12;
+}
+.badge--danger {
+  background: #e74c3c;
+}
+.badge--muted {
+  background: #999;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  color: #999;
+  display: block;
+}
+
+.field-span2 {
+  grid-column: span 2;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn--primary {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.btn--success {
+  background: #27ae60;
+  color: #fff;
+}
+
+.btn--secondary {
+  background: #eee;
+  color: #333;
+}
+
+/* ── Form controls ── */
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+/* ── Table ── */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table thead tr {
+  background: #1a1a2e;
+  color: #fff;
+  text-align: left;
+}
+
+.admin-table th {
+  padding: 0.75rem 1rem;
+}
+
+.admin-table th a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.admin-table td {
+  padding: 0.6rem 1rem;
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table .col-index {
+  color: #999;
+}
+
+.admin-table .col-name {
+  font-weight: 500;
+}
+
+.admin-table .col-name a {
+  color: #1a1a2e;
+  text-decoration: none;
+}
+
+.admin-table .col-date {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+/* ── Index page ── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-header p {
+  margin: 0;
+}
+
+.filter-form {
+  margin-bottom: 1.5rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Detail page ── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.detail-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.detail-title {
+  margin-top: 0.75rem;
+}
+
+.cambiar-estado {
+  margin-top: 2rem;
+  max-width: 500px;
+}
+
+.cambiar-estado__form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cambiar-estado__msg {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* ── Grupo familiar page ── */
+.grupo-subtitle {
+  margin-bottom: 1.5rem;
+}

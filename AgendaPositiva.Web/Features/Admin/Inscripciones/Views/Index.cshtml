@@ -5,36 +5,28 @@
 @model ListaInscripcionesViewModel
 
 <h1>Inscripciones — @Model.Evento.Nombre</h1>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <p style="color: #666; margin: 0;">
+<div class="page-header">
+    <p class="text-secondary">
         @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
         · <strong>@Model.Inscripciones.Count</strong> inscripciones
     </p>
-    <a href="/admin/inscripciones/exportar"
-           style="padding: 0.5rem 1.25rem; background: #27ae60; color: #fff; border-radius: 6px; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
-        ⬇ Exportar Excel
-    </a>
+    <a href="/admin/inscripciones/exportar" class="btn btn--success">⬇ Exportar Excel</a>
 </div>
 
-<form method="get" action="/admin/inscripciones"
-      style="background: #fff; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+<form method="get" action="/admin/inscripciones" class="card filter-form">
     @if (!string.IsNullOrEmpty(Model.SortLocalidad))
     {
         <input type="hidden" name="sortLocalidad" value="@Model.SortLocalidad" />
     }
-    <div
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+    <div class="filter-grid">
         <div>
-            <label
-            style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #555;">Nombre</label>
+            <label class="form-label">Nombre</label>
             <input type="text" name="nombre" value="@Model.FiltroNombre" placeholder="Buscar por nombre..."
-                   style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;" />
+                   class="form-control" />
         </div>
         <div>
-            <label
-            style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #555;">Localidad</label>
-            <select name="departamento"
-                    style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; background: #fff;">
+            <label class="form-label">Localidad</label>
+            <select name="departamento" class="form-control">
                 <option value="">Todos</option>
                 @foreach (var dep in Model.Departamentos)
                 {
@@ -43,10 +35,8 @@
             </select>
         </div>
         <div>
-            <label
-            style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #555;">Estado</label>
-            <select name="estado"
-                    style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; background: #fff;">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-control">
                 <option value="">Todos</option>
                 @foreach (EstadoInscripcion e in Enum.GetValues<EstadoInscripcion>())
                 {
@@ -56,10 +46,8 @@
                 </select>
             </div>
             <div>
-                <label
-                style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #555;">Hospedaje</label>
-                <select name="hospedaje"
-                        style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; background: #fff;">
+                <label class="form-label">Hospedaje</label>
+                <select name="hospedaje" class="form-control">
                     <option value="">Todos</option>
                     <option value="true" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == true)">Sí
                     </option>
@@ -67,15 +55,9 @@
                     </option>
                 </select>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="submit"
-                        style="padding: 0.5rem 1.25rem; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer;">
-                    Buscar
-                </button>
-                <a href="/admin/inscripciones"
-                       style="padding: 0.5rem 1rem; background: #eee; color: #333; border-radius: 6px; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center;">
-                    Limpiar
-                </a>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn--primary">Buscar</button>
+                <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
             </div>
         </div>
     </form>
@@ -86,53 +68,44 @@
     }
     else
     {
-        <div style="overflow-x: auto;">
-            <table
-                style="width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div class="table-wrapper">
+            <table class="admin-table">
                 <thead>
-                    <tr style="background: #1a1a2e; color: #fff; text-align: left;">
-                        <th style="padding: 0.75rem 1rem;">#</th>
-                        <th style="padding: 0.75rem 1rem;">Nombre</th>
-                        <th style="padding: 0.75rem 1rem;">Identificación</th>
-                        <th style="padding: 0.75rem 1rem;">
-                            <a href="@Model.BuildSortUrl(Model.NextSortLocalidad)"
-                               style="color: #fff; text-decoration: none;">Localidad@(Model.SortLocalidadIndicator)</a>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                        <th>
+                            <a href="@Model.BuildSortUrl(Model.NextSortLocalidad)">Localidad@(Model.SortLocalidadIndicator)</a>
                         </th>
-                        <th style="padding: 0.75rem 1rem;">Estado</th>
-                        <th style="padding: 0.75rem 1rem;">Hospedaje</th>
-                        <th style="padding: 0.75rem 1rem;">Fecha Registro</th>
+                        <th>Estado</th>
+                        <th>Hospedaje</th>
+                        <th>Fecha Registro</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
                     {
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 0.6rem 1rem; color: #999;">@(index + 1)</td>
-                            <td style="padding: 0.6rem 1rem; font-weight: 500;">@inscripcion.Persona.NombreCompleto</td>
-                            <td style="padding: 0.6rem 1rem;">@inscripcion.Persona.TipoIdentificacion.Humanize() —
-                                @inscripcion.Persona.NumeroIdentificacion</td>
-                                <td style="padding: 0.6rem 1rem;">@inscripcion.Localidad</td>
-                                <td style="padding: 0.6rem 1rem;">
-                                    @{
-                                        var badgeColor = inscripcion.Estado switch
-                                        {
-                                            EstadoInscripcion.Completado => "#27ae60",
-                                            EstadoInscripcion.Pendiente => "#f39c12",
-                                            EstadoInscripcion.NoAsistio => "#e74c3c",
-                                            _ => "#999"
-                                        };
-                                    }
-                                    <span
-                                        style="background: @badgeColor; color: #fff; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
-                                        @inscripcion.Estado.Humanize()
-                                    </span>
-                                </td>
-                                <td style="padding: 0.6rem 1rem;">@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
-                                <td style="padding: 0.6rem 1rem; color: #999; font-size: 0.85rem;">
-                                    @inscripcion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+                        var badgeCss = inscripcion.Estado switch
+                        {
+                            EstadoInscripcion.PagoCompletado => "badge--success",
+                            EstadoInscripcion.Pendiente => "badge--warning",
+                            EstadoInscripcion.NoVaAsistir => "badge--danger",
+                            _ => "badge--muted"
+                        };
+                        <tr>
+                            <td class="col-index">@(index + 1)</td>
+                            <td class="col-name">
+                                <a href="/admin/inscripciones/@inscripcion.Id">@inscripcion.Persona.NombreCompleto</a>
+                            </td>
+                            <td>@inscripcion.Persona.TipoIdentificacion.Humanize() — @inscripcion.Persona.NumeroIdentificacion</td>
+                            <td>@inscripcion.Localidad</td>
+                            <td><span class="badge @badgeCss">@inscripcion.Estado.Humanize()</span></td>
+                            <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
+                            <td class="col-date">@inscripcion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }

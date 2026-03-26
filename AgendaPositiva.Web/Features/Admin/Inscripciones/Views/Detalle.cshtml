@@ -1,0 +1,126 @@
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@model Inscripcion
+
+@{
+    var badgeCss = Model.Estado switch
+    {
+        EstadoInscripcion.PagoCompletado => "badge--success",
+        EstadoInscripcion.Pendiente => "badge--warning",
+        EstadoInscripcion.NoVaAsistir => "badge--danger",
+        _ => "badge--muted"
+    };
+}
+
+<a href="/admin/inscripciones" class="back-link">← Volver a inscripciones</a>
+
+<h1 class="detail-title">Detalle de Inscripción #@Model.Id</h1>
+
+<div class="detail-grid">
+    @* Datos personales *@
+    <div class="card">
+        <h2 class="card__title">Datos personales</h2>
+
+        <div class="detail-fields">
+            <div>
+                <span class="field-label">Nombres</span>
+                <strong>@Model.Persona.Nombres</strong>
+            </div>
+            <div>
+                <span class="field-label">Apellidos</span>
+                <strong>@Model.Persona.Apellidos</strong>
+            </div>
+            <div>
+                <span class="field-label">Género</span>
+                @Model.Persona.Genero.Humanize()
+            </div>
+            <div>
+                <span class="field-label">Fecha nacimiento</span>
+                @Model.Persona.FechaNacimiento.ToString("dd/MM/yyyy")
+            </div>
+            <div>
+                <span class="field-label">Identificación</span>
+                @Model.Persona.TipoIdentificacion.Humanize() — @Model.Persona.NumeroIdentificacion
+            </div>
+            <div>
+                <span class="field-label">Teléfono</span>
+                @Model.Persona.Telefono
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Persona.Email))
+            {
+                <div class="field-span2">
+                    <span class="field-label">Email</span>
+                    @Model.Persona.Email
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Datos de inscripción *@
+    <div class="card">
+        <h2 class="card__title">Inscripción</h2>
+
+        <div class="detail-fields">
+            <div>
+                <span class="field-label">Estado</span>
+                <span class="badge @badgeCss">@Model.Estado.Humanize()</span>
+            </div>
+            <div>
+                <span class="field-label">Hospedaje</span>
+                @(Model.RequiereHospedaje ? "Sí" : "No")
+            </div>
+            <div>
+                <span class="field-label">Localidad</span>
+                @Model.Localidad
+            </div>
+            <div>
+                <span class="field-label">Fecha registro</span>
+                @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+            </div>
+            @if (Model.GrupoFamiliar is not null)
+            {
+                <div>
+                    <span class="field-label">Grupo familiar</span>
+                    <a href="/admin/inscripciones/grupo/@Model.GrupoFamiliarId" class="back-link"
+                       style="font-weight: 500;">Grupo #@Model.GrupoFamiliar.Id</a>
+                </div>
+            }
+            @if (Model.Relacion.HasValue && Model.RelacionConPersona is not null)
+            {
+                <div>
+                    <span class="field-label">Relación</span>
+                    @Model.Relacion.Value.Humanize() de @Model.RelacionConPersona.NombreCompleto
+                </div>
+            }
+            <div class="field-span2">
+                <span class="field-label">Necesidades especiales</span>
+                @(string.IsNullOrEmpty(Model.NecesidadesEspeciales) ? "Ninguna" : Model.NecesidadesEspeciales)
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Cambiar estado *@
+<div class="card cambiar-estado">
+    <h2 class="card__title">Cambiar estado</h2>
+
+    @if (Model.Estado == EstadoInscripcion.PagoCompletado)
+    {
+        <p class="cambiar-estado__msg">El pago ya fue completado. No se puede cambiar el estado.</p>
+    }
+    else
+    {
+        <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
+            <select name="nuevoEstado" class="form-control" style="width: auto;">
+                <option value="@EstadoInscripcion.Pendiente" selected="@(Model.Estado == EstadoInscripcion.Pendiente)">
+                    @EstadoInscripcion.Pendiente.Humanize()
+                </option>
+                <option value="@EstadoInscripcion.NoVaAsistir" selected="@(Model.Estado == EstadoInscripcion.NoVaAsistir)">
+                    @EstadoInscripcion.NoVaAsistir.Humanize()
+                </option>
+            </select>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </form>
+    }
+</div>

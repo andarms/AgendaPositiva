@@ -3,8 +3,8 @@ namespace AgendaPositiva.Web.Features.Commons;
 public enum EstadoInscripcion
 {
     Pendiente,
-    Completado,
-    NoAsistio
+    PagoCompletado,
+    NoVaAsistir
 }
 
 public enum TipoIdentificacion
