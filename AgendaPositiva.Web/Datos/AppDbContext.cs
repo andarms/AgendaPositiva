@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Features.Admin.Auth.Domain;
+using AgendaPositiva.Web.Features.Admin.Auditoria;
 using AgendaPositiva.Web.Features.Commons.Domain;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Persistencia;
@@ -15,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Inscripcion> Inscripciones => Set<Inscripcion>();
     public DbSet<GrupoFamiliar> GrupoFamiliar => Set<GrupoFamiliar>();
     public DbSet<UsuarioAdministrador> UsuariosAdministradores => Set<UsuarioAdministrador>();
+    public DbSet<AuditoriaAdmin> AuditoriaAdmin => Set<AuditoriaAdmin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +27,16 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarInscripciones();
         modelBuilder.ConfigurarGrupoFamiliar();
         modelBuilder.ConfigurarUsuariosAdministradores();
+
+        modelBuilder.Entity<AuditoriaAdmin>(e =>
+        {
+            e.HasKey(a => a.Id);
+            e.Property(a => a.Id).ValueGeneratedOnAdd();
+            e.Property(a => a.Usuario).HasMaxLength(255).IsRequired();
+            e.Property(a => a.Accion).HasMaxLength(255).IsRequired();
+            e.Property(a => a.ValorAnterior).HasMaxLength(500);
+            e.Property(a => a.ValorNuevo).HasMaxLength(500);
+        });
     }
 
     public override int SaveChanges()

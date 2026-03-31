@@ -1,6 +1,7 @@
 @using AgendaPositiva.Web.Features.Commons.Views;
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@using AgendaPositiva.Web.Features.Admin.Auditoria;
 @model Inscripcion
 
 @{
@@ -121,3 +122,53 @@
         <button type="submit" class="btn btn--primary">Guardar</button>
     </form>
 </div>
+
+@* Cambiar hospedaje *@
+<div class="card cambiar-estado">
+    <h2 class="card__title">Cambiar hospedaje</h2>
+
+    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-hospedaje" class="cambiar-estado__form">
+        <select name="requiereHospedaje" class="form-control" style="width: auto;">
+            <option value="true" selected="@Model.RequiereHospedaje">Sí</option>
+            <option value="false" selected="@(!Model.RequiereHospedaje)">No</option>
+        </select>
+        <button type="submit" class="btn btn--primary">Guardar</button>
+    </form>
+</div>
+
+@* Historial de auditoría *@
+@{
+    var auditoria = ViewBag.Auditoria as List<AuditoriaAdmin> ?? [];
+}
+@if (auditoria.Count > 0)
+{
+    <div class="card">
+        <h2 class="card__title">Historial de cambios</h2>
+
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Anterior</th>
+                        <th>Nuevo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var registro in auditoria)
+                    {
+                        <tr>
+                            <td>@registro.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@registro.Usuario</td>
+                            <td>@registro.Accion</td>
+                            <td>@(registro.ValorAnterior ?? "—")</td>
+                            <td>@(registro.ValorNuevo ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -1,6 +1,7 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Commons.Views;
+using AgendaPositiva.Web.Features.Admin.Auditoria;
 using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using ClosedXML.Excel;
@@ -145,6 +146,11 @@ public class InscripcionesAdminController : Controller
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
             return Forbid();
 
+        ViewBag.Auditoria = store.AuditoriaAdmin
+            .Where(a => a.InscripcionId == id)
+            .OrderByDescending(a => a.FechaCreacion)
+            .ToList();
+
         return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", inscripcion);
     }
 
@@ -162,8 +168,48 @@ public class InscripcionesAdminController : Controller
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
             return Forbid();
 
+        var estadoAnterior = inscripcion.Estado;
         inscripcion.Estado = nuevoEstado;
         inscripcion.FechaActualizacion = DateTime.UtcNow;
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido",
+            Accion = "Cambio de estado",
+            ValorAnterior = estadoAnterior.Humanize(),
+            ValorNuevo = nuevoEstado.Humanize()
+        });
+
+        store.SaveChanges();
+
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    [HttpPost("{id:int}/cambiar-hospedaje")]
+    public IActionResult CambiarHospedaje(int id, [FromForm] bool requiereHospedaje)
+    {
+        var inscripcion = store.Inscripciones
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
+            return Forbid();
+
+        var valorAnterior = inscripcion.RequiereHospedaje;
+        inscripcion.RequiereHospedaje = requiereHospedaje;
+        inscripcion.FechaActualizacion = DateTime.UtcNow;
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido",
+            Accion = "Cambio de hospedaje",
+            ValorAnterior = valorAnterior ? "Sí" : "No",
+            ValorNuevo = requiereHospedaje ? "Sí" : "No"
+        });
+
         store.SaveChanges();
 
         return RedirectToAction(nameof(Detalle), new { id });
