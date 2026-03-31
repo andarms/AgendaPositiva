@@ -52,6 +52,44 @@ public enum Genero
     Femenino,
 }
 
+public enum ServicioInscripcion
+{
+    FvkdsNinos,
+    CdaAdolescentes,
+    Jovenes,
+    Ujier,
+    Seguridad,
+    Enfermeria,
+    Alimentacion,
+    Aseo,
+    Expolibro,
+    Ofrenda,
+    Alabanza,
+    Multimedia,
+    Otros
+}
+
+public static class ServicioInscripcionExtensions
+{
+    public static string Descripcion(this ServicioInscripcion servicio) => servicio switch
+    {
+        ServicioInscripcion.FvkdsNinos => "FVKDS (Niños)",
+        ServicioInscripcion.CdaAdolescentes => "CDA (Adolescentes)",
+        ServicioInscripcion.Jovenes => "Jóvenes",
+        ServicioInscripcion.Ujier => "Ujier",
+        ServicioInscripcion.Seguridad => "Seguridad",
+        ServicioInscripcion.Enfermeria => "Enfermería",
+        ServicioInscripcion.Alimentacion => "Alimentación",
+        ServicioInscripcion.Aseo => "Aseo",
+        ServicioInscripcion.Expolibro => "Expolibro",
+        ServicioInscripcion.Ofrenda => "Ofrenda",
+        ServicioInscripcion.Alabanza => "Alabanza",
+        ServicioInscripcion.Multimedia => "Multimedia",
+        ServicioInscripcion.Otros => "Otros",
+        _ => servicio.ToString()
+    };
+}
+
 public static class ParentescoExtensions
 {
     /// <summary>

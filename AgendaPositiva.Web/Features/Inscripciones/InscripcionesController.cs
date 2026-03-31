@@ -133,10 +133,11 @@ public class InscripcionesController : Controller
     [HttpPost("formulario-personal")]
     public async Task<IActionResult> PostFormularioPersonal(
         [FromForm] RegistrarPersonaPrincipalDto command,
+        [FromForm(Name = "Servicios")] List<ServicioInscripcion>? servicios,
         [FromForm] string? accion,
         [FromServices] RegistrarPersonaPrincipal handler)
     {
-        var result = await handler.Handle(command);
+        var result = await handler.Handle(command with { Servicios = servicios });
 
         if (result.IsSuccess)
         {
@@ -250,14 +251,16 @@ public class InscripcionesController : Controller
     public async Task<IActionResult> PostFormularioFamiliar(
         int inscripcionId,
         [FromForm] FamiliarDto datos,
+        [FromForm(Name = "Servicios")] List<ServicioInscripcion>? servicios,
         [FromServices] AgregarAlGrupo handler)
     {
         var inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == inscripcionId);
         if (inscripcion is null) return NotFound();
 
         var relacion = datos.Parentesco ?? Parentesco.Otro;
+        var datosConServicios = datos with { Servicios = servicios };
 
-        var result = await handler.ConPersonaNueva(inscripcionId, datos, relacion, inscripcion.PersonaId);
+        var result = await handler.ConPersonaNueva(inscripcionId, datosConServicios, relacion, inscripcion.PersonaId);
 
         if (result.IsSuccess)
             return RedirectToAction("VerificarFamiliares", new { inscripcionId });

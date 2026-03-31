@@ -15,6 +15,7 @@ public record RegistrarPersonaPrincipalDto(
     TipoIdentificacion TipoIdentificacion,
     string NumeroIdentificacion,
     bool RequiereHospedaje,
+    List<ServicioInscripcion>? Servicios,
     string? NecesidadesEspeciales,
     string Ciudad,
     string Departamento
@@ -75,6 +76,7 @@ public class RegistrarPersonaPrincipal
         {
             // Actualizar datos de la inscripción existente
             inscripcion.RequiereHospedaje = command.RequiereHospedaje;
+            inscripcion.Servicios = command.Servicios ?? [];
             inscripcion.NecesidadesEspeciales = command.NecesidadesEspeciales;
             inscripcion.Ciudad = command.Ciudad;
             inscripcion.Departamento = command.Departamento;
@@ -89,6 +91,7 @@ public class RegistrarPersonaPrincipal
                 EventoId = evento.Id,
                 GrupoFamiliarId = null,
                 RequiereHospedaje = command.RequiereHospedaje,
+                Servicios = command.Servicios ?? [],
                 NecesidadesEspeciales = command.NecesidadesEspeciales,
                 Ciudad = command.Ciudad,
                 Departamento = command.Departamento,

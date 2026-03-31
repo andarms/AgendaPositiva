@@ -121,6 +121,18 @@
         </div>
     </div>
 
+    <div class="form-control form-grid__full" id="@id("Servicios")_container" style="display:none">
+        <label>Actualmente en su localidad está sirviendo en alguno de estos servicios?:</label>
+        <div class="checkbox-group">
+            @foreach (ServicioInscripcion servicio in Enum.GetValues<ServicioInscripcion>())
+            {
+                <label class="checkbox-option">
+                    <input type="checkbox" name="@name("Servicios")" value="@servicio"> @servicio.Descripcion()
+                </label>
+            }
+        </div>
+    </div>
+
     <div class="form-control form-grid__full">
         <label for="@id("NecesidadesEspeciales")">Necesidades Especiales:</label>
         <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se
@@ -213,5 +225,25 @@
             actualizarVisibilidad(this.value);
             cargarCiudades(this.value, '');
         });
+
+        // Mostrar servicios solo si la persona es mayor de 16 años
+        var fechaNacInput = document.getElementById('@id("FechaNacimiento")');
+        var serviciosContainer = document.getElementById('@id("Servicios")_container');
+
+        function actualizarServicios() {
+            if (!fechaNacInput.value) {
+                serviciosContainer.style.display = 'none';
+                return;
+            }
+            var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
+            var hoy = new Date();
+            var edad = hoy.getFullYear() - fechaNac.getFullYear();
+            var m = hoy.getMonth() - fechaNac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
+            serviciosContainer.style.display = edad >= 16 ? '' : 'none';
+        }
+
+        actualizarServicios();
+        fechaNacInput.addEventListener('change', actualizarServicios);
     })();
 </script>

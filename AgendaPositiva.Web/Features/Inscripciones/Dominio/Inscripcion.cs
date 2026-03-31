@@ -15,6 +15,7 @@ public class Inscripcion : EntidadBase
     public int? RelacionConPersonaId { get; set; }
     /// <summary>Estado actual de la inscripción. Por defecto, pendiente hasta que luego se registren los pagos.</summary>
     public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
+    public List<ServicioInscripcion> Servicios { get; set; } = [];
     public string? NecesidadesEspeciales { get; set; }
     public string Ciudad { get; set; } = string.Empty;
     public string Departamento { get; set; } = string.Empty;
