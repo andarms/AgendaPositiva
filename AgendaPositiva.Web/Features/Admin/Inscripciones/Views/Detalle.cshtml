@@ -105,22 +105,19 @@
 <div class="card cambiar-estado">
     <h2 class="card__title">Cambiar estado</h2>
 
-    @if (Model.Estado == EstadoInscripcion.PagoCompletado)
-    {
-        <p class="cambiar-estado__msg">El pago ya fue completado. No se puede cambiar el estado.</p>
-    }
-    else
-    {
-        <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
-            <select name="nuevoEstado" class="form-control" style="width: auto;">
-                <option value="@EstadoInscripcion.Pendiente" selected="@(Model.Estado == EstadoInscripcion.Pendiente)">
-                    @EstadoInscripcion.Pendiente.Humanize()
-                </option>
-                <option value="@EstadoInscripcion.NoVaAsistir" selected="@(Model.Estado == EstadoInscripcion.NoVaAsistir)">
-                    @EstadoInscripcion.NoVaAsistir.Humanize()
-                </option>
-            </select>
-            <button type="submit" class="btn btn--primary">Guardar</button>
-        </form>
-    }
+    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
+        <select name="nuevoEstado" class="form-control" style="width: auto;">
+            <option value="@EstadoInscripcion.Pendiente" selected="@(Model.Estado == EstadoInscripcion.Pendiente)">
+                @EstadoInscripcion.Pendiente.Humanize()
+            </option>
+            <option value="@EstadoInscripcion.PagoCompletado"
+                    selected="@(Model.Estado == EstadoInscripcion.PagoCompletado)">
+                @EstadoInscripcion.PagoCompletado.Humanize()
+            </option>
+            <option value="@EstadoInscripcion.NoVaAsistir" selected="@(Model.Estado == EstadoInscripcion.NoVaAsistir)">
+                @EstadoInscripcion.NoVaAsistir.Humanize()
+            </option>
+        </select>
+        <button type="submit" class="btn btn--primary">Guardar</button>
+    </form>
 </div>

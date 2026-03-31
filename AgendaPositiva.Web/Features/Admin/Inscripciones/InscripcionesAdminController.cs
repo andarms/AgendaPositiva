@@ -151,7 +151,7 @@ public class InscripcionesAdminController : Controller
     [HttpPost("{id:int}/cambiar-estado")]
     public IActionResult CambiarEstado(int id, [FromForm] EstadoInscripcion nuevoEstado)
     {
-        if (nuevoEstado != EstadoInscripcion.NoVaAsistir && nuevoEstado != EstadoInscripcion.Pendiente)
+        if (nuevoEstado != EstadoInscripcion.NoVaAsistir && nuevoEstado != EstadoInscripcion.Pendiente && nuevoEstado != EstadoInscripcion.PagoCompletado)
             return BadRequest("Estado no permitido.");
 
         var inscripcion = store.Inscripciones
