@@ -44,6 +44,14 @@
         opacity: 0.9;
     }
 
+    .countdown__date {
+        font-size: clamp(0.8rem, 2.5vw, 1rem);
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        margin-bottom: 0.25rem;
+    }
+
     .landing__logo {
         max-width: 380px;
         width: 80%;
@@ -52,32 +60,50 @@
     /* --- Countdown --- */
     .countdown {
         display: flex;
-        gap: 1rem;
+        flex-direction: row;
+        gap: 0.5rem;
         flex-wrap: wrap;
         justify-content: center;
+        align-items: center;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .countdown__date {
+        width: 100%;
+        text-align: center;
     }
 
     .countdown__block {
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-width: 70px;
+        min-width: 0;
+        flex: 1 1 0;
         background: rgba(26, 26, 46, 0.75);
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
         border-radius: 10px;
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 0.4rem;
+    }
+
+    @@media (min-width: 640px) {
+        .countdown__block {
+            min-width: 70px;
+            flex: 0 0 auto;
+            padding: 0.75rem 1rem;
+        }
     }
 
     .countdown__number {
-        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        font-size: clamp(1.2rem, 5vw, 2.8rem);
         font-weight: 800;
         color: #ffffff;
         line-height: 1;
     }
 
     .countdown__label {
-        font-size: 0.7rem;
+        font-size: clamp(0.6rem, 1.5vw, 0.7rem);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -113,7 +139,7 @@
         @if (Model is not null)
         {
             <h1 class="landing__title">@Model.Nombre</h1>
-            <p class="landing__subtitle">@Model.Ubicacion &middot; @Model.FechaInicio.ToString("dd 'de' MMMM, yyyy")</p>
+            <p class="landing__subtitle">@Model.Ubicacion</p>
         }
         else
         {
@@ -127,6 +153,7 @@
     {
         <div class="countdown" id="countdown"
              data-target="@Model.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss")">
+            <p class="countdown__date">@Model.FechaInicio.ToString("dd 'de' MMMM") — @Model.FechaFin.ToString("dd 'de' MMMM, yyyy")</p>
             <div class="countdown__block">
                 <span class="countdown__number" id="cd-days">--</span>
                 <span class="countdown__label">Días</span>
