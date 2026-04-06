@@ -303,7 +303,7 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 12).Value = ins.Estado.Humanize();
             var estadoColor = ins.Estado switch
             {
-                EstadoInscripcion.PagoCompletado => "#27ae60",
+                EstadoInscripcion.Completado => "#27ae60",
                 EstadoInscripcion.Abono2 => "#6abf4b",
                 EstadoInscripcion.Abono1 => "#a3d977",
                 EstadoInscripcion.Pendiente => "#f39c12",
