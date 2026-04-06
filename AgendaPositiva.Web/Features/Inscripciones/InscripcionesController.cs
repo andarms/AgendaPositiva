@@ -147,6 +147,7 @@ public class InscripcionesController : Controller
             return RedirectToAction("VerificarFamiliares", new { inscripcionId = result.Value });
         }
 
+        ViewBag.Error = result.Error;
         return View("FormularioPersonal", command);
     }
 

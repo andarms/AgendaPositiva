@@ -14,7 +14,7 @@ public record RegistrarPersonaPrincipalDto(
     string? Email,
     TipoIdentificacion TipoIdentificacion,
     string NumeroIdentificacion,
-    bool RequiereHospedaje,
+    bool? RequiereHospedaje,
     List<ServicioInscripcion>? Servicios,
     string? NecesidadesEspeciales,
     string Ciudad,
@@ -32,6 +32,9 @@ public class RegistrarPersonaPrincipal
 
     public async Task<Result<int>> Handle(RegistrarPersonaPrincipalDto command)
     {
+        if (command.RequiereHospedaje is null)
+            return Result.Failure<int>("El campo '¿Requiere hospedaje?' es obligatorio.");
+
         Evento? evento = db.Eventos.FirstOrDefault(e => e.Activo);
         if (evento is null)
             return Result.Failure<int>("No hay un evento activo.");
@@ -75,7 +78,7 @@ public class RegistrarPersonaPrincipal
         if (inscripcion is not null)
         {
             // Actualizar datos de la inscripción existente
-            inscripcion.RequiereHospedaje = command.RequiereHospedaje;
+            inscripcion.RequiereHospedaje = command.RequiereHospedaje.Value;
             inscripcion.Servicios = command.Servicios ?? [];
             inscripcion.NecesidadesEspeciales = command.NecesidadesEspeciales;
             inscripcion.Ciudad = command.Ciudad;
@@ -90,7 +93,7 @@ public class RegistrarPersonaPrincipal
                 PersonaId = persona.Id,
                 EventoId = evento.Id,
                 GrupoFamiliarId = null,
-                RequiereHospedaje = command.RequiereHospedaje,
+                RequiereHospedaje = command.RequiereHospedaje.Value,
                 Servicios = command.Servicios ?? [],
                 NecesidadesEspeciales = command.NecesidadesEspeciales,
                 Ciudad = command.Ciudad,

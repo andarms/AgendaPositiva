@@ -10,6 +10,11 @@
 
 <form action="/inscripciones/formulario-personal" method="post">
 
+    @if (ViewBag.Error is string error)
+    {
+        <div class="form-error">@error</div>
+    }
+
     @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
     {
         Prefix = "",

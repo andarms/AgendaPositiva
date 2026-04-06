@@ -15,17 +15,17 @@
 <div class="form-grid">
 
     <div class="form-control form-grid__half">
-        <label for="@id("Nombres")">Nombres:</label>
+        <label for="@id("Nombres")">Nombres: <span class="required">*</span></label>
         <input type="text" id="@id("Nombres")" name="@name("Nombres")" required>
     </div>
 
     <div class="form-control form-grid__half">
-        <label for="@id("Apellidos")">Apellidos:</label>
+        <label for="@id("Apellidos")">Apellidos: <span class="required">*</span></label>
         <input type="text" id="@id("Apellidos")" name="@name("Apellidos")" required>
     </div>
 
     <div class="form-control">
-        <label for="@id("Genero")">Sexo:</label>
+        <label for="@id("Genero")">Sexo: <span class="required">*</span></label>
         <select id="@id("Genero")" name="@name("Genero")" required>
             @foreach (Genero genero in Enum.GetValues<Genero>())
             {
@@ -35,7 +35,7 @@
     </div>
 
     <div class="form-control">
-        <label for="@id("TipoIdentificacion")">Tipo de Identificación:</label>
+        <label for="@id("TipoIdentificacion")">Tipo de Identificación: <span class="required">*</span></label>
         @if (Model.IdentificacionHabilitada)
         {
             <select id="@id("TipoIdentificacion")" disabled>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="form-control">
-        <label for="@id("NumeroIdentificacion")">Número de Identificación:</label>
+        <label for="@id("NumeroIdentificacion")">Número de Identificación: <span class="required">*</span></label>
         @if (Model.IdentificacionHabilitada)
         {
             <input type="text" inputmode="numeric" id="@id("NumeroIdentificacion")" disabled
@@ -73,12 +73,12 @@
     </div>
 
     <div class="form-control">
-        <label for="@id("FechaNacimiento")">Fecha de Nacimiento:</label>
+        <label for="@id("FechaNacimiento")">Fecha de Nacimiento: <span class="required">*</span></label>
         <input type="date" id="@id("FechaNacimiento")" name="@name("FechaNacimiento")" required>
     </div>
 
     <div class="form-control">
-        <label for="@id("Telefono")">Teléfono:</label>
+        <label for="@id("Telefono")">Teléfono: <span class="required">*</span></label>
         <input type="tel" id="@id("Telefono")" name="@name("Telefono")" required>
     </div>
 
@@ -88,7 +88,7 @@
     </div>
 
     <div class="form-control">
-        <label for="@id("Departamento")">Departamento:</label>
+        <label for="@id("Departamento")">Departamento: <span class="required">*</span></label>
         <select id="@id("Departamento")" name="@name("Departamento")" required>
             <option value="">-- Seleccione --</option>
             @foreach (var dep in departamentos)
@@ -99,7 +99,7 @@
     </div>
 
     <div class="form-control" id="@id("Ciudad")_container">
-        <label for="@id("Ciudad")">Ciudad:</label>
+        <label for="@id("Ciudad")">Ciudad: <span class="required">*</span></label>
         <select id="@id("Ciudad")" name="@name("Ciudad")">
             <option value="">-- Seleccione --</option>
         </select>
@@ -108,17 +108,12 @@
     </div>
 
     <div class="form-control form-grid__full">
-        <label>¿Requiere hospedaje?</label>
-        <div class="radio-group">
-            <label class="radio-option">
-                <input type="radio" id="@id("RequiereHospedaje")_si" name="@name("RequiereHospedaje")" value="true"
-                       required> Sí
-            </label>
-            <label class="radio-option">
-                <input type="radio" id="@id("RequiereHospedaje")_no" name="@name("RequiereHospedaje")" value="false"
-                       checked> No
-            </label>
-        </div>
+        <label for="@id("RequiereHospedaje")">¿Requiere hospedaje? <span class="required">*</span></label>
+        <select id="@id("RequiereHospedaje")" name="@name("RequiereHospedaje")" required>
+            <option value="">-- Seleccione --</option>
+            <option value="true">Sí</option>
+            <option value="false">No</option>
+        </select>
     </div>
 
     <div class="form-control form-grid__full" id="@id("Servicios")_container" style="display:none">
@@ -155,7 +150,7 @@
 @if (Model.MostrarRelacion)
 {
     <div class="form-control">
-        <label for="@id("Parentesco")">Parentesco:</label>
+        <label for="@id("Parentesco")">Parentesco: <span class="required">*</span></label>
         <select id="@id("Parentesco")" name="@name("Parentesco")" required>
             <option value="">-- Seleccione --</option>
             @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
