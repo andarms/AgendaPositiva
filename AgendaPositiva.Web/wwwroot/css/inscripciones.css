@@ -625,8 +625,16 @@ hr {
 /* --- Inline search form --- */
 .search-inline {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  align-items: flex-end;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .search-inline {
+    flex-direction: row;
+    align-items: flex-end;
+  }
 }
 
 .search-inline .form-control {
@@ -646,3 +654,5 @@ hr {
   white-space: nowrap;
   width: auto;
 }
+
+
