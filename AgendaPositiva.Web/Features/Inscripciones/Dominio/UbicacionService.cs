@@ -5,6 +5,7 @@ namespace AgendaPositiva.Web.Features.Inscripciones.Dominio;
 public class UbicacionService
 {
     public const string Internacional = "Internacional";
+    public const string Misioneros = "Misioneros";
 
     public List<DepartamentoInfo> Departamentos { get; }
     readonly JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
@@ -17,7 +18,11 @@ public class UbicacionService
 
         // Agregar opción especial "Internacional" sin ciudades
         datos.Add(new DepartamentoInfo { Departamento = Internacional, Ciudades = [] });
-        datos = [.. datos.OrderBy(d => d.Departamento == Internacional ? 0 : 1).ThenBy(d => d.Departamento)];
+
+        // Agregar departamento "Misioneros" con ciudades CEPEV y PAC
+        datos.Add(new DepartamentoInfo { Departamento = Misioneros, Ciudades = ["CEPEV", "PAC"] });
+
+        datos = [.. datos.OrderBy(d => d.Departamento == Internacional || d.Departamento == Misioneros ? 0 : 1).ThenBy(d => d.Departamento)];
 
         Departamentos = datos;
     }

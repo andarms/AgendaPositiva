@@ -155,6 +155,7 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/cambiar-estado")]
+    [Authorize(Roles = "Administrador")]
     public IActionResult CambiarEstado(int id, [FromForm] EstadoInscripcion nuevoEstado)
     {
         if (nuevoEstado != EstadoInscripcion.NoVaAsistir && nuevoEstado != EstadoInscripcion.Pendiente && nuevoEstado != EstadoInscripcion.PagoCompletado)
@@ -187,6 +188,7 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/cambiar-hospedaje")]
+    [Authorize(Roles = "Administrador")]
     public IActionResult CambiarHospedaje(int id, [FromForm] bool requiereHospedaje)
     {
         var inscripcion = store.Inscripciones

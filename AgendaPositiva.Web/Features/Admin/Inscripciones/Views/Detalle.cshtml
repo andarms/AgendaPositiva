@@ -102,7 +102,9 @@
     </div>
 </div>
 
-@* Cambiar estado *@
+@* Cambiar estado (solo administradores) *@
+@if (User.IsInRole("Administrador"))
+{
 <div class="card cambiar-estado">
     <h2 class="card__title">Cambiar estado</h2>
 
@@ -122,8 +124,11 @@
         <button type="submit" class="btn btn--primary">Guardar</button>
     </form>
 </div>
+}
 
-@* Cambiar hospedaje *@
+@* Cambiar hospedaje (solo administradores) *@
+@if (User.IsInRole("Administrador"))
+{
 <div class="card cambiar-estado">
     <h2 class="card__title">Cambiar hospedaje</h2>
 
@@ -135,6 +140,7 @@
         <button type="submit" class="btn btn--primary">Guardar</button>
     </form>
 </div>
+}
 
 @* Historial de auditoría *@
 @{
