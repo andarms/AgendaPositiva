@@ -1,5 +1,10 @@
 @using AgendaPositiva.Web.Features.Inscripciones.Dominio
+@using System.Globalization
 @model Evento?
+
+@{
+    var cultura = new CultureInfo("es-ES");
+}
 
 <style>
     * {
@@ -153,7 +158,7 @@
     {
         <div class="countdown" id="countdown"
              data-target="@Model.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss")">
-            <p class="countdown__date">@Model.FechaInicio.ToString("dd 'de' MMMM") — @Model.FechaFin.ToString("dd 'de' MMMM, yyyy")</p>
+            <p class="countdown__date">@Model.FechaInicio.ToString("dd 'de' MMMM", cultura) — @Model.FechaFin.ToString("dd 'de' MMMM, yyyy", cultura)</p>
             <div class="countdown__block">
                 <span class="countdown__number" id="cd-days">--</span>
                 <span class="countdown__label">Días</span>
