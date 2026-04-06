@@ -158,8 +158,8 @@ public class InscripcionesAdminController : Controller
     [Authorize(Roles = "Administrador")]
     public IActionResult CambiarEstado(int id, [FromForm] EstadoInscripcion nuevoEstado)
     {
-        if (nuevoEstado != EstadoInscripcion.NoVaAsistir && nuevoEstado != EstadoInscripcion.Pendiente && nuevoEstado != EstadoInscripcion.PagoCompletado)
-            return BadRequest("Estado no permitido.");
+        if (!Enum.IsDefined(nuevoEstado))
+            return BadRequest("Estado no válido.");
 
         var inscripcion = store.Inscripciones
             .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
@@ -301,6 +301,17 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 10).Value = ins.Departamento;
             ws.Cell(row, 11).Value = ins.Ciudad;
             ws.Cell(row, 12).Value = ins.Estado.Humanize();
+            var estadoColor = ins.Estado switch
+            {
+                EstadoInscripcion.PagoCompletado => "#27ae60",
+                EstadoInscripcion.Abono2 => "#6abf4b",
+                EstadoInscripcion.Abono1 => "#a3d977",
+                EstadoInscripcion.Pendiente => "#f39c12",
+                EstadoInscripcion.NoVaAsistir => "#e74c3c",
+                _ => "#999999"
+            };
+            ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
+            ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
             ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
             ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "N/A";
             ws.Cell(row, 15).Value = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));

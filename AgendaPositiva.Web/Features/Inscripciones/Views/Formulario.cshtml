@@ -265,6 +265,7 @@
                     <div class="form-control">
                         <label>Parentesco:</label>
                         <select name="${prefix}.Parentesco" required>
+                            <option value="">-- Seleccione --</option>
                             @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                             {
                                                     <option value="@rel">@rel.Humanize()</option>

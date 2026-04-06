@@ -47,6 +47,7 @@
                 <div class="form-control">
                     <label for="parentesco">Parentesco:</label>
                     <select id="parentesco" name="Parentesco" required>
+                        <option value="">-- Seleccione --</option>
                         @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                         {
                             <option value="@rel">@rel.Humanize()</option>

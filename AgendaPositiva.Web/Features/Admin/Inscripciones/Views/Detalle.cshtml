@@ -8,6 +8,8 @@
     var badgeCss = Model.Estado switch
     {
         EstadoInscripcion.PagoCompletado => "badge--success",
+        EstadoInscripcion.Abono2 => "badge--abono2",
+        EstadoInscripcion.Abono1 => "badge--abono1",
         EstadoInscripcion.Pendiente => "badge--warning",
         EstadoInscripcion.NoVaAsistir => "badge--danger",
         _ => "badge--muted"
@@ -110,16 +112,10 @@
 
     <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
         <select name="nuevoEstado" class="form-control" style="width: auto;">
-            <option value="@EstadoInscripcion.Pendiente" selected="@(Model.Estado == EstadoInscripcion.Pendiente)">
-                @EstadoInscripcion.Pendiente.Humanize()
-            </option>
-            <option value="@EstadoInscripcion.PagoCompletado"
-                    selected="@(Model.Estado == EstadoInscripcion.PagoCompletado)">
-                @EstadoInscripcion.PagoCompletado.Humanize()
-            </option>
-            <option value="@EstadoInscripcion.NoVaAsistir" selected="@(Model.Estado == EstadoInscripcion.NoVaAsistir)">
-                @EstadoInscripcion.NoVaAsistir.Humanize()
-            </option>
+            @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
+            {
+                <option value="@estado" selected="@(Model.Estado == estado)">@estado.Humanize()</option>
+            }
         </select>
         <button type="submit" class="btn btn--primary">Guardar</button>
     </form>

@@ -29,6 +29,12 @@
 .badge--success {
   background: #27ae60;
 }
+.badge--abono1 {
+  background: #a3d977;
+}
+.badge--abono2 {
+  background: #6abf4b;
+}
 .badge--warning {
   background: #f39c12;
 }
