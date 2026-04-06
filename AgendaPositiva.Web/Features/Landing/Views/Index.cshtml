@@ -1,3 +1,6 @@
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio
+@model Evento?
+
 <style>
     * {
         margin: 0;
@@ -13,13 +16,73 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 3rem;
+        gap: 2rem;
+        padding: 2rem 1rem;
         font-family: 'Montserrat', sans-serif;
+        text-align: center;
+    }
+
+    .landing__header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .landing__title {
+        font-size: clamp(1.4rem, 4vw, 2.2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+    .landing__subtitle {
+        font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+        font-weight: 400;
+        opacity: 0.9;
     }
 
     .landing__logo {
         max-width: 380px;
         width: 80%;
+    }
+
+    /* --- Countdown --- */
+    .countdown {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .countdown__block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 70px;
+        background: rgba(26, 26, 46, 0.75);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .countdown__number {
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1;
+    }
+
+    .countdown__label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.75);
+        margin-top: 0.25rem;
     }
 
     .landing__cta {
@@ -46,6 +109,73 @@
 </style>
 
 <section class="landing">
+    <header class="landing__header">
+        @if (Model is not null)
+        {
+            <h1 class="landing__title">@Model.Nombre</h1>
+            <p class="landing__subtitle">@Model.Ubicacion &middot; @Model.FechaInicio.ToString("dd 'de' MMMM, yyyy")</p>
+        }
+        else
+        {
+            <h1 class="landing__title">Conferencia Internacional 2026</h1>
+        }
+    </header>
+
     <img src="/images/logos/Espanhol%20Branco@2x.png" alt="Agenda Positiva" class="landing__logo" />
+
+    @if (Model is not null)
+    {
+        <div class="countdown" id="countdown"
+             data-target="@Model.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss")">
+            <div class="countdown__block">
+                <span class="countdown__number" id="cd-days">--</span>
+                <span class="countdown__label">Días</span>
+            </div>
+            <div class="countdown__block">
+                <span class="countdown__number" id="cd-hours">--</span>
+                <span class="countdown__label">Horas</span>
+            </div>
+            <div class="countdown__block">
+                <span class="countdown__number" id="cd-minutes">--</span>
+                <span class="countdown__label">Minutos</span>
+            </div>
+            <div class="countdown__block">
+                <span class="countdown__number" id="cd-seconds">--</span>
+                <span class="countdown__label">Segundos</span>
+            </div>
+        </div>
+    }
+
     <a href="/inscripciones/verificacion" class="landing__cta">Formulario De Registro</a>
 </section>
+
+<script>
+    (function () {
+        const el = document.getElementById('countdown');
+        if (!el) return;
+
+        const target = new Date(el.dataset.target).getTime();
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function tick() {
+            const now = Date.now();
+            const diff = Math.max(0, target - now);
+
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('cd-days').textContent = days;
+            document.getElementById('cd-hours').textContent = pad(hours);
+            document.getElementById('cd-minutes').textContent = pad(minutes);
+            document.getElementById('cd-seconds').textContent = pad(seconds);
+
+            if (diff > 0) requestAnimationFrame(tick);
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>

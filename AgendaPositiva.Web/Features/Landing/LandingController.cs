@@ -1,12 +1,14 @@
+using AgendaPositiva.Web.Datos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgendaPositiva.Web.Features.Landing;
 
-public class LandingController : Controller
+public class LandingController(AppDbContext db) : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        var evento = db.Eventos.FirstOrDefault(e => e.Activo);
+        return View(evento);
     }
 
     [Route("no-encontrado")]
