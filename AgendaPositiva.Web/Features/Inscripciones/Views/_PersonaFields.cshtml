@@ -131,8 +131,9 @@
     <div class="form-control form-grid__full" id="@id("AlergiaAlimentaria")_container" style="display:none">
         <label for="@id("TieneAlergiaAlimentaria")">¿Presenta alguna intolerancia o alergia alimenticia? <span
             class="required">*</span></label>
-            <select id="@id("TieneAlergiaAlimentaria")" name="@name("TieneAlergiaAlimentaria")">
-                <option value="false" selected>No</option>
+            <select id="@id("TieneAlergiaAlimentaria")" name="@name("TieneAlergiaAlimentaria")" required>
+                <option value="">-- Seleccione --</option>
+                <option value="false">No</option>
                 <option value="true">Sí</option>
             </select>
         </div>
@@ -143,20 +144,22 @@
                    placeholder="Describa la alergia o intolerancia...">
         </div>
 
-        <div class="form-control form-grid__full">
+        <div class="form-control form-grid__full" id="@id("ComunionAncianos")_container" style="display:none">
             <label for="@id("ParticipaComunionAncianos")">¿Va a participar de la comunión de Ancianos, Diácono y
-                Diaconisa?</label>
-                <select id="@id("ParticipaComunionAncianos")" name="@name("ParticipaComunionAncianos")">
-                    <option value="false" selected>No</option>
+                Diaconisa? <span class="required">*</span></label>
+                <select id="@id("ParticipaComunionAncianos")" name="@name("ParticipaComunionAncianos")" required>
+                    <option value="">-- Seleccione --</option>
+                    <option value="false">No</option>
                     <option value="true">Sí</option>
                 </select>
             </div>
 
             <div class="form-control form-grid__full">
                 <label for="@id("RequiereAlimentacion")">¿Requiere usted el servicio de alimentación que ofrece la
-                    conferencia?</label>
-                    <select id="@id("RequiereAlimentacion")" name="@name("RequiereAlimentacion")">
-                        <option value="false" selected>No</option>
+                    conferencia? <span class="required">*</span></label>
+                    <select id="@id("RequiereAlimentacion")" name="@name("RequiereAlimentacion")" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="false">No</option>
                         <option value="true">Sí</option>
                     </select>
                 </div>
@@ -261,7 +264,9 @@
                 var serviciosContainer = document.getElementById('@id("Servicios")_container');
                 var alergiaContainer = document.getElementById('@id("AlergiaAlimentaria")_container');
                 var descripcionAlergiaContainer = document.getElementById('@id("DescripcionAlergia")_container');
-                var tieneAlergiaSelect = document.getElementById('@id("TieneAlergiaAlimentaria")');
+                var tieneAlergiaSelect = document.getElementById('@id("TieneAlergiaAlimentaria")');  
+                var comunionContainer = document.getElementById('@id("ComunionAncianos")_container');
+                var comunionSelect = document.getElementById('@id("ParticipaComunionAncianos")');
 
                 function calcularEdad(fechaNac) {
                     var hoy = new Date();
@@ -276,24 +281,41 @@
                         serviciosContainer.style.display = 'none';
                         alergiaContainer.style.display = 'none';
                         descripcionAlergiaContainer.style.display = 'none';
+                        comunionContainer.style.display = 'none';
+                        comunionSelect.value = '';
+                        comunionSelect.removeAttribute('required');
+                        tieneAlergiaSelect.removeAttribute('required');
                         return;
                     }
                     var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
                     var edad = calcularEdad(fechaNac);
                     serviciosContainer.style.display = edad >= 16 ? '' : 'none';
 
+                    // Comunión de ancianos: solo mayores de 18 años
+                    var esMayorDeEdad = edad >= 18;
+                    comunionContainer.style.display = esMayorDeEdad ? '' : 'none';
+                    if (esMayorDeEdad) {
+                        comunionSelect.setAttribute('required', '');
+                    } else {
+                        comunionSelect.value = '';
+                        comunionSelect.removeAttribute('required');
+                    }
+
                     // Alergia alimentaria: solo niños de 4 a 10 años
                     var esNino4a10 = edad >= 4 && edad <= 10;
                     alergiaContainer.style.display = esNino4a10 ? '' : 'none';
-                    if (!esNino4a10) {
-                        tieneAlergiaSelect.value = 'false';
+                    if (esNino4a10) {
+                        tieneAlergiaSelect.setAttribute('required', '');
+                    } else {
+                        tieneAlergiaSelect.value = '';
+                        tieneAlergiaSelect.removeAttribute('required');
                         descripcionAlergiaContainer.style.display = 'none';
                     }
                     actualizarDescripcionAlergia();
                 }
 
                 function actualizarDescripcionAlergia() {
-                    if (alergiaContainer.style.display !== 'none' && tieneAlergiaSelect.value === 'true') {
+                    if (alergiaContainer.style.display !== 'none' && tieneAlergiaSelect && tieneAlergiaSelect.value === 'true') {
                         descripcionAlergiaContainer.style.display = '';
                     } else {
                         descripcionAlergiaContainer.style.display = 'none';
