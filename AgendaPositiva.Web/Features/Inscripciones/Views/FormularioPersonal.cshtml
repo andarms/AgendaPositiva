@@ -1,11 +1,8 @@
-@using AgendaPositiva.Web.Features.Commons;
-@using AgendaPositiva.Web.Features.Commons.Views;
-@using AgendaPositiva.Web.Features.Inscripciones.Views;
 @using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
 
 <hgroup>
     <h1>Formulario de Inscripción</h1>
-    <h2>Conferencia International 2026 Genesis</h2>
+    <h2>@ViewBag.NombreEvento</h2>
 </hgroup>
 
 <form action="/inscripciones/formulario-personal" method="post">

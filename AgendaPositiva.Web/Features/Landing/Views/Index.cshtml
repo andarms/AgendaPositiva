@@ -145,19 +145,24 @@
             <h1 class="landing__title">@Model.Nombre</h1>
             <p class="landing__subtitle">@Model.Ubicacion</p>
         }
-        else
-        {
-            <h1 class="landing__title">Conferencia Internacional 2026</h1>
-        }
     </header>
 
     <img src="/images/logos/Espanhol%20Branco@2x.png" alt="Agenda Positiva" class="landing__logo" />
 
     @if (Model is not null)
     {
-        <div class="countdown" id="countdown"
-             data-target="@Model.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss")">
-            <p class="countdown__date">@Model.FechaInicio.ToString("dd 'de' MMMM", cultura) — @Model.FechaFin.ToString("dd 'de' MMMM, yyyy", cultura)</p>
+        <div class="countdown" id="countdown" data-target="@Model.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss")">
+            <p class="countdown__date">
+                @if (Model.FechaInicio.Month == Model.FechaFin.Month && Model.FechaInicio.Year == Model.FechaFin.Year)
+                {
+                    @($"{Model.FechaInicio.Day}-{Model.FechaFin.Day} de {Model.FechaInicio.ToString("MMMM", cultura)}")
+                }
+                else
+                {
+                    @($"{Model.FechaInicio.ToString("dd 'de' MMMM", cultura)} — {Model.FechaFin.ToString("dd 'de' MMMM",
+            cultura)}")
+                }
+            </p>
             <div class="countdown__block">
                 <span class="countdown__number" id="cd-days">--</span>
                 <span class="countdown__label">Días</span>

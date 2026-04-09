@@ -127,6 +127,7 @@ public class InscripcionesController : Controller
     [HttpGet("formulario-personal")]
     public IActionResult FormularioPersonal(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
     {
+        ViewBag.NombreEvento = evento.Nombre;
         return View(new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
     }
 

@@ -56,7 +56,7 @@ public enum Genero
 
 public enum ServicioInscripcion
 {
-    FvkdsNinos,
+    Fvkids,
     CdaAdolescentes,
     Jovenes,
     Ujier,
@@ -75,7 +75,7 @@ public static class ServicioInscripcionExtensions
 {
     public static string Descripcion(this ServicioInscripcion servicio) => servicio switch
     {
-        ServicioInscripcion.FvkdsNinos => "FVKDS (Niños)",
+        ServicioInscripcion.Fvkids => "FVKIDS (Niños)",
         ServicioInscripcion.CdaAdolescentes => "CDA (Adolescentes)",
         ServicioInscripcion.Jovenes => "Jóvenes",
         ServicioInscripcion.Ujier => "Ujier",
