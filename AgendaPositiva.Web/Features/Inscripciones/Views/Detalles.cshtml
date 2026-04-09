@@ -49,6 +49,21 @@
             <div class="detail-item__label">Necesidades Especiales</div>
             <div class="detail-item__value">@(Model.NecesidadesEspeciales ?? "—")</div>
         </div>
+        @if (Model.TieneAlergiaAlimentaria)
+        {
+            <div class="detail-item detail-item--full">
+                <div class="detail-item__label">Alergia/Intolerancia Alimentaria</div>
+                <div class="detail-item__value">Sí — @(Model.DescripcionAlergia ?? "Sin descripción")</div>
+            </div>
+        }
+        <div class="detail-item">
+            <div class="detail-item__label">Comunión de Ancianos, Diácono y Diaconisa</div>
+            <div class="detail-item__value">@(Model.ParticipaComunionAncianos ? "Sí" : "No")</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item__label">Servicio de Alimentación</div>
+            <div class="detail-item__value">@(Model.RequiereAlimentacion ? "Sí" : "No")</div>
+        </div>
         @if (Model.Relacion is not null)
         {
             <div class="detail-item detail-item--full">
@@ -138,6 +153,21 @@
             <div class="detail-item detail-item--full">
                 <div class="detail-item__label">Necesidades Especiales</div>
                 <div class="detail-item__value">@(ins.NecesidadesEspeciales ?? "—")</div>
+            </div>
+            @if (ins.TieneAlergiaAlimentaria)
+            {
+                <div class="detail-item detail-item--full">
+                    <div class="detail-item__label">Alergia/Intolerancia Alimentaria</div>
+                    <div class="detail-item__value">Sí — @(ins.DescripcionAlergia ?? "Sin descripción")</div>
+                </div>
+            }
+            <div class="detail-item">
+                <div class="detail-item__label">Comunión de Ancianos, Diácono y Diaconisa</div>
+                <div class="detail-item__value">@(ins.ParticipaComunionAncianos ? "Sí" : "No")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-item__label">Servicio de Alimentación</div>
+                <div class="detail-item__value">@(ins.RequiereAlimentacion ? "Sí" : "No")</div>
             </div>
             @if (ins.Relacion is not null)
             {

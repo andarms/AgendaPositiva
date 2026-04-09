@@ -19,6 +19,14 @@ public class Inscripcion : EntidadBase
     public string? NecesidadesEspeciales { get; set; }
     public string Ciudad { get; set; } = string.Empty;
     public string Departamento { get; set; } = string.Empty;
+    /// <summary>¿Presenta alguna intolerancia o alergia alimenticia? (Niños 4-10 años)</summary>
+    public bool TieneAlergiaAlimentaria { get; set; } = false;
+    /// <summary>Descripción de la alergia alimentaria (si aplica)</summary>
+    public string? DescripcionAlergia { get; set; }
+    /// <summary>¿Va a participar de la comunión de Ancianos, Diácono y Diaconisa?</summary>
+    public bool ParticipaComunionAncianos { get; set; } = false;
+    /// <summary>¿Requiere el servicio de alimentación que ofrece la conferencia?</summary>
+    public bool RequiereAlimentacion { get; set; } = false;
 
     // Navigation properties
     public Persona Persona { get; set; } = null!;

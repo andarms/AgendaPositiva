@@ -18,7 +18,11 @@ public record RegistrarPersonaPrincipalDto(
     List<ServicioInscripcion>? Servicios,
     string? NecesidadesEspeciales,
     string Ciudad,
-    string Departamento
+    string Departamento,
+    bool TieneAlergiaAlimentaria = false,
+    string? DescripcionAlergia = null,
+    bool ParticipaComunionAncianos = false,
+    bool RequiereAlimentacion = false
 );
 
 public class RegistrarPersonaPrincipal
@@ -83,6 +87,10 @@ public class RegistrarPersonaPrincipal
             inscripcion.NecesidadesEspeciales = command.NecesidadesEspeciales;
             inscripcion.Ciudad = command.Ciudad;
             inscripcion.Departamento = command.Departamento;
+            inscripcion.TieneAlergiaAlimentaria = command.TieneAlergiaAlimentaria;
+            inscripcion.DescripcionAlergia = command.DescripcionAlergia;
+            inscripcion.ParticipaComunionAncianos = command.ParticipaComunionAncianos;
+            inscripcion.RequiereAlimentacion = command.RequiereAlimentacion;
         }
         else
         {
@@ -98,6 +106,10 @@ public class RegistrarPersonaPrincipal
                 NecesidadesEspeciales = command.NecesidadesEspeciales,
                 Ciudad = command.Ciudad,
                 Departamento = command.Departamento,
+                TieneAlergiaAlimentaria = command.TieneAlergiaAlimentaria,
+                DescripcionAlergia = command.DescripcionAlergia,
+                ParticipaComunionAncianos = command.ParticipaComunionAncianos,
+                RequiereAlimentacion = command.RequiereAlimentacion,
             };
             db.Inscripciones.Add(inscripcion);
         }

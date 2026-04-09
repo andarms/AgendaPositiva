@@ -268,7 +268,10 @@ public class InscripcionesAdminController : Controller
         var headers = new[] { "#", "Nombres", "Apellidos", "Género",
             "Tipo Identificación", "Número Identificación", "Fecha Nacimiento",
             "Teléfono", "Email", "Departamento", "Ciudad", "Estado", "Hospedaje",
-            "Grupo Familiar", "Servicios", "Necesidades Especiales", "Fecha Registro" };
+            "Grupo Familiar", "Servicios", "Necesidades Especiales",
+            "Alergia Alimentaria", "Descripción Alergia",
+            "Comunión Ancianos/Diácono/Diaconisa", "Servicio Alimentación",
+            "Fecha Registro" };
 
         for (int i = 0; i < headers.Length; i++)
             ws.Cell(1, i + 1).Value = headers[i];
@@ -316,7 +319,11 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "N/A";
             ws.Cell(row, 15).Value = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
             ws.Cell(row, 16).Value = ins.NecesidadesEspeciales ?? "";
-            ws.Cell(row, 17).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
+            ws.Cell(row, 17).Value = ins.TieneAlergiaAlimentaria ? "Sí" : "No";
+            ws.Cell(row, 18).Value = ins.DescripcionAlergia ?? "";
+            ws.Cell(row, 19).Value = ins.ParticipaComunionAncianos ? "Sí" : "No";
+            ws.Cell(row, 20).Value = ins.RequiereAlimentacion ? "Sí" : "No";
+            ws.Cell(row, 21).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
         }
 
         ws.Columns().AdjustToContents();

@@ -19,6 +19,8 @@
                 <th>Estado</th>
                 <th>Hospedaje</th>
                 <th>Necesidades Especiales</th>
+                <th>Comunión</th>
+                <th>Alimentación</th>
             </tr>
         </thead>
         <tbody>
@@ -53,6 +55,8 @@
                     <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
                     <td>@(string.IsNullOrEmpty(inscripcion.NecesidadesEspeciales) ? "—" : inscripcion.NecesidadesEspeciales)
                     </td>
+                    <td>@(inscripcion.ParticipaComunionAncianos ? "Sí" : "No")</td>
+                    <td>@(inscripcion.RequiereAlimentacion ? "Sí" : "No")</td>
                 </tr>
             }
         </tbody>

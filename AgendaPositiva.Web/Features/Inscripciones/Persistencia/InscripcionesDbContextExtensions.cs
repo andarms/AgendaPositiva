@@ -74,6 +74,8 @@ public static class InscripcionesDbContextExtensions
             e.Property(i => i.Servicios)
                 .HasColumnType("jsonb");
 
+            e.Property(i => i.DescripcionAlergia).HasMaxLength(500);
+
             e.HasOne(i => i.Persona)
                 .WithMany(p => p.Inscripciones)
                 .HasForeignKey(i => i.PersonaId)

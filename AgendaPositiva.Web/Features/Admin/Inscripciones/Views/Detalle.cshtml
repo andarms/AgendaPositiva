@@ -100,6 +100,21 @@
                 <span class="field-label">Necesidades especiales</span>
                 @(string.IsNullOrEmpty(Model.NecesidadesEspeciales) ? "Ninguna" : Model.NecesidadesEspeciales)
             </div>
+            @if (Model.TieneAlergiaAlimentaria)
+            {
+                <div class="field-span2">
+                    <span class="field-label">Alergia/Intolerancia alimentaria</span>
+                    Sí — @(string.IsNullOrEmpty(Model.DescripcionAlergia) ? "Sin descripción" : Model.DescripcionAlergia)
+                </div>
+            }
+            <div>
+                <span class="field-label">Comunión Ancianos/Diácono/Diaconisa</span>
+                @(Model.ParticipaComunionAncianos ? "Sí" : "No")
+            </div>
+            <div>
+                <span class="field-label">Servicio de alimentación</span>
+                @(Model.RequiereAlimentacion ? "Sí" : "No")
+            </div>
         </div>
     </div>
 </div>
@@ -107,35 +122,35 @@
 @* Cambiar estado (solo administradores) *@
 @if (User.IsInRole("Administrador"))
 {
-<div class="card cambiar-estado">
-    <h2 class="card__title">Cambiar estado</h2>
+    <div class="card cambiar-estado">
+        <h2 class="card__title">Cambiar estado</h2>
 
-    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
-        <select name="nuevoEstado" class="form-control" style="width: auto;">
-            @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
-            {
-                <option value="@estado" selected="@(Model.Estado == estado)">@estado.Humanize()</option>
-            }
-        </select>
-        <button type="submit" class="btn btn--primary">Guardar</button>
-    </form>
-</div>
+        <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
+            <select name="nuevoEstado" class="form-control" style="width: auto;">
+                @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
+                {
+                    <option value="@estado" selected="@(Model.Estado == estado)">@estado.Humanize()</option>
+                }
+            </select>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </form>
+    </div>
 }
 
 @* Cambiar hospedaje (solo administradores) *@
 @if (User.IsInRole("Administrador"))
 {
-<div class="card cambiar-estado">
-    <h2 class="card__title">Cambiar hospedaje</h2>
+    <div class="card cambiar-estado">
+        <h2 class="card__title">Cambiar hospedaje</h2>
 
-    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-hospedaje" class="cambiar-estado__form">
-        <select name="requiereHospedaje" class="form-control" style="width: auto;">
-            <option value="true" selected="@Model.RequiereHospedaje">Sí</option>
-            <option value="false" selected="@(!Model.RequiereHospedaje)">No</option>
-        </select>
-        <button type="submit" class="btn btn--primary">Guardar</button>
-    </form>
-</div>
+        <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-hospedaje" class="cambiar-estado__form">
+            <select name="requiereHospedaje" class="form-control" style="width: auto;">
+                <option value="true" selected="@Model.RequiereHospedaje">Sí</option>
+                <option value="false" selected="@(!Model.RequiereHospedaje)">No</option>
+            </select>
+            <button type="submit" class="btn btn--primary">Guardar</button>
+        </form>
+    </div>
 }
 
 @* Historial de auditoría *@

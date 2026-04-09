@@ -19,6 +19,10 @@ public record FamiliarDto(
     Parentesco? Parentesco,
     string Ciudad,
     string Departamento,
+    bool TieneAlergiaAlimentaria = false,
+    string? DescripcionAlergia = null,
+    bool ParticipaComunionAncianos = false,
+    bool RequiereAlimentacion = false,
     int? PersonaExistenteId = null
 );
 
@@ -112,6 +116,10 @@ public class AgregarAlGrupo(AppDbContext db)
             NecesidadesEspeciales = datos.NecesidadesEspeciales,
             Ciudad = datos.Ciudad,
             Departamento = datos.Departamento,
+            TieneAlergiaAlimentaria = datos.TieneAlergiaAlimentaria,
+            DescripcionAlergia = datos.DescripcionAlergia,
+            ParticipaComunionAncianos = datos.ParticipaComunionAncianos,
+            RequiereAlimentacion = datos.RequiereAlimentacion,
             Relacion = relacion,
             RelacionConPersonaId = relacionConPersonaId,
         });
