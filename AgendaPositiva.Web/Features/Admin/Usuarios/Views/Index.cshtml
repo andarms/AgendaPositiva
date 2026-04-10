@@ -16,138 +16,54 @@
 
 @section Styles {
     <style>
-        .usuarios-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .usuarios-header h1 {
-            font-size: 1.5rem;
-            color: #1a1a2e;
-        }
-
-        .btn-crear {
-            padding: .5rem 1.25rem;
-            background: #1a1a2e;
-            color: #fff;
-            border-radius: 6px;
-            font-size: .9rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background .15s ease;
-        }
-
-        .btn-crear:hover {
-            background: #2d2d44;
-        }
-
-        .tabla-usuarios {
-            width: 100%;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
-            border-collapse: collapse;
-            overflow: hidden;
-        }
-
-        .tabla-usuarios th {
-            background: #1a1a2e;
-            color: #fff;
-            padding: .75rem 1rem;
-            text-align: left;
-            font-size: .85rem;
-            font-weight: 600;
-        }
-
-        .tabla-usuarios td {
-            padding: .75rem 1rem;
-            border-bottom: 1px solid #eee;
-            font-size: .9rem;
-        }
-
-        .tabla-usuarios tr:last-child td {
-            border-bottom: none;
-        }
-
-        .tabla-usuarios tr:hover td {
-            background: #fafafa;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: .2rem .6rem;
-            border-radius: 4px;
-            font-size: .75rem;
-            font-weight: 600;
-        }
-
-        .badge--admin {
-            background: #1a1a2e;
-            color: #fff;
-        }
-
-        .badge--colab {
-            background: #f0f0f0;
-            color: #333;
-            border: 1px solid #ddd;
-        }
-
-        .badge--activo {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge--inactivo {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
         .deptos-list {
             display: flex;
             flex-wrap: wrap;
-            gap: .25rem;
+            gap: 0.25rem;
             max-width: 300px;
         }
 
         .deptos-list span {
-            font-size: .75rem;
-            background: #e8e8f0;
-            padding: .15rem .5rem;
-            border-radius: 3px;
-            color: #333;
+            font-size: 0.6875rem;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 0.15rem 0.5rem;
+            border-radius: 100px;
+            color: #1d1d1f;
         }
 
         .acciones {
             display: flex;
-            gap: .5rem;
+            gap: 0.5rem;
             align-items: center;
         }
 
         .acciones a {
-            font-size: .85rem;
-            color: #1a1a2e;
+            font-size: 0.8125rem;
+            color: #0066cc;
             text-decoration: none;
             font-weight: 500;
         }
 
         .acciones a:hover {
-            text-decoration: underline;
+            color: #004499;
         }
 
         .btn-eliminar {
             background: none;
             border: none;
-            color: #e74c3c;
-            font-size: .85rem;
+            color: #ff3b30;
+            font-size: 0.8125rem;
             font-weight: 500;
             cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
+            font-family: inherit;
         }
 
         .btn-eliminar:hover {
-            text-decoration: underline;
+            color: #d32f2f;
+        }
+
+        .badge--primary {
+            background: #0066cc;
         }
     </style>
 }
@@ -158,13 +74,18 @@
     <span class="breadcrumb__current">Usuarios</span>
 </nav>
 
-<div class="usuarios-header">
-    <h1>Usuarios administradores <span
-        style="font-size: .875rem; color: #6e6e73; font-weight: 400;">(@totalRegistros)</span></h1>
-        <a href="/admin/usuarios/crear" class="btn-crear">+ Nuevo usuario</a>
+<h1>Usuarios administradores</h1>
+<div class="page-header">
+    <p class="text-secondary">
+        <strong>@totalRegistros</strong> usuarios
+    </p>
+    <div class="page-header__actions">
+        <a href="/admin/usuarios/crear" class="btn btn--primary">+ Nuevo usuario</a>
     </div>
+</div>
 
-    <table class="tabla-usuarios">
+<div class="table-wrapper">
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -179,22 +100,22 @@
             @foreach (var u in Model)
             {
                 <tr>
-                    <td>@(u.Nombre ?? "—")</td>
+                    <td class="col-name">@(u.Nombre ?? "—")</td>
                     <td>@u.Email</td>
                     <td>
                         @if (u.Rol == RolAdministrador.Administrador)
                         {
-                            <span class="badge badge--admin">Administrador</span>
+                            <span class="badge badge--primary">Administrador</span>
                         }
                         else
                         {
-                            <span class="badge badge--colab">Colaborador</span>
+                            <span class="badge badge--muted">Colaborador</span>
                         }
                     </td>
                     <td>
                         @if (u.Rol == RolAdministrador.Administrador)
                         {
-                            <span style="color:#666; font-size:.85rem;">Todos</span>
+                            <span class="text-muted" style="font-size:.8125rem;">Todos</span>
                         }
                         else if (u.Localidades.Any())
                         {
@@ -220,17 +141,17 @@
                         }
                         else
                         {
-                            <span style="color:#999; font-size:.85rem;">Ninguno</span>
+                            <span class="text-muted" style="font-size:.8125rem;">Ninguno</span>
                         }
                     </td>
                     <td>
                         @if (u.Activo)
                         {
-                            <span class="badge badge--activo">Activo</span>
+                            <span class="badge badge--success">Activo</span>
                         }
                         else
                         {
-                            <span class="badge badge--inactivo">Inactivo</span>
+                            <span class="badge badge--danger">Inactivo</span>
                         }
                     </td>
                     <td>
@@ -246,36 +167,37 @@
             }
         </tbody>
     </table>
+</div>
 
-    @if (totalRegistros > 0)
-    {
-        <div class="pagination">
-            <div class="pagination__info">
-                Mostrando @((pagina - 1) * porPagina + 1)–@(Math.Min(pagina * porPagina, totalRegistros)) de @totalRegistros
-            </div>
-            <div class="pagination__controls">
-                @if (pagina > 1)
-                {
-                    <a href="@BuildPageUrl(pagina - 1)" class="btn btn--secondary">← Anterior</a>
-                }
-                <span class="pagination__current">Página @pagina de @totalPaginas</span>
-                @if (pagina < totalPaginas)
-                {
-                    <a href="@BuildPageUrl(pagina + 1)" class="btn btn--secondary">Siguiente →</a>
-                }
-            </div>
-            <div class="pagination__size">
-                @foreach (var size in new[] { 10, 50, 100 })
-                {
-                    if (size == porPagina)
-                    {
-                        <span class="btn btn--primary">@size</span>
-                    }
-                    else
-                    {
-                        <a href="@BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
-                    }
-                }
-            </div>
+@if (totalRegistros > 0)
+{
+    <div class="pagination">
+        <div class="pagination__info">
+            Mostrando @((pagina - 1) * porPagina + 1)–@(Math.Min(pagina * porPagina, totalRegistros)) de @totalRegistros
         </div>
-    }
+        <div class="pagination__controls">
+            @if (pagina > 1)
+            {
+                <a href="@BuildPageUrl(pagina - 1)" class="btn btn--secondary">← Anterior</a>
+            }
+            <span class="pagination__current">Página @pagina de @totalPaginas</span>
+            @if (pagina < totalPaginas)
+            {
+                <a href="@BuildPageUrl(pagina + 1)" class="btn btn--secondary">Siguiente →</a>
+            }
+        </div>
+        <div class="pagination__size">
+            @foreach (var size in new[] { 10, 50, 100 })
+            {
+                if (size == porPagina)
+                {
+                    <span class="btn btn--primary">@size</span>
+                }
+                else
+                {
+                    <a href="@BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                }
+            }
+        </div>
+    </div>
+}
