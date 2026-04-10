@@ -3,11 +3,18 @@
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 @model VerificarFamiliaresViewModel
 
-<h1>Grupo Familiar de @Model.NombrePersona</h1>
-<p class="small-text">
-    Busca e inscribe a los familiares que acompañarán a <strong>@Model.NombrePersona</strong> en la conferencia.
-    Esto permite gestionar mejor el hospedaje. No implica que compartirán alojamiento.
-</p>
+@section Header {
+    <nav class="breadcrumb">
+        <a href="/admin/inscripciones">Inscripciones</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">Familiares de @Model.NombrePersona</span>
+    </nav>
+    <h1>Grupo Familiar de @Model.NombrePersona</h1>
+    <p class="small-text">
+        Busca e inscribe a los familiares que acompañarán a <strong>@Model.NombrePersona</strong> en la conferencia.
+        Esto permite gestionar mejor el hospedaje. No implica que compartirán alojamiento.
+    </p>
+}
 
 @if (Model.PersonaEncontrada is not null)
 {

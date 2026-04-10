@@ -3,6 +3,12 @@
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 @model ListaInscripcionesViewModel
 
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Inscripciones</span>
+</nav>
+
 <h1>Inscripciones — @Model.Evento.Nombre</h1>
 <div class="page-header">
     <p class="text-secondary">
@@ -88,15 +94,6 @@
                     @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
                     {
                         var offset = (Model.Pagina - 1) * Model.PorPagina;
-                        var badgeCss = inscripcion.Estado switch
-                        {
-                            EstadoInscripcion.Completado => "badge--success",
-                            EstadoInscripcion.Abono2 => "badge--abono2",
-                            EstadoInscripcion.Abono1 => "badge--abono1",
-                            EstadoInscripcion.Pendiente => "badge--warning",
-                            EstadoInscripcion.NoVaAsistir => "badge--danger",
-                            _ => "badge--muted"
-                        };
                         <tr>
                             <td class="col-index">@(offset + index + 1)</td>
                             <td class="col-name">
@@ -104,7 +101,7 @@
                             </td>
                             <td>@inscripcion.Persona.TipoIdentificacion.Humanize() — @inscripcion.Persona.NumeroIdentificacion</td>
                             <td>@inscripcion.Localidad</td>
-                            <td><span class="badge @badgeCss">@inscripcion.Estado.Humanize()</span></td>
+                            <td><span class="badge @inscripcion.Estado.BadgeCss()">@inscripcion.Estado.Humanize()</span></td>
                             <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
                         </tr>
                     }
@@ -114,7 +111,8 @@
 
         <div class="pagination">
             <div class="pagination__info">
-                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina, Model.TotalInscripciones)) de @Model.TotalInscripciones
+                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
+                        Model.TotalInscripciones)) de @Model.TotalInscripciones
             </div>
             <div class="pagination__controls">
                 @if (Model.Pagina > 1)

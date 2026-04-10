@@ -16,7 +16,6 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
             padding: 2rem;
-            max-width: 780px;
         }
 
         .form-card h1 {
@@ -248,7 +247,13 @@
     </style>
 }
 
-<div class="form-card">
+<nav class="breadcrumb">
+    <a href="/admin/usuarios">Usuarios</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@titulo</span>
+</nav>
+
+<div>
     <h1>@titulo</h1>
 
     <form method="post" action="@action" id="usuario-form">

@@ -4,8 +4,16 @@
     ViewData[index: "MainClass"] = "site-main--narrow";
 }
 
-<div class="narrow-container">
+@section Header {
+    <nav class="breadcrumb">
+        <a href="/admin/inscripciones">Inscripciones</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">Verificación</span>
+    </nav>
     <h1>Verificación de Inscripción</h1>
+}
+
+<div class="narrow-container">
 
     <form action="/admin/inscripciones/formulario/verificacion" method="post">
         <label for="tipoIdentificacion">Tipo de Identificación:</label>
@@ -19,8 +27,8 @@
 
 
         <label for="numeroIdentificacion">Número de Identificación:</label>
-        <input type="text" id="numeroIdentificacion" name="numeroIdentificacion" required
-               pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números"
+        <input type="text" id="numeroIdentificacion" name="numeroIdentificacion" required pattern="[0-9]+"
+               inputmode="numeric" title="Solo se permiten números"
                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
         <button type="submit" class="btn btn--primary">Continuar</button>

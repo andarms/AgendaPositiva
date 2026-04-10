@@ -24,6 +24,9 @@ public class AuthAdminController : Controller
     [HttpGet("/admin")]
     public IActionResult Login()
     {
+        if (User.Identity?.IsAuthenticated == true)
+            return Redirect("/admin/inscripciones");
+
         return View("~/Features/Admin/Auth/Views/Login.cshtml");
     }
 

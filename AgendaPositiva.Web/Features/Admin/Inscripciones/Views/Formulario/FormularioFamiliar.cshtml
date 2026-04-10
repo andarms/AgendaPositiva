@@ -1,7 +1,16 @@
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 
-<h1>Datos del Familiar</h1>
-<p>La persona no se encontró registrada. Complete los datos a continuación.</p>
+@section Header {
+    <nav class="breadcrumb">
+        <a href="/admin/inscripciones">Inscripciones</a>
+        <span class="breadcrumb__separator">/</span>
+        <a href="/admin/inscripciones/formulario/verificar-familiares/@Model.InscripcionId">Familiares</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">Datos del Familiar</span>
+    </nav>
+    <h1>Datos del Familiar</h1>
+    <p>La persona no se encontró registrada. Complete los datos a continuación.</p>
+}
 
 <form action="/admin/inscripciones/formulario/formulario-familiar/@Model.InscripcionId" method="post">
 

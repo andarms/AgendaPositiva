@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using AgendaPositiva.Web.Features.Commons;
 
 namespace AgendaPositiva.Web.Features.Commons.Views;
 
@@ -21,6 +22,25 @@ public static partial class ViewHelpers
     public static string Titalize(this Enum value)
     {
         return value.Humanize();
+    }
+
+    public static string BadgeCss(this EstadoInscripcion estado) => estado switch
+    {
+        EstadoInscripcion.Completado => "badge--success",
+        EstadoInscripcion.Abono2 => "badge--abono2",
+        EstadoInscripcion.Abono1 => "badge--abono1",
+        EstadoInscripcion.Pendiente => "badge--warning",
+        EstadoInscripcion.NoVaAsistir => "badge--danger",
+        _ => "badge--muted"
+    };
+
+    public static int CalcularEdad(this DateOnly fechaNacimiento)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        var edad = hoy.Year - fechaNacimiento.Year;
+        if (hoy < fechaNacimiento.AddYears(edad))
+            edad--;
+        return edad;
     }
 
     [GeneratedRegex(@"(?<!^)([A-Z])")]

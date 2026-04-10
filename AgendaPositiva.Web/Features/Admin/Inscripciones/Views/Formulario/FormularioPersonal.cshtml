@@ -1,9 +1,18 @@
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 
-<hgroup>
-    <h1>Formulario de Inscripción</h1>
-    <p>@ViewBag.NombreEvento</p>
-</hgroup>
+@section Header {
+    <nav class="breadcrumb">
+        <a href="/admin/inscripciones">Inscripciones</a>
+        <span class="breadcrumb__separator">/</span>
+        <a href="/admin/inscripciones/formulario/verificacion">Verificación</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">Formulario</span>
+    </nav>
+    <hgroup>
+        <h1>Formulario de Inscripción</h1>
+        <p>@ViewBag.NombreEvento</p>
+    </hgroup>
+}
 
 <form action="/admin/inscripciones/formulario/formulario-personal" method="post">
 

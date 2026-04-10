@@ -2,22 +2,10 @@
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 @using AgendaPositiva.Web.Features.Admin.Auditoria;
-@model Inscripcion
-
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+@model DetalleViewModel
 @{
-    var badgeCss = Model.Estado switch
-    {
-        EstadoInscripcion.Completado => "badge--success",
-        EstadoInscripcion.Abono2 => "badge--abono2",
-        EstadoInscripcion.Abono1 => "badge--abono1",
-        EstadoInscripcion.Pendiente => "badge--warning",
-        EstadoInscripcion.NoVaAsistir => "badge--danger",
-        _ => "badge--muted"
-    };
-
-    var edad = DateTime.Today.Year - Model.Persona.FechaNacimiento.Year;
-    if (DateOnly.FromDateTime(DateTime.Today) < Model.Persona.FechaNacimiento.AddYears(edad))
-        edad--;
+    var ins = Model.Inscripcion;
 }
 
 @section Styles {
@@ -156,25 +144,31 @@
     </style>
 }
 
-<a href="/admin/inscripciones" class="back-link">← Volver a inscripciones</a>
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/inscripciones">Inscripciones</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@ins.Persona.NombreCompleto</span>
+</nav>
 
 <div class="detalle-header">
     <div class="detalle-header__info">
-        <h1>@Model.Persona.NombreCompleto</h1>
+        <h1>@ins.Persona.NombreCompleto</h1>
         <div class="detalle-header__meta">
-            <span class="badge @badgeCss">@Model.Estado.Humanize()</span>
-            <span>Inscripción #@Model.Id</span>
+            <span class="badge @ins.Estado.BadgeCss()">@ins.Estado.Humanize()</span>
+            <span>Inscripción #@ins.Id</span>
             <span>·</span>
-            <span>@Model.Localidad</span>
+            <span>@ins.Localidad</span>
             <span>·</span>
-            <span>Registrado @Model.FechaCreacion.ToString("dd MMM yyyy, HH:mm")</span>
+            <span>Registrado @ins.FechaCreacion.ToString("dd MMM yyyy, HH:mm")</span>
         </div>
     </div>
-    @if (Model.GrupoFamiliar is not null)
+    @if (ins.GrupoFamiliar is not null)
     {
         <div class="detalle-header__actions">
-            <a href="/admin/inscripciones/grupo/@Model.GrupoFamiliarId" class="btn btn--secondary">
-                Grupo familiar #@Model.GrupoFamiliar.Id
+            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary">
+                Grupo familiar #@ins.GrupoFamiliar.Id
             </a>
         </div>
     }
@@ -187,285 +181,274 @@
         <div class="detail-fields">
             <div>
                 <span class="field-label">Nombres</span>
-                <span class="detail-value"><strong>@Model.Persona.Nombres</strong></span>
+                <span class="detail-value"><strong>@ins.Persona.Nombres</strong></span>
             </div>
             <div>
                 <span class="field-label">Apellidos</span>
-                <span class="detail-value"><strong>@Model.Persona.Apellidos</strong></span>
+                <span class="detail-value"><strong>@ins.Persona.Apellidos</strong></span>
             </div>
             <div>
                 <span class="field-label">Género</span>
-                <span class="detail-value">@Model.Persona.Genero.Humanize()</span>
+                <span class="detail-value">@ins.Persona.Genero.Humanize()</span>
             </div>
             <div>
                 <span class="field-label">Edad</span>
-                <span class="detail-value">@edad años (@Model.Persona.FechaNacimiento.ToString("dd/MM/yyyy"))</span>
-            </div>
-            <div>
-                <span class="field-label">Identificación</span>
-                <span class="detail-value">@Model.Persona.TipoIdentificacion.Humanize() —
-                    @Model.Persona.NumeroIdentificacion</span>
+                <span class="detail-value">@ins.Persona.FechaNacimiento.CalcularEdad() años
+                    (@ins.Persona.FechaNacimiento.ToString("dd/MM/yyyy"))</span>
                 </div>
                 <div>
-                    <span class="field-label">Teléfono</span>
-                    <span class="detail-value">@Model.Persona.Telefono</span>
-                </div>
-                @if (!string.IsNullOrEmpty(Model.Persona.Email))
-                {
-                    <div class="field-span2">
-                        <span class="field-label">Email</span>
-                        <span class="detail-value">@Model.Persona.Email</span>
-                    </div>
-                }
-                @if (Model.Relacion.HasValue && Model.RelacionConPersona is not null)
-                {
-                    <div class="field-span2">
-                        <span class="field-label">Relación familiar</span>
-                        <span class="detail-value">@Model.Relacion.Value.Humanize() de
-                            @Model.RelacionConPersona.NombreCompleto</span>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            @* ── Inscripción y servicios ── *@
-            <div class="card">
-                <div class="detail-section-title">Inscripción</div>
-                <div class="detail-fields">
-                    <div>
-                        <span class="field-label">Hospedaje</span>
-                        <span class="indicator">
-                            <span
-                            class="indicator__dot @(Model.RequiereHospedaje ? "indicator__dot--yes" : "indicator__dot--no")"></span>
-                            @(Model.RequiereHospedaje ? "Sí requiere" : "No requiere")
-                        </span>
+                    <span class="field-label">Identificación</span>
+                    <span class="detail-value">@ins.Persona.TipoIdentificacion.Humanize() —
+                        @ins.Persona.NumeroIdentificacion</span>
                     </div>
                     <div>
-                        <span class="field-label">Alimentación</span>
-                        <span class="indicator">
-                            <span
-                            class="indicator__dot @(Model.RequiereAlimentacion ? "indicator__dot--yes" : "indicator__dot--no")"></span>
-                            @(Model.RequiereAlimentacion ? "Sí requiere" : "No requiere")
-                        </span>
+                        <span class="field-label">Teléfono</span>
+                        <span class="detail-value">@ins.Persona.Telefono</span>
                     </div>
-                    <div>
-                        <span class="field-label">Comunión Ancianos/Diácono/Diaconisa</span>
-                        <span class="indicator">
-                            <span
-                            class="indicator__dot @(Model.ParticipaComunionAncianos ? "indicator__dot--yes" : "indicator__dot--no")"></span>
-                            @(Model.ParticipaComunionAncianos ? "Sí participa" : "No participa")
-                        </span>
-                    </div>
-                    <div>
-                        <span class="field-label">Alergia alimentaria</span>
-                        @if (Model.TieneAlergiaAlimentaria)
-                        {
-                            <span class="indicator">
-                                <span class="indicator__dot indicator__dot--yes"></span>
-                                Sí — @(string.IsNullOrEmpty(Model.DescripcionAlergia) ? "Sin descripción" :
-                                                                                    Model.DescripcionAlergia)
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="indicator">
-                                <span class="indicator__dot indicator__dot--no"></span>
-                                Ninguna
-                            </span>
-                        }
-                    </div>
-                    <div class="field-span2">
-                        <span class="field-label">Necesidades especiales</span>
-                        @if (string.IsNullOrEmpty(Model.NecesidadesEspeciales))
-                        {
-                            <span class="detail-value detail-value--muted">Ninguna</span>
-                        }
-                        else
-                        {
-                            <span class="detail-value">@Model.NecesidadesEspeciales</span>
-                        }
-                    </div>
-                    @if (Model.Servicios.Count > 0)
+                    @if (!string.IsNullOrEmpty(ins.Persona.Email))
                     {
                         <div class="field-span2">
-                            <span class="field-label">Servicios</span>
-                            <div class="servicios-tags">
-                                @foreach (var servicio in Model.Servicios)
-                                {
-                                    <span class="servicio-tag">@servicio.Descripcion()</span>
-                                }
-                            </div>
+                            <span class="field-label">Email</span>
+                            <span class="detail-value">@ins.Persona.Email</span>
                         </div>
                     }
+                    @if (ins.Relacion.HasValue && ins.RelacionConPersona is not null)
+                    {
+                        <div class="field-span2">
+                            <span class="field-label">Relación familiar</span>
+                            <span class="detail-value">@ins.Relacion.Value.Humanize() de
+                                @ins.RelacionConPersona.NombreCompleto</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @* ── Inscripción y servicios ── *@
+                <div class="card">
+                    <div class="detail-section-title">Inscripción</div>
+                    <div class="detail-fields">
+                        <div>
+                            <span class="field-label">Hospedaje</span>
+                            <span class="indicator">
+                                <span
+                                class="indicator__dot @(ins.RequiereHospedaje ? "indicator__dot--yes" : "indicator__dot--no")"></span>
+                                @(ins.RequiereHospedaje ? "Sí requiere" : "No requiere")
+                            </span>
+                        </div>
+                        <div>
+                            <span class="field-label">Alimentación</span>
+                            <span class="indicator">
+                                <span
+                                class="indicator__dot @(ins.RequiereAlimentacion ? "indicator__dot--yes" : "indicator__dot--no")"></span>
+                                @(ins.RequiereAlimentacion ? "Sí requiere" : "No requiere")
+                            </span>
+                        </div>
+                        <div>
+                            <span class="field-label">Comunión Ancianos/Diácono/Diaconisa</span>
+                            <span class="indicator">
+                                <span
+                                class="indicator__dot @(ins.ParticipaComunionAncianos ? "indicator__dot--yes" : "indicator__dot--no")"></span>
+                                @(ins.ParticipaComunionAncianos ? "Sí participa" : "No participa")
+                            </span>
+                        </div>
+                        <div>
+                            <span class="field-label">Alergia alimentaria</span>
+                            @if (ins.TieneAlergiaAlimentaria)
+                            {
+                                <span class="indicator">
+                                    <span class="indicator__dot indicator__dot--yes"></span>
+                                    Sí — @(string.IsNullOrEmpty(ins.DescripcionAlergia) ? "Sin descripción" :
+                                                                                                                                                                                        ins.DescripcionAlergia)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="indicator">
+                                    <span class="indicator__dot indicator__dot--no"></span>
+                                    Ninguna
+                                </span>
+                            }
+                        </div>
+                        <div class="field-span2">
+                            <span class="field-label">Necesidades especiales</span>
+                            @if (string.IsNullOrEmpty(ins.NecesidadesEspeciales))
+                            {
+                                <span class="detail-value detail-value--muted">Ninguna</span>
+                            }
+                            else
+                            {
+                                <span class="detail-value">@ins.NecesidadesEspeciales</span>
+                            }
+                        </div>
+                        @if (ins.Servicios.Count > 0)
+                        {
+                            <div class="field-span2">
+                                <span class="field-label">Servicios</span>
+                                <div class="servicios-tags">
+                                    @foreach (var servicio in ins.Servicios)
+                                    {
+                                        <span class="servicio-tag">@servicio.Descripcion()</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
 
-        @* ── Grupo familiar ── *@
-        @if (Model.GrupoFamiliar is not null && Model.GrupoFamiliar.Inscripciones.Count > 0)
-        {
-            var familiares = Model.GrupoFamiliar.Inscripciones
-                .Where(i => i.Id != Model.Id)
-                .ToList();
+            @* ── Grupo familiar ── *@
+            @if (ins.GrupoFamiliar is not null && ins.GrupoFamiliar.Inscripciones.Count > 0)
+            {
+                var familiares = ins.GrupoFamiliar.Inscripciones
+                    .Where(i => i.Id != ins.Id)
+                    .ToList();
 
-            <div class="card" style="margin-top: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-                        Grupo Familiar #@Model.GrupoFamiliar.Id
-                        <span style="font-weight: 400; color: #86868b; text-transform: none; letter-spacing: normal;">
-                            — @Model.GrupoFamiliar.Inscripciones.Count miembro(s)
-                        </span>
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+                            Grupo Familiar #@ins.GrupoFamiliar.Id
+                            <span style="font-weight: 400; color: #86868b; text-transform: none; letter-spacing: normal;">
+                                — @ins.GrupoFamiliar.Inscripciones.Count miembro(s)
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary"
+                               style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
+                                + Agregar familiar
+                            </a>
+                            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary"
+                               style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
+                                Ver grupo completo
+                            </a>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <a href="/admin/inscripciones/formulario/verificar-familiares/@Model.Id" class="btn btn--primary"
+
+                    @if (familiares.Count > 0)
+                    {
+                        <div class="table-wrapper" style="border: none; border-radius: 0;">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Identificación</th>
+                                        <th>Relación</th>
+                                        <th>Estado</th>
+                                        <th>Hospedaje</th>
+                                        <th>Alimentación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var familiar in familiares)
+                                    {
+                                        <tr>
+                                            <td class="col-name">
+                                                <a href="/admin/inscripciones/@familiar.Id">@familiar.Persona.NombreCompleto</a>
+                                            </td>
+                                            <td>@familiar.Persona.TipoIdentificacion.Humanize() — @familiar.Persona.NumeroIdentificacion</td>
+                                            <td>
+                                                @if (familiar.Relacion.HasValue && familiar.RelacionConPersona is not null)
+                                                {
+                                                    @($"{familiar.Relacion.Value.Humanize()} de {familiar.RelacionConPersona.NombreCompleto}")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td><span class="badge @familiar.Estado.BadgeCss()">@familiar.Estado.Humanize()</span></td>
+                                            <td>@(familiar.RequiereHospedaje ? "Sí" : "No")</td>
+                                            <td>@(familiar.RequiereAlimentacion ? "Sí" : "No")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.5rem;">
+                            Esta persona es el único miembro del grupo familiar.
+                        </p>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+                            Grupo Familiar
+                        </div>
+                        <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary"
                            style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
                             + Agregar familiar
                         </a>
-                        <a href="/admin/inscripciones/grupo/@Model.GrupoFamiliarId" class="btn btn--secondary"
-                           style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
-                            Ver grupo completo
-                        </a>
+                    </div>
+                    <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.75rem;">
+                        Esta inscripción no tiene grupo familiar asignado.
+                    </p>
+                </div>
+            }
+
+            @* ── Acciones admin ── *@
+            @if (User.IsInRole("Administrador"))
+            {
+                <div class="admin-actions-grid">
+                    <div class="admin-action-card">
+                        <h3>Cambiar estado</h3>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-estado" class="cambiar-estado__form">
+                            <select name="nuevoEstado" class="form-control" style="width: auto;">
+                                @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
+                                {
+                                    <option value="@estado" selected="@(ins.Estado == estado)">@estado.Humanize()</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn--primary">Guardar</button>
+                        </form>
+                    </div>
+                    <div class="admin-action-card">
+                        <h3>Cambiar hospedaje</h3>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-hospedaje" class="cambiar-estado__form">
+                            <select name="requiereHospedaje" class="form-control" style="width: auto;">
+                                <option value="true" selected="@ins.RequiereHospedaje">Sí</option>
+                                <option value="false" selected="@(!ins.RequiereHospedaje)">No</option>
+                            </select>
+                            <button type="submit" class="btn btn--primary">Guardar</button>
+                        </form>
                     </div>
                 </div>
+            }
 
-                @if (familiares.Count > 0)
-                {
+            @* ── Historial de auditoría ── *@
+            @if (Model.Auditoria.Count > 0)
+            {
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="detail-section-title">Historial de cambios</div>
+
                     <div class="table-wrapper" style="border: none; border-radius: 0;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Identificación</th>
-                                    <th>Relación</th>
-                                    <th>Estado</th>
-                                    <th>Hospedaje</th>
-                                    <th>Alimentación</th>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Acción</th>
+                                    <th>Anterior</th>
+                                    <th>Nuevo</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var familiar in familiares)
+                                @foreach (var registro in Model.Auditoria)
                                 {
-                                    var familiarBadge = familiar.Estado switch
-                                    {
-                                        EstadoInscripcion.Completado => "badge--success",
-                                        EstadoInscripcion.Abono2 => "badge--abono2",
-                                        EstadoInscripcion.Abono1 => "badge--abono1",
-                                        EstadoInscripcion.Pendiente => "badge--warning",
-                                        EstadoInscripcion.NoVaAsistir => "badge--danger",
-                                        _ => "badge--muted"
-                                    };
                                     <tr>
-                                        <td class="col-name">
-                                            <a href="/admin/inscripciones/@familiar.Id">@familiar.Persona.NombreCompleto</a>
-                                        </td>
-                                        <td>@familiar.Persona.TipoIdentificacion.Humanize() — @familiar.Persona.NumeroIdentificacion</td>
-                                        <td>
-                                            @if (familiar.Relacion.HasValue && familiar.RelacionConPersona is not null)
-                                            {
-                                                @($"{familiar.Relacion.Value.Humanize()} de {familiar.RelacionConPersona.NombreCompleto}")
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">—</span>
-                                            }
-                                        </td>
-                                        <td><span class="badge @familiarBadge">@familiar.Estado.Humanize()</span></td>
-                                        <td>@(familiar.RequiereHospedaje ? "Sí" : "No")</td>
-                                        <td>@(familiar.RequiereAlimentacion ? "Sí" : "No")</td>
+                                        <td class="col-date">@registro.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@registro.Usuario</td>
+                                        <td>@registro.Accion</td>
+                                        <td>@(registro.ValorAnterior ?? "—")</td>
+                                        <td>@(registro.ValorNuevo ?? "—")</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
-                }
-                else
-                {
-                    <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.5rem;">
-                        Esta persona es el único miembro del grupo familiar.
-                    </p>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="card" style="margin-top: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-                        Grupo Familiar
-                    </div>
-                    <a href="/admin/inscripciones/formulario/verificar-familiares/@Model.Id" class="btn btn--primary"
-                       style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
-                        + Agregar familiar
-                    </a>
                 </div>
-                <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.75rem;">
-                    Esta inscripción no tiene grupo familiar asignado.
-                </p>
-            </div>
-        }
-
-        @* ── Acciones admin ── *@
-        @if (User.IsInRole("Administrador"))
-        {
-            <div class="admin-actions-grid">
-                <div class="admin-action-card">
-                    <h3>Cambiar estado</h3>
-                    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-estado" class="cambiar-estado__form">
-                        <select name="nuevoEstado" class="form-control" style="width: auto;">
-                            @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
-                            {
-                                <option value="@estado" selected="@(Model.Estado == estado)">@estado.Humanize()</option>
-                            }
-                        </select>
-                        <button type="submit" class="btn btn--primary">Guardar</button>
-                    </form>
-                </div>
-                <div class="admin-action-card">
-                    <h3>Cambiar hospedaje</h3>
-                    <form method="post" action="/admin/inscripciones/@Model.Id/cambiar-hospedaje" class="cambiar-estado__form">
-                        <select name="requiereHospedaje" class="form-control" style="width: auto;">
-                            <option value="true" selected="@Model.RequiereHospedaje">Sí</option>
-                            <option value="false" selected="@(!Model.RequiereHospedaje)">No</option>
-                        </select>
-                        <button type="submit" class="btn btn--primary">Guardar</button>
-                    </form>
-                </div>
-            </div>
-        }
-
-        @* ── Historial de auditoría ── *@
-        @{
-            var auditoria = ViewBag.Auditoria as List<AuditoriaAdmin> ?? [];
-        }
-        @if (auditoria.Count > 0)
-        {
-            <div class="card" style="margin-top: 1.5rem;">
-                <div class="detail-section-title">Historial de cambios</div>
-
-                <div class="table-wrapper" style="border: none; border-radius: 0;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Usuario</th>
-                                <th>Acción</th>
-                                <th>Anterior</th>
-                                <th>Nuevo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var registro in auditoria)
-                            {
-                                <tr>
-                                    <td class="col-date">@registro.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@registro.Usuario</td>
-                                    <td>@registro.Accion</td>
-                                    <td>@(registro.ValorAnterior ?? "—")</td>
-                                    <td>@(registro.ValorNuevo ?? "—")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
+            }

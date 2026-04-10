@@ -169,12 +169,16 @@ public class InscripcionesAdminController : Controller
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
             return View("~/Features/Admin/Inscripciones/Views/SinAcceso.cshtml");
 
-        ViewBag.Auditoria = store.AuditoriaAdmin
+        var auditoria = store.AuditoriaAdmin
             .Where(a => a.InscripcionId == id)
             .OrderByDescending(a => a.FechaCreacion)
             .ToList();
 
-        return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", inscripcion);
+        return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", new Views.ViewModels.DetalleViewModel
+        {
+            Inscripcion = inscripcion,
+            Auditoria = auditoria
+        });
     }
 
     [HttpPost("{id:int}/cambiar-estado")]

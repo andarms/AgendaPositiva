@@ -2,7 +2,16 @@
 @using AgendaPositiva.Web.Features.Commons.Views;
 @using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 
-<h1>Formulario de Inscripción</h1>
+@section Header {
+    <nav class="breadcrumb">
+        <a href="/admin/inscripciones">Inscripciones</a>
+        <span class="breadcrumb__separator">/</span>
+        <a href="/admin/inscripciones/formulario/verificacion">Verificación</a>
+        <span class="breadcrumb__separator">/</span>
+        <span class="breadcrumb__current">Formulario</span>
+    </nav>
+    <h1>Formulario de Inscripción</h1>
+}
 
 <form action="/admin/inscripciones/formulario/formulario" method="post">
 
@@ -41,7 +50,8 @@
                         <label>Número de Identificación:</label>
                         <input type="text" inputmode="numeric" class="buscar-numero">
                     </div>
-                    <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                    <button type="button" class="btn btn--secondary"
+                            onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
                 </div>
                 <div class="buscar-familiar__resultado" style="display:none;"></div>
                 <div class="buscar-familiar__campos" style="display:none;">
@@ -103,7 +113,8 @@
                     <label>Número de Identificación:</label>
                     <input type="text" inputmode="numeric" class="buscar-numero">
                 </div>
-                <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                <button type="button" class="btn btn--secondary"
+                        onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
             </div>
             <div class="buscar-familiar__resultado" style="display:none;"></div>
             <div class="buscar-familiar__campos" style="display:none;">
@@ -140,7 +151,8 @@
                     <label>Número de Identificación:</label>
                     <input type="text" inputmode="numeric" class="buscar-numero">
                 </div>
-                <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                <button type="button" class="btn btn--secondary"
+                        onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
             </div>
             <div class="buscar-familiar__resultado" style="display:none;"></div>
             <div class="buscar-familiar__campos" style="display:none;">
@@ -271,7 +283,7 @@
                             <option value="">-- Seleccione --</option>
                             @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                             {
-                                                        <option value="@rel">@rel.Humanize()</option>
+                                                            <option value="@rel">@rel.Humanize()</option>
                             }
                         </select>
                     </div>` : '';

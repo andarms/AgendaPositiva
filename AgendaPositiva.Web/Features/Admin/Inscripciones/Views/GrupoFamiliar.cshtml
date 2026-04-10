@@ -3,7 +3,11 @@
 @using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 @model GrupoFamiliar
 
-<a href="javascript:history.back()" class="back-link">← Volver</a>
+<nav class="breadcrumb">
+    <a href="/admin/inscripciones">Inscripciones</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Grupo Familiar #@Model.Id</span>
+</nav>
 
 <h1 class="detail-title">Grupo Familiar #@Model.Id</h1>
 <p class="text-secondary grupo-subtitle">@Model.Inscripciones.Count miembro(s)</p>
@@ -26,15 +30,6 @@
         <tbody>
             @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
             {
-                var badgeCss = inscripcion.Estado switch
-                {
-                    EstadoInscripcion.Completado => "badge--success",
-                    EstadoInscripcion.Abono2 => "badge--abono2",
-                    EstadoInscripcion.Abono1 => "badge--abono1",
-                    EstadoInscripcion.Pendiente => "badge--warning",
-                    EstadoInscripcion.NoVaAsistir => "badge--danger",
-                    _ => "badge--muted"
-                };
                 <tr>
                     <td class="col-index">@(index + 1)</td>
                     <td class="col-name">
@@ -51,7 +46,7 @@
                             <span class="text-muted">—</span>
                         }
                     </td>
-                    <td><span class="badge @badgeCss">@inscripcion.Estado.Humanize()</span></td>
+                    <td><span class="badge @inscripcion.Estado.BadgeCss()">@inscripcion.Estado.Humanize()</span></td>
                     <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
                     <td>@(string.IsNullOrEmpty(inscripcion.NecesidadesEspeciales) ? "—" : inscripcion.NecesidadesEspeciales)
                     </td>
