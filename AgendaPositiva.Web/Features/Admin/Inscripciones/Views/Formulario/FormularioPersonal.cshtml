@@ -1,0 +1,30 @@
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+
+<hgroup>
+    <h1>Formulario de Inscripción</h1>
+    <p>@ViewBag.NombreEvento</p>
+</hgroup>
+
+<form action="/admin/inscripciones/formulario/formulario-personal" method="post">
+
+    @if (ViewBag.Error is string error)
+    {
+        <div class="form-error">@error</div>
+    }
+
+    @await Html.PartialAsync("~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new
+    PersonaFieldsViewModel
+    {
+        Prefix = "",
+        IdentificacionHabilitada = true,
+        TipoIdentificacion = Model.TipoIdentificacion.ToString(),
+        NumeroIdentificacion = Model.NumeroIdentificacion.ToString(),
+        MostrarRelacion = false,
+        DepartamentosDisponibles = ViewBag.DepartamentosDisponibles as List<string>
+    })
+
+    <div class="btn-group">
+        <button type="submit" name="accion" value="continuar" class="btn btn--primary">Continuar</button>
+    </div>
+
+</form>

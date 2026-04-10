@@ -1,0 +1,23 @@
+@{
+    Layout = "~/Features/Admin/Inscripciones/Views/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="/css/inscripciones.css" />
+    <style>
+        .formulario-inscripcion {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+        }
+    </style>
+}
+
+<div class="formulario-inscripcion">
+    @RenderBody()
+</div>
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

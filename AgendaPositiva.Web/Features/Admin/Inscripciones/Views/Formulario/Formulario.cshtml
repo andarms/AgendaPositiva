@@ -1,14 +1,14 @@
 @using AgendaPositiva.Web.Features.Commons;
 @using AgendaPositiva.Web.Features.Commons.Views;
-@using AgendaPositiva.Web.Features.Inscripciones.Views;
-@using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 
 <h1>Formulario de Inscripción</h1>
 
-<form action="/inscripciones/formulario" method="post">
+<form action="/admin/inscripciones/formulario/formulario" method="post">
 
 
-    @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+    @await Html.PartialAsync("~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new
+    PersonaFieldsViewModel
     {
         Prefix = "",
         IdentificacionHabilitada = true,
@@ -41,16 +41,17 @@
                         <label>Número de Identificación:</label>
                         <input type="text" inputmode="numeric" class="buscar-numero">
                     </div>
-                    <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                    <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
                 </div>
                 <div class="buscar-familiar__resultado" style="display:none;"></div>
                 <div class="buscar-familiar__campos" style="display:none;">
-                    @await Html.PartialAsync(partialViewName: "_PersonaFields", new PersonaFieldsViewModel
-                    {
-                        Prefix = "Esposa",
-                        IdentificacionHabilitada = false,
-                        MostrarRelacion = false
-                    })
+                    @await Html.PartialAsync(partialViewName:
+   "~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new PersonaFieldsViewModel
+   {
+       Prefix = "Esposa",
+       IdentificacionHabilitada = false,
+       MostrarRelacion = false
+   })
                 </div>
             </div>
         </div>
@@ -63,7 +64,7 @@
         <div id="seccionHijos" style="display: none;">
             <h3>Datos de los hijos</h3>
             <div id="listaHijos"></div>
-            <button type="button" onclick="agregarHijo()">+ Agregar hijo</button>
+            <button type="button" class="btn btn--secondary" onclick="agregarHijo()">+ Agregar hijo</button>
         </div>
 
         @* Otros familiares *@
@@ -74,11 +75,11 @@
         <div id="seccionOtrosFamiliares" style="display: none;">
             <h3>Datos de otros familiares</h3>
             <div id="listaOtrosFamiliares"></div>
-            <button type="button" onclick="agregarOtroFamiliar()">+ Agregar familiar</button>
+            <button type="button" class="btn btn--secondary" onclick="agregarOtroFamiliar()">+ Agregar familiar</button>
         </div>
     </div>
 
-    <button type="submit">Listo, terminar pre-inscripción</button>
+    <button type="submit" class="btn btn--primary">Listo, terminar pre-inscripción</button>
 
 </form>
 
@@ -102,11 +103,12 @@
                     <label>Número de Identificación:</label>
                     <input type="text" inputmode="numeric" class="buscar-numero">
                 </div>
-                <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
             </div>
             <div class="buscar-familiar__resultado" style="display:none;"></div>
             <div class="buscar-familiar__campos" style="display:none;">
-                @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+                @await Html.PartialAsync("~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new
+                PersonaFieldsViewModel
                 {
                     Prefix = "Hijos[__INDEX__]",
                     IdentificacionHabilitada = false,
@@ -114,7 +116,7 @@
                 })
             </div>
         </div>
-        <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
+        <button type="button" class="btn btn--secondary" onclick="eliminarFamiliar(this)">Eliminar</button>
     </fieldset>
 </template>
 
@@ -138,11 +140,12 @@
                     <label>Número de Identificación:</label>
                     <input type="text" inputmode="numeric" class="buscar-numero">
                 </div>
-                <button type="button" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
+                <button type="button" class="btn btn--secondary" onclick="buscarFamiliar(this.closest('.buscar-familiar'))">Buscar</button>
             </div>
             <div class="buscar-familiar__resultado" style="display:none;"></div>
             <div class="buscar-familiar__campos" style="display:none;">
-                @await Html.PartialAsync("_PersonaFields", new PersonaFieldsViewModel
+                @await Html.PartialAsync("~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new
+                PersonaFieldsViewModel
                 {
                     Prefix = "OtrosFamiliares[__INDEX__]",
                     IdentificacionHabilitada = false,
@@ -150,7 +153,7 @@
                 })
             </div>
         </div>
-        <button type="button" onclick="eliminarFamiliar(this)">Eliminar</button>
+        <button type="button" class="btn btn--secondary" onclick="eliminarFamiliar(this)">Eliminar</button>
     </fieldset>
 </template>
 
@@ -250,7 +253,7 @@
         const prefix = container.dataset.prefix;
 
         try {
-            const resp = await fetch(`/inscripciones/buscar-persona?tipoIdentificacion=${encodeURIComponent(tipo)}&numeroIdentificacion=${encodeURIComponent(numero)}`);
+            const resp = await fetch(`/admin/inscripciones/formulario/buscar-persona?tipoIdentificacion=${encodeURIComponent(tipo)}&numeroIdentificacion=${encodeURIComponent(numero)}`);
 
             if (resp.ok) {
                 const persona = await resp.json();
@@ -268,7 +271,7 @@
                             <option value="">-- Seleccione --</option>
                             @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
                             {
-                                                    <option value="@rel">@rel.Humanize()</option>
+                                                        <option value="@rel">@rel.Humanize()</option>
                             }
                         </select>
                     </div>` : '';
@@ -294,7 +297,7 @@
                         <input type="hidden" name="${prefix}.Email" value="${persona.email || ''}">
                         <input type="hidden" name="${prefix}.TipoIdentificacion" value="${persona.tipoIdentificacion}">
                         <input type="hidden" name="${prefix}.NumeroIdentificacion" value="${persona.numeroIdentificacion}">
-                        <button type="button" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Cambiar</button>
+                        <button type="button" class="btn btn--secondary" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Cambiar</button>
                     </div>`;
                 resultadoDiv.style.display = 'block';
             } else if (resp.status === 404) {
@@ -302,7 +305,7 @@
                 formDiv.style.display = 'none';
                 resultadoDiv.innerHTML = `
                     <p>Persona no registrada. Complete los datos a continuación.</p>
-                    <button type="button" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Buscar otro documento</button>`;
+                    <button type="button" class="btn btn--secondary" onclick="resetearBusqueda(this.closest('.buscar-familiar'))">Buscar otro documento</button>`;
                 resultadoDiv.style.display = 'block';
                 camposDiv.style.display = 'block';
                 // Habilitar campos y pre-llenar identificación

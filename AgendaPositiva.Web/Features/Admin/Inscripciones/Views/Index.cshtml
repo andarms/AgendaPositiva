@@ -9,7 +9,10 @@
         @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
         · <strong>@Model.Inscripciones.Count</strong> inscripciones
     </p>
-    <a href="/admin/inscripciones/exportar" class="btn btn--success">⬇ Exportar Excel</a>
+    <div class="page-header__actions">
+        <a href="/admin/inscripciones/formulario/verificacion" class="btn btn--primary">+ Nueva Inscripción</a>
+        <a href="/admin/inscripciones/exportar" class="btn btn--success">⬇ Exportar Excel</a>
+    </div>
 </div>
 
 <form method="get" action="/admin/inscripciones" class="card filter-form">

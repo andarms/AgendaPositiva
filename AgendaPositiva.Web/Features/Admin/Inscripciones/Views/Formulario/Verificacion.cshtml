@@ -7,7 +7,7 @@
 <div class="narrow-container">
     <h1>Verificación de Inscripción</h1>
 
-    <form action="/inscripciones/verificacion" method="post">
+    <form action="/admin/inscripciones/formulario/verificacion" method="post">
         <label for="tipoIdentificacion">Tipo de Identificación:</label>
         <select id="tipoIdentificacion" name="tipoIdentificacion" required>
             @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
@@ -21,6 +21,6 @@
         <label for="numeroIdentificacion">Número de Identificación:</label>
         <input type="text" id="numeroIdentificacion" name="numeroIdentificacion" required>
 
-        <button type="submit">Continuar</button>
+        <button type="submit" class="btn btn--primary">Continuar</button>
     </form>
 </div>

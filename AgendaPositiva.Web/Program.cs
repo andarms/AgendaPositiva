@@ -1,5 +1,5 @@
 using AgendaPositiva.Web.Datos;
-using AgendaPositiva.Web.Features.Inscripciones;
+using AgendaPositiva.Web.Features.Admin.Inscripciones;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;

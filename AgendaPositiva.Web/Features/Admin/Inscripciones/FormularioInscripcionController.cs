@@ -2,12 +2,14 @@ using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
-using AgendaPositiva.Web.Features.Inscripciones.Views;
-using AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
+using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Text.Json;
 
-namespace AgendaPositiva.Web.Features.Inscripciones;
+namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
 public record VerificacionDto(string NumeroIdentificacion, TipoIdentificacion TipoIdentificacion)
 {
@@ -22,16 +24,43 @@ public record VerificacionDto(string NumeroIdentificacion, TipoIdentificacion Ti
     }
 }
 
-[Route("inscripciones")]
-public class InscripcionesController : Controller
+[Route("admin/inscripciones/formulario")]
+[Authorize(Policy = "AdminPanel")]
+public class FormularioInscripcionController : Controller
 {
     readonly AppDbContext store;
     readonly Evento evento;
+    readonly UbicacionService ubicacionService;
 
-    public InscripcionesController(AppDbContext db)
+    public FormularioInscripcionController(AppDbContext db, UbicacionService ubicacionService)
     {
         store = db;
+        this.ubicacionService = ubicacionService;
         evento = store.Eventos.FirstOrDefault(e => e.Activo) ?? throw new Exception("No hay un evento activo");
+    }
+
+    bool EsAdministrador => User.IsInRole("Administrador");
+
+    Dictionary<string, List<string>> LocalidadesAsignadas
+    {
+        get
+        {
+            var json = User.FindFirstValue("Localidades");
+            if (string.IsNullOrEmpty(json)) return [];
+            return JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json) ?? [];
+        }
+    }
+
+    List<string> DepartamentosDisponibles => EsAdministrador
+        ? ubicacionService.ObtenerNombresDepartamentos()
+        : [.. LocalidadesAsignadas.Keys];
+
+    bool TieneAcceso(string departamento, string ciudad)
+    {
+        if (EsAdministrador) return true;
+        var localidades = LocalidadesAsignadas;
+        if (!localidades.TryGetValue(departamento, out var ciudades)) return false;
+        return ciudades.Count == 0 || ciudades.Contains(ciudad);
     }
 
     // ==========================================
@@ -46,7 +75,7 @@ public class InscripcionesController : Controller
     [HttpGet("verificacion")]
     public IActionResult Verificacion()
     {
-        return View(new { Evento = evento });
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/Verificacion.cshtml", new { Evento = evento });
     }
 
     [HttpPost("verificacion")]
@@ -65,32 +94,13 @@ public class InscripcionesController : Controller
         {
             return RedirectToAction("FormularioPersonal", new { numeroIdentificacion = datos.NumeroIdentificacion, tipoIdentificacion = datos.TipoIdentificacion });
         }
-        else
-        {
-            return RedirectToAction("Detalles", new { id = inscripcion.Id });
-        }
-    }
 
-    [HttpGet("detalles/{id}")]
-    public IActionResult Detalles(int id)
-    {
-        Inscripcion? inscripcion = store.Inscripciones
-            .Include(i => i.Persona)
-            .Include(i => i.RelacionConPersona)
-            .Include(i => i.GrupoFamiliar)
-                .ThenInclude(g => g!.Inscripciones)
-                    .ThenInclude(i => i.Persona)
-            .Include(i => i.GrupoFamiliar)
-                .ThenInclude(g => g!.Inscripciones)
-                    .ThenInclude(i => i.RelacionConPersona)
-            .FirstOrDefault(i => i.Id == id);
-
-        if (inscripcion == null)
+        if (!TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
         {
-            return NotFound();
+            return RedirectToAction("SinAcceso");
         }
 
-        return View(inscripcion);
+        return Redirect($"/admin/inscripciones/{inscripcion.Id}");
     }
 
     [HttpGet("buscar-persona")]
@@ -128,7 +138,8 @@ public class InscripcionesController : Controller
     public IActionResult FormularioPersonal(string numeroIdentificacion, TipoIdentificacion tipoIdentificacion)
     {
         ViewBag.NombreEvento = evento.Nombre;
-        return View(new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
+        ViewBag.DepartamentosDisponibles = DepartamentosDisponibles;
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/FormularioPersonal.cshtml", new { NumeroIdentificacion = numeroIdentificacion, TipoIdentificacion = tipoIdentificacion });
     }
 
     [HttpPost("formulario-personal")]
@@ -143,13 +154,14 @@ public class InscripcionesController : Controller
         if (result.IsSuccess)
         {
             if (accion == "terminar")
-                return RedirectToAction("Detalles", new { id = result.Value });
+                return Redirect($"/admin/inscripciones/{result.Value}");
 
             return RedirectToAction("VerificarFamiliares", new { inscripcionId = result.Value });
         }
 
         ViewBag.Error = result.Error;
-        return View("FormularioPersonal", command);
+        ViewBag.DepartamentosDisponibles = DepartamentosDisponibles;
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/FormularioPersonal.cshtml", command);
     }
 
     // ==========================================
@@ -172,7 +184,7 @@ public class InscripcionesController : Controller
                 .Where(i => i.Id != inscripcionId).ToList()
             : [];
 
-        return View(new VerificarFamiliaresViewModel
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/VerificarFamiliares.cshtml", new VerificarFamiliaresViewModel
         {
             InscripcionId = inscripcionId,
             FamiliaresAgregados = familiares
@@ -201,7 +213,7 @@ public class InscripcionesController : Controller
                 ? [.. inscripcion.GrupoFamiliar!.Inscripciones.Where(i => i.Id != inscripcionId)]
                 : new List<Inscripcion>();
 
-            return View("VerificarFamiliares", new VerificarFamiliaresViewModel
+            return View("~/Features/Admin/Inscripciones/Views/Formulario/VerificarFamiliares.cshtml", new VerificarFamiliaresViewModel
             {
                 InscripcionId = inscripcionId,
                 PersonaEncontrada = persona,
@@ -239,7 +251,8 @@ public class InscripcionesController : Controller
     public IActionResult FormularioFamiliar(int inscripcionId, string? numeroIdentificacion, TipoIdentificacion? tipoIdentificacion)
     {
         var inscripcion = store.Inscripciones.FirstOrDefault(i => i.Id == inscripcionId);
-        return View(new
+        ViewBag.DepartamentosDisponibles = DepartamentosDisponibles;
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/FormularioFamiliar.cshtml", new
         {
             InscripcionId = inscripcionId,
             NumeroIdentificacion = numeroIdentificacion ?? "",
@@ -267,7 +280,8 @@ public class InscripcionesController : Controller
         if (result.IsSuccess)
             return RedirectToAction("VerificarFamiliares", new { inscripcionId });
 
-        return View("FormularioFamiliar", new
+        ViewBag.DepartamentosDisponibles = DepartamentosDisponibles;
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/FormularioFamiliar.cshtml", new
         {
             InscripcionId = inscripcionId,
             NumeroIdentificacion = datos.NumeroIdentificacion,
@@ -275,5 +289,15 @@ public class InscripcionesController : Controller
             DepartamentoDefault = datos.Departamento,
             CiudadDefault = datos.Ciudad
         });
+    }
+
+    // ==========================================
+    // Sin acceso
+    // ==========================================
+
+    [HttpGet("sin-acceso")]
+    public IActionResult SinAcceso()
+    {
+        return View("~/Features/Admin/Inscripciones/Views/Formulario/SinAcceso.cshtml");
     }
 }

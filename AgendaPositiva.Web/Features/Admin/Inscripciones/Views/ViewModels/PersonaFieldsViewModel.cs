@@ -1,4 +1,4 @@
-namespace AgendaPositiva.Web.Features.Inscripciones.Views.ViewModels;
+namespace AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
 
 public class PersonaFieldsViewModel
 {
@@ -9,4 +9,5 @@ public class PersonaFieldsViewModel
     public string? NumeroIdentificacion { get; set; }
     public string? DepartamentoDefault { get; set; }
     public string? CiudadDefault { get; set; }
+    public List<string>? DepartamentosDisponibles { get; set; }
 }

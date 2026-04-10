@@ -1,0 +1,26 @@
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+
+<h1>Datos del Familiar</h1>
+<p>La persona no se encontró registrada. Complete los datos a continuación.</p>
+
+<form action="/admin/inscripciones/formulario/formulario-familiar/@Model.InscripcionId" method="post">
+
+    @await Html.PartialAsync("~/Features/Admin/Inscripciones/Views/Formulario/_PersonaFields.cshtml", new
+    PersonaFieldsViewModel
+    {
+        Prefix = "",
+        IdentificacionHabilitada = true,
+        TipoIdentificacion = Model.TipoIdentificacion,
+        NumeroIdentificacion = Model.NumeroIdentificacion,
+        MostrarRelacion = true,
+        DepartamentoDefault = Model.DepartamentoDefault,
+        CiudadDefault = Model.CiudadDefault,
+        DepartamentosDisponibles = ViewBag.DepartamentosDisponibles as List<string>
+    })
+
+    <div class="btn-group">
+        <button type="submit" class="btn btn--primary">Guardar Cambios</button>
+        <a href="/admin/inscripciones/formulario/verificar-familiares/@Model.InscripcionId"
+           class="btn btn--secondary">Cancelar</a>
+    </div>
+</form>
