@@ -7,6 +7,7 @@ public class ListaInscripcionesViewModel
 {
     public required Evento Evento { get; init; }
     public required List<Inscripcion> Inscripciones { get; init; }
+    public required int TotalInscripciones { get; init; }
     public required List<string> Departamentos { get; init; }
 
     // Filtros
@@ -17,6 +18,11 @@ public class ListaInscripcionesViewModel
 
     // Sort
     public string? SortLocalidad { get; init; }
+
+    // Paginación
+    public int Pagina { get; init; } = 1;
+    public int PorPagina { get; init; } = 50;
+    public int TotalPaginas { get; init; }
 
     public string NextSortLocalidad => SortLocalidad switch
     {
@@ -40,7 +46,27 @@ public class ListaInscripcionesViewModel
             ["departamento"] = FiltroDepartamento,
             ["estado"] = FiltroEstado?.ToString(),
             ["hospedaje"] = FiltroHospedaje?.ToString(),
-            ["sortLocalidad"] = sort
+            ["sortLocalidad"] = sort,
+            ["porPagina"] = PorPagina.ToString(),
+        };
+        var pairs = qs
+            .Where(kv => !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value!)}");
+        var query = string.Join("&", pairs);
+        return "/admin/inscripciones" + (query.Length > 0 ? "?" + query : "");
+    }
+
+    public string BuildPageUrl(int pagina, int? porPaginaOverride = null)
+    {
+        var qs = new Dictionary<string, string?>
+        {
+            ["nombre"] = FiltroNombre,
+            ["departamento"] = FiltroDepartamento,
+            ["estado"] = FiltroEstado?.ToString(),
+            ["hospedaje"] = FiltroHospedaje?.ToString(),
+            ["sortLocalidad"] = SortLocalidad,
+            ["pagina"] = pagina.ToString(),
+            ["porPagina"] = (porPaginaOverride ?? PorPagina).ToString(),
         };
         var pairs = qs
             .Where(kv => !string.IsNullOrEmpty(kv.Value))

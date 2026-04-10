@@ -1,6 +1,19 @@
 @using AgendaPositiva.Web.Features.Admin.Auth.Domain
 @model List<UsuarioAdministrador>
 
+@{
+    int pagina = ViewBag.Pagina;
+    int porPagina = ViewBag.PorPagina;
+    int totalPaginas = ViewBag.TotalPaginas;
+    int totalRegistros = ViewBag.TotalRegistros;
+
+    string BuildPageUrl(int pag, int? porPaginaOverride = null)
+    {
+        var pp = porPaginaOverride ?? porPagina;
+        return $"/admin/usuarios?pagina={pag}&porPagina={pp}";
+    }
+}
+
 @section Styles {
     <style>
         .usuarios-header {
@@ -140,89 +153,123 @@
 }
 
 <div class="usuarios-header">
-    <h1>Usuarios administradores</h1>
-    <a href="/admin/usuarios/crear" class="btn-crear">+ Nuevo usuario</a>
-</div>
+    <h1>Usuarios administradores <span
+        style="font-size: .875rem; color: #6e6e73; font-weight: 400;">(@totalRegistros)</span></h1>
+        <a href="/admin/usuarios/crear" class="btn-crear">+ Nuevo usuario</a>
+    </div>
 
-<table class="tabla-usuarios">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Localidades</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var u in Model)
-        {
+    <table class="tabla-usuarios">
+        <thead>
             <tr>
-                <td>@(u.Nombre ?? "—")</td>
-                <td>@u.Email</td>
-                <td>
-                    @if (u.Rol == RolAdministrador.Administrador)
-                    {
-                        <span class="badge badge--admin">Administrador</span>
-                    }
-                    else
-                    {
-                        <span class="badge badge--colab">Colaborador</span>
-                    }
-                </td>
-                <td>
-                    @if (u.Rol == RolAdministrador.Administrador)
-                    {
-                        <span style="color:#666; font-size:.85rem;">Todos</span>
-                    }
-                    else if (u.Localidades.Any())
-                    {
-                        <div class="deptos-list">
-                            @foreach (var kv in u.Localidades.Take(5))
-                            {
-                                if (kv.Value.Count == 0)
-                                {
-                                    <span>@kv.Key</span>
-                                }
-                                else
-                                {
-                                    var ciudadesTexto = string.Join(", ", kv.Value.Take(3));
-                                    if (kv.Value.Count > 3) ciudadesTexto += $" +{kv.Value.Count - 3}";
-                                    <span title="@string.Join(", ", kv.Value)">@kv.Key (@ciudadesTexto)</span>
-                                }
-                            }
-                            @if (u.Localidades.Count > 5)
-                            {
-                                <span>+@(u.Localidades.Count - 5) más</span>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <span style="color:#999; font-size:.85rem;">Ninguno</span>
-                    }
-                </td>
-                <td>
-                    @if (u.Activo)
-                    {
-                        <span class="badge badge--activo">Activo</span>
-                    }
-                    else
-                    {
-                        <span class="badge badge--inactivo">Inactivo</span>
-                    }
-                </td>
-                <td>
-                    <div class="acciones">
-                        <a href="/admin/usuarios/editar/@u.Id">Editar</a>
-                        <form method="post" action="/admin/usuarios/eliminar/@u.Id"
-                              onsubmit="return confirm('¿Eliminar a @(u.Nombre ?? u.Email)?');" style="margin:0;">
-                            <button type="submit" class="btn-eliminar">Eliminar</button>
-                        </form>
-                    </div>
-                </td>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Localidades</th>
+                <th>Estado</th>
+                <th>Acciones</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@(u.Nombre ?? "—")</td>
+                    <td>@u.Email</td>
+                    <td>
+                        @if (u.Rol == RolAdministrador.Administrador)
+                        {
+                            <span class="badge badge--admin">Administrador</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge--colab">Colaborador</span>
+                        }
+                    </td>
+                    <td>
+                        @if (u.Rol == RolAdministrador.Administrador)
+                        {
+                            <span style="color:#666; font-size:.85rem;">Todos</span>
+                        }
+                        else if (u.Localidades.Any())
+                        {
+                            <div class="deptos-list">
+                                @foreach (var kv in u.Localidades.Take(5))
+                                {
+                                    if (kv.Value.Count == 0)
+                                    {
+                                        <span>@kv.Key</span>
+                                    }
+                                    else
+                                    {
+                                        var ciudadesTexto = string.Join(", ", kv.Value.Take(3));
+                                        if (kv.Value.Count > 3) ciudadesTexto += $" +{kv.Value.Count - 3}";
+                                        <span title="@string.Join(", ", kv.Value)">@kv.Key (@ciudadesTexto)</span>
+                                    }
+                                }
+                                @if (u.Localidades.Count > 5)
+                                {
+                                    <span>+@(u.Localidades.Count - 5) más</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span style="color:#999; font-size:.85rem;">Ninguno</span>
+                        }
+                    </td>
+                    <td>
+                        @if (u.Activo)
+                        {
+                            <span class="badge badge--activo">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge--inactivo">Inactivo</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="acciones">
+                            <a href="/admin/usuarios/editar/@u.Id">Editar</a>
+                            <form method="post" action="/admin/usuarios/eliminar/@u.Id"
+                                  onsubmit="return confirm('¿Eliminar a @(u.Nombre ?? u.Email)?');" style="margin:0;">
+                                <button type="submit" class="btn-eliminar">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (totalRegistros > 0)
+    {
+        <div class="pagination">
+            <div class="pagination__info">
+                Mostrando @((pagina - 1) * porPagina + 1)–@(Math.Min(pagina * porPagina, totalRegistros)) de @totalRegistros
+            </div>
+            <div class="pagination__controls">
+                @if (pagina > 1)
+                {
+                    <a href="@BuildPageUrl(pagina - 1)" class="btn btn--secondary">← Anterior</a>
+                }
+                <span class="pagination__current">Página @pagina de @totalPaginas</span>
+                @if (pagina < totalPaginas)
+                {
+                    <a href="@BuildPageUrl(pagina + 1)" class="btn btn--secondary">Siguiente →</a>
+                }
+            </div>
+            <div class="pagination__size">
+                @foreach (var size in new[] { 10, 50, 100 })
+                {
+                    if (size == porPagina)
+                    {
+                        <span class="btn btn--primary">@size</span>
+                    }
+                    else
+                    {
+                        <a href="@BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                    }
+                }
+            </div>
+        </div>
+    }

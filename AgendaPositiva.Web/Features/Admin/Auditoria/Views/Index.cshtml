@@ -5,12 +5,32 @@
     var filtroUsuario = ViewBag.FiltroUsuario as string;
     var filtroAccion = ViewBag.FiltroAccion as string;
     var acciones = ViewBag.AccionesDisponibles as List<string> ?? [];
+    int pagina = ViewBag.Pagina;
+    int porPagina = ViewBag.PorPagina;
+    int totalPaginas = ViewBag.TotalPaginas;
+    int totalRegistros = ViewBag.TotalRegistros;
+
+    string BuildPageUrl(int pag, int? porPaginaOverride = null)
+    {
+        var qs = new Dictionary<string, string?>
+        {
+            ["usuario"] = filtroUsuario,
+            ["accion"] = filtroAccion,
+            ["pagina"] = pag.ToString(),
+            ["porPagina"] = (porPaginaOverride ?? porPagina).ToString(),
+        };
+        var pairs = qs
+            .Where(kv => !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value!)}");
+        var query = string.Join("&", pairs);
+        return "/admin/auditoria" + (query.Length > 0 ? "?" + query : "");
+    }
 }
 
 <h1>Historial de Auditoría</h1>
 <div class="page-header">
     <p class="text-secondary">
-        <strong>@Model.Count</strong> registros
+        <strong>@totalRegistros</strong> registros
     </p>
 </div>
 
@@ -55,8 +75,9 @@
             @for (int i = 0; i < Model.Count; i++)
             {
                 var reg = Model[i];
+                var offset = (pagina - 1) * porPagina;
                 <tr>
-                    <td class="col-index">@(i + 1)</td>
+                    <td class="col-index">@(offset + i + 1)</td>
                     <td class="col-date">@reg.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@reg.Usuario</td>
                     <td><a href="/admin/inscripciones/@reg.InscripcionId">#@reg.InscripcionId</a></td>
@@ -68,6 +89,39 @@
         </tbody>
     </table>
 </div>
+
+@if (totalRegistros > 0)
+{
+    <div class="pagination">
+        <div class="pagination__info">
+            Mostrando @((pagina - 1) * porPagina + 1)–@(Math.Min(pagina * porPagina, totalRegistros)) de @totalRegistros
+        </div>
+        <div class="pagination__controls">
+            @if (pagina > 1)
+            {
+                <a href="@BuildPageUrl(pagina - 1)" class="btn btn--secondary">← Anterior</a>
+            }
+            <span class="pagination__current">Página @pagina de @totalPaginas</span>
+            @if (pagina < totalPaginas)
+            {
+                <a href="@BuildPageUrl(pagina + 1)" class="btn btn--secondary">Siguiente →</a>
+            }
+        </div>
+        <div class="pagination__size">
+            @foreach (var size in new[] { 10, 50, 100 })
+            {
+                if (size == porPagina)
+                {
+                    <span class="btn btn--primary">@size</span>
+                }
+                else
+                {
+                    <a href="@BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                }
+            }
+        </div>
+    </div>
+}
 
 @if (Model.Count == 0)
 {

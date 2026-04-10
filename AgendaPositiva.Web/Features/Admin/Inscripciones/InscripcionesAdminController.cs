@@ -74,8 +74,12 @@ public class InscripcionesAdminController : Controller
         [FromQuery] string? departamento,
         [FromQuery] EstadoInscripcion? estado,
         [FromQuery] bool? hospedaje,
-        [FromQuery] string? sortLocalidad)
+        [FromQuery] string? sortLocalidad,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int porPagina = 50)
     {
+        porPagina = porPagina is 10 or 50 or 100 ? porPagina : 50;
+
         var query = store.Inscripciones
             .Include(i => i.Persona)
             .Where(i => i.EventoId == evento.Id);
@@ -108,17 +112,28 @@ public class InscripcionesAdminController : Controller
             query = query.Where(i => i.RequiereHospedaje == hospedaje.Value);
         }
 
-        var inscripciones = (sortLocalidad switch
+        var orderedQuery = sortLocalidad switch
         {
             "asc" => query.OrderBy(i => i.Departamento).ThenBy(i => i.Ciudad),
             "desc" => query.OrderByDescending(i => i.Departamento).ThenByDescending(i => i.Ciudad),
             _ => query.OrderByDescending(i => i.FechaCreacion)
-        }).ToList();
+        };
+
+        var total = orderedQuery.Count();
+        var totalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+        if (pagina < 1) pagina = 1;
+        if (pagina > totalPaginas && totalPaginas > 0) pagina = totalPaginas;
+
+        var inscripciones = orderedQuery
+            .Skip((pagina - 1) * porPagina)
+            .Take(porPagina)
+            .ToList();
 
         var vm = new ListaInscripcionesViewModel
         {
             Evento = evento,
             Inscripciones = inscripciones,
+            TotalInscripciones = total,
             Departamentos = EsAdministrador
                 ? ubicacionService.ObtenerNombresDepartamentos()
                 : DepartamentosAsignados,
@@ -126,7 +141,10 @@ public class InscripcionesAdminController : Controller
             FiltroDepartamento = departamento,
             FiltroEstado = estado,
             FiltroHospedaje = hospedaje,
-            SortLocalidad = sortLocalidad
+            SortLocalidad = sortLocalidad,
+            Pagina = pagina,
+            PorPagina = porPagina,
+            TotalPaginas = totalPaginas,
         };
 
         return View("~/Features/Admin/Inscripciones/Views/Index.cshtml", vm);
@@ -138,13 +156,18 @@ public class InscripcionesAdminController : Controller
         var inscripcion = store.Inscripciones
             .Include(i => i.Persona)
             .Include(i => i.GrupoFamiliar)
+                .ThenInclude(g => g!.Inscripciones)
+                    .ThenInclude(i => i.Persona)
+            .Include(i => i.GrupoFamiliar)
+                .ThenInclude(g => g!.Inscripciones)
+                    .ThenInclude(i => i.RelacionConPersona)
             .Include(i => i.RelacionConPersona)
             .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
 
         if (inscripcion is null) return NotFound();
 
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
-            return Forbid();
+            return View("~/Features/Admin/Inscripciones/Views/SinAcceso.cshtml");
 
         ViewBag.Auditoria = store.AuditoriaAdmin
             .Where(a => a.InscripcionId == id)
@@ -167,7 +190,7 @@ public class InscripcionesAdminController : Controller
         if (inscripcion is null) return NotFound();
 
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
-            return Forbid();
+            return View("~/Features/Admin/Inscripciones/Views/SinAcceso.cshtml");
 
         var estadoAnterior = inscripcion.Estado;
         inscripcion.Estado = nuevoEstado;
@@ -197,7 +220,7 @@ public class InscripcionesAdminController : Controller
         if (inscripcion is null) return NotFound();
 
         if (!EsAdministrador && !TieneAcceso(inscripcion.Departamento, inscripcion.Ciudad))
-            return Forbid();
+            return View("~/Features/Admin/Inscripciones/Views/SinAcceso.cshtml");
 
         var valorAnterior = inscripcion.RequiereHospedaje;
         inscripcion.RequiereHospedaje = requiereHospedaje;
@@ -236,7 +259,7 @@ public class InscripcionesAdminController : Controller
         if (!EsAdministrador)
         {
             if (!inscripcionesEvento.Any(i => TieneAcceso(i.Departamento, i.Ciudad)))
-                return Forbid();
+                return View("~/Features/Admin/Inscripciones/Views/SinAcceso.cshtml");
         }
 
         return View("~/Features/Admin/Inscripciones/Views/GrupoFamiliar.cshtml", grupo);

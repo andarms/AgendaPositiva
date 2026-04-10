@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
@@ -15,8 +16,12 @@ public record VerificacionDto(string NumeroIdentificacion, TipoIdentificacion Ti
 {
     public VerificacionDto Sanitize()
     {
-        // remueve espacio puntos y guiones para estandarizar el número de identificación
-        string numero = NumeroIdentificacion.Replace(" ", "").Replace("-", "").Replace(".", "");
+        // remueve todo lo que no sea dígito
+        string numero = Regex.Replace(NumeroIdentificacion, @"[^0-9]", "");
+
+        if (string.IsNullOrEmpty(numero))
+            throw new ArgumentException("El número de identificación debe contener solo números.");
+
         return new VerificacionDto(
             NumeroIdentificacion: numero,
             TipoIdentificacion: TipoIdentificacion
@@ -172,6 +177,7 @@ public class FormularioInscripcionController : Controller
     public IActionResult VerificarFamiliares(int inscripcionId)
     {
         var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
             .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.Inscripciones)
                     .ThenInclude(i => i.Persona)
@@ -187,6 +193,7 @@ public class FormularioInscripcionController : Controller
         return View("~/Features/Admin/Inscripciones/Views/Formulario/VerificarFamiliares.cshtml", new VerificarFamiliaresViewModel
         {
             InscripcionId = inscripcionId,
+            NombrePersona = inscripcion.Persona.NombreCompleto,
             FamiliaresAgregados = familiares
         });
     }
@@ -204,6 +211,7 @@ public class FormularioInscripcionController : Controller
         if (persona is not null)
         {
             var inscripcion = store.Inscripciones
+                .Include(i => i.Persona)
                 .Include(i => i.GrupoFamiliar)
                     .ThenInclude(g => g!.Inscripciones)
                         .ThenInclude(i => i.Persona)
@@ -216,6 +224,7 @@ public class FormularioInscripcionController : Controller
             return View("~/Features/Admin/Inscripciones/Views/Formulario/VerificarFamiliares.cshtml", new VerificarFamiliaresViewModel
             {
                 InscripcionId = inscripcionId,
+                NombrePersona = inscripcion?.Persona.NombreCompleto ?? "",
                 PersonaEncontrada = persona,
                 FamiliaresAgregados = familiares
             });

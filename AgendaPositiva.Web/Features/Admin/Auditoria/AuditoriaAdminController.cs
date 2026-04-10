@@ -19,10 +19,14 @@ public class AuditoriaAdminController : Controller
     [HttpGet]
     public IActionResult Index(
         [FromQuery] string? usuario,
-        [FromQuery] string? accion)
+        [FromQuery] string? accion,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int porPagina = 50)
     {
         if (!User.IsInRole("Administrador"))
             return Forbid();
+
+        porPagina = porPagina is 10 or 50 or 100 ? porPagina : 50;
 
         var query = store.AuditoriaAdmin.AsQueryable();
 
@@ -37,13 +41,23 @@ public class AuditoriaAdminController : Controller
             query = query.Where(a => a.Accion == accion);
         }
 
-        var registros = query
-            .OrderByDescending(a => a.FechaCreacion)
-            .Take(500)
+        var orderedQuery = query.OrderByDescending(a => a.FechaCreacion);
+        var total = orderedQuery.Count();
+        var totalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+        if (pagina < 1) pagina = 1;
+        if (pagina > totalPaginas && totalPaginas > 0) pagina = totalPaginas;
+
+        var registros = orderedQuery
+            .Skip((pagina - 1) * porPagina)
+            .Take(porPagina)
             .ToList();
 
         ViewBag.FiltroUsuario = usuario;
         ViewBag.FiltroAccion = accion;
+        ViewBag.Pagina = pagina;
+        ViewBag.PorPagina = porPagina;
+        ViewBag.TotalPaginas = totalPaginas;
+        ViewBag.TotalRegistros = total;
         ViewBag.AccionesDisponibles = store.AuditoriaAdmin
             .Select(a => a.Accion)
             .Distinct()

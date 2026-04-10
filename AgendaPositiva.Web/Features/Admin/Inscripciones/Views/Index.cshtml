@@ -7,7 +7,7 @@
 <div class="page-header">
     <p class="text-secondary">
         @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
-        · <strong>@Model.Inscripciones.Count</strong> inscripciones
+        · <strong>@Model.TotalInscripciones</strong> inscripciones
     </p>
     <div class="page-header__actions">
         <a href="/admin/inscripciones/formulario/verificacion" class="btn btn--primary">+ Nueva Inscripción</a>
@@ -87,6 +87,7 @@
                 <tbody>
                     @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
                     {
+                        var offset = (Model.Pagina - 1) * Model.PorPagina;
                         var badgeCss = inscripcion.Estado switch
                         {
                             EstadoInscripcion.Completado => "badge--success",
@@ -97,7 +98,7 @@
                             _ => "badge--muted"
                         };
                         <tr>
-                            <td class="col-index">@(index + 1)</td>
+                            <td class="col-index">@(offset + index + 1)</td>
                             <td class="col-name">
                                 <a href="/admin/inscripciones/@inscripcion.Id">@inscripcion.Persona.NombreCompleto</a>
                             </td>
@@ -109,5 +110,35 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        <div class="pagination">
+            <div class="pagination__info">
+                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina, Model.TotalInscripciones)) de @Model.TotalInscripciones
+            </div>
+            <div class="pagination__controls">
+                @if (Model.Pagina > 1)
+                {
+                    <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
+                }
+                <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
+                @if (Model.Pagina < Model.TotalPaginas)
+                {
+                    <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
+                }
+            </div>
+            <div class="pagination__size">
+                @foreach (var size in new[] { 10, 50, 100 })
+                {
+                    if (size == Model.PorPagina)
+                    {
+                        <span class="btn btn--primary">@size</span>
+                    }
+                    else
+                    {
+                        <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                    }
+                }
+            </div>
         </div>
     }

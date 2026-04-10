@@ -19,7 +19,9 @@
 
 
         <label for="numeroIdentificacion">Número de Identificación:</label>
-        <input type="text" id="numeroIdentificacion" name="numeroIdentificacion" required>
+        <input type="text" id="numeroIdentificacion" name="numeroIdentificacion" required
+               pattern="[0-9]+" inputmode="numeric" title="Solo se permiten números"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 
         <button type="submit" class="btn btn--primary">Continuar</button>
     </form>

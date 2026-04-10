@@ -328,3 +328,43 @@ h1 {
 .grupo-subtitle {
   margin-bottom: 1.5rem;
 }
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagination__info {
+  font-size: 0.8125rem;
+  color: #6e6e73;
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination__current {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  padding: 0 0.5rem;
+}
+
+.pagination__size {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination__size .btn {
+  min-width: 2.5rem;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.75rem;
+}

@@ -22,11 +22,25 @@ public class UsuariosAdminController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] int pagina = 1, [FromQuery] int porPagina = 50)
     {
-        var usuarios = await store.UsuariosAdministradores
-            .OrderBy(u => u.Nombre)
+        porPagina = porPagina is 10 or 50 or 100 ? porPagina : 50;
+
+        var query = store.UsuariosAdministradores.OrderBy(u => u.Nombre);
+        var total = await query.CountAsync();
+        var totalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+        if (pagina < 1) pagina = 1;
+        if (pagina > totalPaginas && totalPaginas > 0) pagina = totalPaginas;
+
+        var usuarios = await query
+            .Skip((pagina - 1) * porPagina)
+            .Take(porPagina)
             .ToListAsync();
+
+        ViewBag.Pagina = pagina;
+        ViewBag.PorPagina = porPagina;
+        ViewBag.TotalPaginas = totalPaginas;
+        ViewBag.TotalRegistros = total;
 
         return View("~/Features/Admin/Usuarios/Views/Index.cshtml", usuarios);
     }
