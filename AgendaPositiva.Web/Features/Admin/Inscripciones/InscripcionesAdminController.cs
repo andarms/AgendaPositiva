@@ -349,7 +349,7 @@ public class InscripcionesAdminController : Controller
 
         // Headers
         var headers = new[] { "#", "Nombres", "Apellidos", "Género",
-            "Tipo Identificación", "Número Identificación", "Fecha Nacimiento",
+            "Tipo Identificación", "Número Identificación", "Edad",
             "Teléfono", "Email", "Departamento", "Ciudad", "Estado", "Hospedaje",
             "Grupo Familiar", "Servicios", "Necesidades Especiales",
             "Alergia Alimentaria", "Descripción Alergia",
@@ -381,7 +381,7 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 4).Value = ins.Persona.Genero.Humanize();
             ws.Cell(row, 5).Value = ins.Persona.TipoIdentificacion.Humanize();
             ws.Cell(row, 6).Value = ins.Persona.NumeroIdentificacion;
-            ws.Cell(row, 7).Value = ins.Persona.FechaNacimiento.ToString("dd/MM/yyyy");
+            ws.Cell(row, 7).Value = ins.Persona.Edad;
             ws.Cell(row, 8).Value = ins.Persona.Telefono;
             ws.Cell(row, 9).Value = ins.Persona.Email ?? "";
             ws.Cell(row, 10).Value = ins.Departamento;

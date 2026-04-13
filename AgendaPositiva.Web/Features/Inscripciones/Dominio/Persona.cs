@@ -16,4 +16,16 @@ public class Persona : EntidadBase
     public ICollection<Inscripcion> Inscripciones { get; set; } = [];
 
     public string NombreCompleto => $"{Nombres} {Apellidos}";
+
+    public float Edad => CalcularEdad();
+    public bool EsMayorDeEdad => Edad >= 18;
+    public bool EsNino => Edad <= 10;
+
+    public int CalcularEdad()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        int age = today.Year - FechaNacimiento.Year;
+        if (FechaNacimiento > today.AddYears(-age)) age--;
+        return Math.Max(age, 0);
+    }
 }
