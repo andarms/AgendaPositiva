@@ -22,12 +22,30 @@ public class AuthAdminController : Controller
 
     [HttpGet("login")]
     [HttpGet("/admin")]
-    public IActionResult Login()
+    public IActionResult Login([FromQuery] string? ReturnUrl)
     {
         if (User.Identity?.IsAuthenticated == true)
+        {
+            // Si llegó con ReturnUrl, significa que fue rechazado de esa URL.
+            // No redirigir de vuelta (evita loop). Mostrar acceso denegado.
+            if (!string.IsNullOrEmpty(ReturnUrl))
+                return View("~/Features/Admin/Auth/Views/AccesoDenegado.cshtml",
+                    new AccesoDenegadoViewModel { Email = User.FindFirstValue(ClaimTypes.Email) ?? "" });
+
             return Redirect("/admin/inscripciones");
+        }
 
         return View("~/Features/Admin/Auth/Views/Login.cshtml");
+    }
+
+    [HttpGet("acceso-denegado")]
+    public IActionResult AccesoDenegado()
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return RedirectToAction(nameof(Login));
+
+        return View("~/Features/Admin/Auth/Views/AccesoDenegado.cshtml",
+            new AccesoDenegadoViewModel { Email = User.FindFirstValue(ClaimTypes.Email) ?? "" });
     }
 
     [HttpGet("login/google")]
@@ -54,6 +72,7 @@ public class AuthAdminController : Controller
         }
 
         var usuario = await store.UsuariosAdministradores
+            .Include(u => u.UsuarioRegiones)
             .FirstOrDefaultAsync(u => u.Email == email && u.Activo);
 
         if (usuario is null)
@@ -63,6 +82,9 @@ public class AuthAdminController : Controller
                 new AccesoDenegadoViewModel { Email = email });
         }
 
+        // Obtener IDs de regiones asignadas
+        var regionIds = usuario.UsuarioRegiones.Select(ur => ur.RegionEventoId).ToList();
+
         // Crear claims con rol real del usuario
         var claims = new List<Claim>
         {
@@ -70,7 +92,8 @@ public class AuthAdminController : Controller
             new(ClaimTypes.Name, nombre ?? usuario.Nombre ?? email),
             new("AdminUsuarioId", usuario.Id.ToString()),
             new(ClaimTypes.Role, usuario.Rol.ToString()),
-            new("Localidades", JsonSerializer.Serialize(usuario.Localidades))
+            new("Localidades", JsonSerializer.Serialize(usuario.Localidades)),
+            new("RegionIds", JsonSerializer.Serialize(regionIds))
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

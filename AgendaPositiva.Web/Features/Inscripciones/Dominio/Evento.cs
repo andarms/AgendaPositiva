@@ -14,6 +14,15 @@ public class Evento : EntidadBase
     /// <summary>Solo un evento puede estar activo a la vez.</summary>
     public bool Activo { get; set; } = false;
 
+    /// <summary>Cupo total de inscripciones para el evento.</summary>
+    public int CupoTotal { get; set; } = 1000;
+
+    /// <summary>Total de inscripciones registradas (columna desnormalizada para consultas rápidas).</summary>
+    public int TotalInscritos { get; set; } = 0;
+
+    public int CupoDisponible => CupoTotal - TotalInscritos;
+    public bool TieneCupo => CupoDisponible > 0;
+
     // Navigation properties
     public ICollection<Inscripcion> Inscripciones { get; set; } = [];
 }

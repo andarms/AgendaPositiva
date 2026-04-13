@@ -92,6 +92,7 @@
                 <th>Email</th>
                 <th>Rol</th>
                 <th>Localidades</th>
+                <th>Regiones</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
@@ -142,6 +143,29 @@
                         else
                         {
                             <span class="text-muted" style="font-size:.8125rem;">Ninguno</span>
+                        }
+                    </td>
+                    <td>
+                        @if (u.Rol == RolAdministrador.Administrador)
+                        {
+                            <span class="text-muted" style="font-size:.8125rem;">Todas</span>
+                        }
+                        else if (u.UsuarioRegiones.Any())
+                        {
+                            <div class="deptos-list">
+                                @foreach (var ur in u.UsuarioRegiones.Take(3))
+                                {
+                                    <span>@ur.Region.Nombre</span>
+                                }
+                                @if (u.UsuarioRegiones.Count > 3)
+                                {
+                                    <span>+@(u.UsuarioRegiones.Count - 3) más</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted" style="font-size:.8125rem;">Ninguna</span>
                         }
                     </td>
                     <td>

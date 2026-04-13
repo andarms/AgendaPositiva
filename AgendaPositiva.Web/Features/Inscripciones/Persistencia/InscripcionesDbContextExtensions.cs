@@ -1,5 +1,6 @@
 
 using AgendaPositiva.Web.Features.Admin.Auth.Domain;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,6 +53,9 @@ public static class InscripcionesDbContextExtensions
             e.Property(ev => ev.Ubicacion).HasMaxLength(500).IsRequired();
 
             e.HasIndex(ev => ev.Slug).IsUnique();
+
+            e.Ignore(ev => ev.CupoDisponible);
+            e.Ignore(ev => ev.TieneCupo);
         });
     }
 
@@ -129,6 +133,49 @@ public static class InscripcionesDbContextExtensions
 
             e.Property(u => u.Localidades)
                 .HasColumnType("jsonb");
+        });
+    }
+
+    public static void ConfigurarRegionesEvento(this ModelBuilder builder)
+    {
+        builder.Entity<RegionEvento>(e =>
+        {
+            e.HasKey(r => r.Id);
+            e.Property(r => r.Id).ValueGeneratedOnAdd();
+
+            e.Property(r => r.Nombre).HasMaxLength(255).IsRequired();
+
+            e.Property(r => r.Localidades)
+                .HasColumnType("jsonb");
+
+            e.HasOne(r => r.Evento)
+                .WithMany()
+                .HasForeignKey(r => r.EventoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.Ignore(r => r.CupoDisponible);
+            e.Ignore(r => r.TieneCupo);
+        });
+    }
+
+    public static void ConfigurarUsuarioRegiones(this ModelBuilder builder)
+    {
+        builder.Entity<UsuarioRegion>(e =>
+        {
+            e.HasKey(ur => ur.Id);
+            e.Property(ur => ur.Id).ValueGeneratedOnAdd();
+
+            e.HasOne(ur => ur.Usuario)
+                .WithMany(u => u.UsuarioRegiones)
+                .HasForeignKey(ur => ur.UsuarioAdministradorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(ur => ur.Region)
+                .WithMany(r => r.UsuarioRegiones)
+                .HasForeignKey(ur => ur.RegionEventoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(ur => new { ur.UsuarioAdministradorId, ur.RegionEventoId }).IsUnique();
         });
     }
 }

@@ -10,133 +10,179 @@
 </nav>
 
 <h1>Inscripciones — @Model.Evento.Nombre</h1>
-<div class="page-header">
-    <p class="text-secondary">
-        @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
-        · <strong>@Model.TotalInscripciones</strong> inscripciones
-    </p>
-    <div class="page-header__actions">
-        <a href="/admin/inscripciones/formulario/verificacion" class="btn btn--primary">+ Nueva Inscripción</a>
-        <a href="/admin/inscripciones/exportar" class="btn btn--success">⬇ Exportar Excel</a>
-    </div>
-</div>
 
-<form method="get" action="/admin/inscripciones" class="card filter-form">
-    @if (!string.IsNullOrEmpty(Model.SortLocalidad))
-    {
-        <input type="hidden" name="sortLocalidad" value="@Model.SortLocalidad" />
+@if (Model.CupoInfo is not null)
+{
+    var cupo = Model.CupoInfo;
+    var pct = cupo.CupoTotal > 0 ? (double)cupo.TotalInscritos / cupo.CupoTotal * 100 : 100;
+    var barClass = pct >= 100 ? "cupo-bar__fill--full" : pct >= 80 ? "cupo-bar__fill--warn" : "cupo-bar__fill--ok";
+
+    <div class="cupo-header-card"
+         style="background:#fff;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1rem;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <div style="font-size:0.8125rem;font-weight:600;color:#1d1d1f;">@cupo.NombreRegion</div>
+        <div style="display:flex;gap:1.5rem;align-items:center;flex:1;">
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalInscritos</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Inscritos</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.CupoTotal</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Cupo total</div>
+            </div>
+            <div style="text-align:center;">
+                <div
+                    style="font-size:1.25rem;font-weight:700;color:@(cupo.CupoDisponible <= 0 ? "#ff3b30" : "#1d1d1f");line-height:1;">
+                    @cupo.CupoDisponible</div>
+                    <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Disponible</div>
+                </div>
+                <div style="width:100px;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;">
+                    <div class="@barClass"
+                         style="height:100%;border-radius:3px;width:@(Math.Min(pct, 100))%;@(pct >= 100 ? "background:#ff3b30;" : pct >= 80 ? "background:#ff9500;" : "background:#34c759;")">
+                    </div>
+                </div>
+            </div>
+            @if (cupo.Regiones.Count > 1)
+            {
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    @foreach (var r in cupo.Regiones)
+                    {
+                        <span
+                            style="font-size:0.6875rem;background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
+                            @r.Nombre: @r.TotalInscritos/@r.Cupo
+                        </span>
+                    }
+                </div>
+            }
+        </div>
     }
-    <div class="filter-grid">
-        <div>
-            <label class="form-label">Nombre</label>
-            <input type="text" name="nombre" value="@Model.FiltroNombre" placeholder="Buscar por nombre..."
-                   class="form-control" />
+
+    <div class="page-header">
+        <p class="text-secondary">
+            @Model.Evento.FechaInicio.ToString("dd/MM/yyyy") — @Model.Evento.FechaFin.ToString("dd/MM/yyyy")
+            · <strong>@Model.TotalInscripciones</strong> inscripciones
+        </p>
+        <div class="page-header__actions">
+            <a href="/admin/inscripciones/formulario/verificacion" class="btn btn--primary">+ Nueva Inscripción</a>
+            <a href="/admin/inscripciones/exportar" class="btn btn--success">⬇ Exportar Excel</a>
         </div>
-        <div>
-            <label class="form-label">Localidad</label>
-            <select name="departamento" class="form-control">
-                <option value="">Todos</option>
-                @foreach (var dep in Model.Departamentos)
-                {
-                    <option value="@dep" selected="@(Model.FiltroDepartamento == dep)">@dep</option>
-                }
-            </select>
-        </div>
-        <div>
-            <label class="form-label">Estado</label>
-            <select name="estado" class="form-control">
-                <option value="">Todos</option>
-                @foreach (EstadoInscripcion e in Enum.GetValues<EstadoInscripcion>())
-                {
-                    <option value="@e" selected="@(Model.FiltroEstado != null && Model.FiltroEstado == e)">
-                        @e.Humanize()</option>
+    </div>
+
+    <form method="get" action="/admin/inscripciones" class="card filter-form">
+        @if (!string.IsNullOrEmpty(Model.SortLocalidad))
+        {
+            <input type="hidden" name="sortLocalidad" value="@Model.SortLocalidad" />
+        }
+        <div class="filter-grid">
+            <div>
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" value="@Model.FiltroNombre" placeholder="Buscar por nombre..."
+                       class="form-control" />
+            </div>
+            <div>
+                <label class="form-label">Localidad</label>
+                <select name="departamento" class="form-control">
+                    <option value="">Todos</option>
+                    @foreach (var dep in Model.Departamentos)
+                    {
+                        <option value="@dep" selected="@(Model.FiltroDepartamento == dep)">@dep</option>
                     }
                 </select>
             </div>
             <div>
-                <label class="form-label">Hospedaje</label>
-                <select name="hospedaje" class="form-control">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-control">
                     <option value="">Todos</option>
-                    <option value="true" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == true)">Sí
-                    </option>
-                    <option value="false" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == false)">No
-                    </option>
-                </select>
-            </div>
-            <div class="filter-actions">
-                <button type="submit" class="btn btn--primary">Buscar</button>
-                <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
-            </div>
-        </div>
-    </form>
-
-    @if (Model.Inscripciones.Count == 0)
-    {
-        <p>No hay inscripciones que coincidan con los filtros.</p>
-    }
-    else
-    {
-        <div class="table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Identificación</th>
-                        <th>
-                            <a href="@Model.BuildSortUrl(Model.NextSortLocalidad)">Localidad@(Model.SortLocalidadIndicator)</a>
-                        </th>
-                        <th>Estado</th>
-                        <th>Hospedaje</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
+                    @foreach (EstadoInscripcion e in Enum.GetValues<EstadoInscripcion>())
                     {
-                        var offset = (Model.Pagina - 1) * Model.PorPagina;
+                        <option value="@e" selected="@(Model.FiltroEstado != null && Model.FiltroEstado == e)">
+                            @e.Humanize()</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Hospedaje</label>
+                    <select name="hospedaje" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="true" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == true)">Sí
+                        </option>
+                        <option value="false" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == false)">No
+                        </option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn--primary">Buscar</button>
+                    <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+
+        @if (Model.Inscripciones.Count == 0)
+        {
+            <p>No hay inscripciones que coincidan con los filtros.</p>
+        }
+        else
+        {
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
                         <tr>
-                            <td class="col-index">@(offset + index + 1)</td>
-                            <td class="col-name">
-                                <a href="/admin/inscripciones/@inscripcion.Id">@inscripcion.Persona.NombreCompleto</a>
-                            </td>
-                            <td>@inscripcion.Persona.TipoIdentificacion.Humanize() — @inscripcion.Persona.NumeroIdentificacion</td>
-                            <td>@inscripcion.Localidad</td>
-                            <td><span class="badge @inscripcion.Estado.BadgeCss()">@inscripcion.Estado.Humanize()</span></td>
-                            <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Identificación</th>
+                            <th>
+                                <a href="@Model.BuildSortUrl(Model.NextSortLocalidad)">Localidad@(Model.SortLocalidadIndicator)</a>
+                            </th>
+                            <th>Estado</th>
+                            <th>Hospedaje</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
+                        {
+                            var offset = (Model.Pagina - 1) * Model.PorPagina;
+                            <tr>
+                                <td class="col-index">@(offset + index + 1)</td>
+                                <td class="col-name">
+                                    <a href="/admin/inscripciones/@inscripcion.Id">@inscripcion.Persona.NombreCompleto</a>
+                                </td>
+                                <td>@inscripcion.Persona.TipoIdentificacion.Humanize() — @inscripcion.Persona.NumeroIdentificacion</td>
+                                <td>@inscripcion.Localidad</td>
+                                <td><span class="badge @inscripcion.Estado.BadgeCss()">@inscripcion.Estado.Humanize()</span></td>
+                                <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-        <div class="pagination">
-            <div class="pagination__info">
-                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
-                        Model.TotalInscripciones)) de @Model.TotalInscripciones
-            </div>
-            <div class="pagination__controls">
-                @if (Model.Pagina > 1)
-                {
-                    <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
-                }
-                <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
-                @if (Model.Pagina < Model.TotalPaginas)
-                {
-                    <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
-                }
-            </div>
-            <div class="pagination__size">
-                @foreach (var size in new[] { 10, 50, 100 })
-                {
-                    if (size == Model.PorPagina)
+            <div class="pagination">
+                <div class="pagination__info">
+                    Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
+                                            Model.TotalInscripciones)) de @Model.TotalInscripciones
+                </div>
+                <div class="pagination__controls">
+                    @if (Model.Pagina > 1)
                     {
-                        <span class="btn btn--primary">@size</span>
+                        <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
                     }
-                    else
+                    <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
+                    @if (Model.Pagina < Model.TotalPaginas)
                     {
-                        <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                        <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
                     }
-                }
+                </div>
+                <div class="pagination__size">
+                    @foreach (var size in new[] { 10, 50, 100 })
+                    {
+                        if (size == Model.PorPagina)
+                        {
+                            <span class="btn btn--primary">@size</span>
+                        }
+                        else
+                        {
+                            <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                        }
+                    }
+                </div>
             </div>
-        </div>
-    }
+        }

@@ -283,54 +283,56 @@
                    class="@(path.StartsWith("/admin/inscripciones") ? "active" : "")">Inscripciones</a>
                 @if (User.IsInRole("Administrador"))
                 {
-                    <a href="/admin/usuarios" class="@(path.StartsWith("/admin/usuarios") ? "active" : "")">Usuarios</a>
-                    <a href="/admin/auditoria" class="@(path.StartsWith("/admin/auditoria") ? "active" : "")">Auditoría</a>
-                }
-            </nav>
-        </aside>
+                    <a href="/admin/regiones" class="@(path.StartsWith("/admin/regiones") ? "active" : "")">Regiones y
+                        Cupos</a>
+                        <a href="/admin/usuarios" class="@(path.StartsWith("/admin/usuarios") ? "active" : "")">Usuarios</a>
+                        <a href="/admin/auditoria" class="@(path.StartsWith("/admin/auditoria") ? "active" : "")">Auditoría</a>
+                    }
+                </nav>
+            </aside>
 
-        <div class="admin-content">
-            <main class="admin-main">
-                @RenderBody()
-            </main>
+            <div class="admin-content">
+                <main class="admin-main">
+                    @RenderBody()
+                </main>
 
-            <footer class="admin-footer">
-                Agenda Positiva · Panel de administración
-            </footer>
+                <footer class="admin-footer">
+                    Agenda Positiva · Panel de administración
+                </footer>
+            </div>
         </div>
-    </div>
 
-    <script>
-            (function () {
-                var toggle = document.getElementById('sidebar-toggle');
-                var sidebar = document.getElementById('admin-sidebar');
-                var overlay = document.getElementById('sidebar-overlay');
+        <script>
+                (function () {
+                    var toggle = document.getElementById('sidebar-toggle');
+                    var sidebar = document.getElementById('admin-sidebar');
+                    var overlay = document.getElementById('sidebar-overlay');
 
-                function open() {
-                    sidebar.classList.add('is-open');
-                    overlay.classList.add('is-open');
-                    toggle.setAttribute('aria-expanded', 'true');
-                }
+                    function open() {
+                        sidebar.classList.add('is-open');
+                        overlay.classList.add('is-open');
+                        toggle.setAttribute('aria-expanded', 'true');
+                    }
 
-                function close() {
-                    sidebar.classList.remove('is-open');
-                    overlay.classList.remove('is-open');
-                    toggle.setAttribute('aria-expanded', 'false');
-                }
+                    function close() {
+                        sidebar.classList.remove('is-open');
+                        overlay.classList.remove('is-open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
 
-                toggle.addEventListener('click', function () {
-                    sidebar.classList.contains('is-open') ? close() : open();
-                });
+                    toggle.addEventListener('click', function () {
+                        sidebar.classList.contains('is-open') ? close() : open();
+                    });
 
-                overlay.addEventListener('click', close);
+                    overlay.addEventListener('click', close);
 
-                // Close on nav link click (mobile)
-                sidebar.querySelectorAll('nav a').forEach(function (link) {
-                    link.addEventListener('click', close);
-                });
-            })();
-    </script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+                    // Close on nav link click (mobile)
+                    sidebar.querySelectorAll('nav a').forEach(function (link) {
+                        link.addEventListener('click', close);
+                    });
+                })();
+        </script>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
 
 </html>

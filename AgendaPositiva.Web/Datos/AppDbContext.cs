@@ -1,5 +1,6 @@
 using AgendaPositiva.Web.Features.Admin.Auth.Domain;
 using AgendaPositiva.Web.Features.Admin.Auditoria;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons.Domain;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Persistencia;
@@ -16,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<Inscripcion> Inscripciones => Set<Inscripcion>();
     public DbSet<GrupoFamiliar> GrupoFamiliar => Set<GrupoFamiliar>();
     public DbSet<UsuarioAdministrador> UsuariosAdministradores => Set<UsuarioAdministrador>();
+    public DbSet<RegionEvento> RegionesEvento => Set<RegionEvento>();
+    public DbSet<UsuarioRegion> UsuarioRegiones => Set<UsuarioRegion>();
     public DbSet<AuditoriaAdmin> AuditoriaAdmin => Set<AuditoriaAdmin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,6 +30,8 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarInscripciones();
         modelBuilder.ConfigurarGrupoFamiliar();
         modelBuilder.ConfigurarUsuariosAdministradores();
+        modelBuilder.ConfigurarRegionesEvento();
+        modelBuilder.ConfigurarUsuarioRegiones();
 
         modelBuilder.Entity<AuditoriaAdmin>(e =>
         {

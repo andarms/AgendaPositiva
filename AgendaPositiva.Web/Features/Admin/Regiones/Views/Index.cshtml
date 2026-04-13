@@ -1,0 +1,331 @@
+@using AgendaPositiva.Web.Features.Admin.Regiones
+@model RegionesIndexViewModel
+
+@{
+    var evento = Model.Evento;
+    var regiones = Model.Regiones;
+    var totalInscripciones = Model.TotalInscripciones;
+    var totalAdultos = Model.TotalAdultos;
+    var totalNinos = Model.TotalNinos;
+}
+
+@section Styles {
+    <style>
+        .cupo-evento-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .cupo-evento-card h2 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .cupo-evento-card .cupo-info {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .cupo-stat {
+            text-align: center;
+        }
+
+        .cupo-stat .valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            line-height: 1;
+        }
+
+        .cupo-stat .etiqueta {
+            font-size: 0.6875rem;
+            color: #86868b;
+            margin-top: 0.25rem;
+        }
+
+        .cupo-form {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .cupo-form input[type="number"] {
+            width: 100px;
+            padding: 0.375rem 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            text-align: center;
+        }
+
+        .cupo-form input[type="number"]:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+        }
+
+        .deptos-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            max-width: 350px;
+        }
+
+        .deptos-list span {
+            font-size: 0.6875rem;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 0.15rem 0.5rem;
+            border-radius: 100px;
+            color: #1d1d1f;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .acciones a {
+            font-size: 0.8125rem;
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .acciones a:hover {
+            color: #004499;
+        }
+
+        .btn-eliminar {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-eliminar:hover {
+            color: #d32f2f;
+        }
+
+        .cupo-bar {
+            width: 80px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+
+        .cupo-bar__fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .cupo-bar__fill--ok {
+            background: #34c759;
+        }
+
+        .cupo-bar__fill--warn {
+            background: #ff9500;
+        }
+
+        .cupo-bar__fill--full {
+            background: #ff3b30;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #86868b;
+        }
+
+        .empty-state h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #6e6e73;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+}
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Regiones y Cupos</span>
+</nav>
+
+<h1>Regiones y Cupos</h1>
+
+@if (evento is null)
+{
+    <div class="empty-state">
+        <h3>No hay evento activo</h3>
+        <p>Debe haber un evento activo para gestionar regiones y cupos.</p>
+    </div>
+}
+else
+{
+    <div class="cupo-evento-card">
+        <div>
+            <h2>@evento.Nombre</h2>
+        </div>
+        <div class="cupo-info">
+            <div class="cupo-stat">
+                <div class="valor">@totalInscripciones</div>
+                <div class="etiqueta">Total inscritos</div>
+            </div>
+            <div class="cupo-stat">
+                <div class="valor">@totalAdultos</div>
+                <div class="etiqueta">Adultos (cupo)</div>
+            </div>
+            <div class="cupo-stat">
+                <div class="valor">@totalNinos</div>
+                <div class="etiqueta">Niños (≤10 años)</div>
+            </div>
+            <div class="cupo-stat">
+                <div class="valor">@evento.CupoTotal</div>
+                <div class="etiqueta">Cupo total</div>
+            </div>
+            <div class="cupo-stat">
+                <div class="valor">@evento.CupoDisponible</div>
+                <div class="etiqueta">Disponible</div>
+            </div>
+        </div>
+        <form method="post" action="/admin/regiones/cupo-evento" class="cupo-form">
+            <label style="font-size: 0.8125rem; font-weight: 500; color: #6e6e73;">Cupo:</label>
+            <input type="number" name="cupoTotal" value="@evento.CupoTotal" min="0" />
+            <button type="submit" class="btn btn--primary"
+                    style="font-size: 0.8125rem; padding: 0.375rem 0.75rem;">Guardar</button>
+        </form>
+    </div>
+
+    <div class="page-header">
+        <p class="text-secondary">
+            <strong>@regiones.Count</strong> regiones configuradas
+        </p>
+        <div class="page-header__actions">
+            <form method="post" action="/admin/regiones/reasignar-cupos" style="margin:0;">
+                <button type="submit" class="btn btn--secondary"
+                        onclick="return confirm('¿Recalcular los cupos de todas las regiones con las inscripciones actuales?');">
+                    ↻ Reasignar cupos
+                </button>
+            </form>
+            <a href="/admin/regiones/crear" class="btn btn--primary">+ Nueva región</a>
+        </div>
+    </div>
+
+    @if (regiones.Count == 0)
+    {
+        <div class="empty-state">
+            <h3>Sin regiones configuradas</h3>
+            <p>Las regiones permiten limitar cupos por zona geográfica. Sin regiones, solo aplica el cupo total del evento.</p>
+            <a href="/admin/regiones/crear" class="btn btn--primary">Crear primera región</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Localidades</th>
+                        <th>Cupo</th>
+                        <th>Inscritos</th>
+                        <th>Disponible</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in regiones)
+                    {
+                        var pct = r.Cupo > 0 ? (double)r.TotalInscritos / r.Cupo * 100 : 100;
+                        var barClass = pct >= 100 ? "cupo-bar__fill--full" : pct >= 80 ? "cupo-bar__fill--warn" :
+ "cupo-bar__fill--ok";
+
+                        <tr>
+                            <td class="col-name">@r.Nombre</td>
+                            <td>
+                                @if (r.Localidades.Any())
+                                {
+                                    <div class="deptos-list">
+                                        @foreach (var kv in r.Localidades.Take(5))
+                                        {
+                                            if (kv.Value.Count == 0)
+                                            {
+                                                <span>@kv.Key</span>
+                                            }
+                                            else
+                                            {
+                                                var ciudadesTexto = string.Join(", ", kv.Value.Take(3));
+                                                if (kv.Value.Count > 3) ciudadesTexto += $" +{kv.Value.Count - 3}";
+                                                <span title="@string.Join(", ", kv.Value)">@kv.Key (@ciudadesTexto)</span>
+                                            }
+                                        }
+                                        @if (r.Localidades.Count > 5)
+                                        {
+                                            <span>+@(r.Localidades.Count - 5) más</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size:.8125rem;">Sin localidades</span>
+                                }
+                            </td>
+                            <td>@r.Cupo</td>
+                            <td>
+                                @r.TotalInscritos
+                                <div class="cupo-bar">
+                                    <div class="cupo-bar__fill @barClass" style="width: @(Math.Min(pct, 100))%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (r.CupoDisponible <= 0)
+                                {
+                                    <span class="badge badge--danger">Agotado</span>
+                                }
+                                else
+                                {
+                                    @r.CupoDisponible
+                                }
+                            </td>
+                            <td>
+                                <div class="acciones">
+                                    <a href="/admin/regiones/editar/@r.Id">Editar</a>
+                                    <form method="post" action="/admin/regiones/eliminar/@r.Id"
+                                          onsubmit="return confirm('¿Eliminar la región «@r.Nombre»?');" style="margin:0;">
+                                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}

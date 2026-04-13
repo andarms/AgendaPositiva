@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +80,8 @@ public class RegistrarPersonaPrincipal
         var inscripcion = db.Inscripciones
             .FirstOrDefault(i => i.PersonaId == persona.Id && i.EventoId == evento.Id);
 
+        bool esNuevaInscripcion = inscripcion is null;
+
         if (inscripcion is not null)
         {
             // Actualizar datos de la inscripción existente
@@ -94,6 +97,21 @@ public class RegistrarPersonaPrincipal
         }
         else
         {
+            // Los cupos solo aplican para mayores de 10 años
+            var esAdulto = command.FechaNacimiento.AddYears(10) <= DateOnly.FromDateTime(DateTime.UtcNow);
+
+            if (esAdulto)
+            {
+                // Validar cupo del evento
+                if (!evento.TieneCupo)
+                    return Result.Failure<int>("Se ha alcanzado el cupo total del evento. No se pueden registrar más inscripciones.");
+
+                // Validar cupo de región
+                var regionError = await ValidarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
+                if (regionError is not null)
+                    return Result.Failure<int>(regionError);
+            }
+
             // No se crea grupo familiar aún — se creará cuando se agregue un familiar.
             // Si viaja solo, la inscripción queda sin grupo.
             inscripcion = new Inscripcion
@@ -112,9 +130,40 @@ public class RegistrarPersonaPrincipal
                 RequiereAlimentacion = command.RequiereAlimentacion,
             };
             db.Inscripciones.Add(inscripcion);
+
+            // Incrementar contadores de cupo (solo mayores de 10 años)
+            if (esAdulto)
+            {
+                evento.TotalInscritos++;
+                await IncrementarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
+            }
         }
         await db.SaveChangesAsync();
 
         return Result.Success(inscripcion.Id);
+    }
+
+    async Task<string?> ValidarCupoRegion(int eventoId, string departamento, string ciudad)
+    {
+        var regiones = await db.Set<RegionEvento>()
+            .Where(r => r.EventoId == eventoId)
+            .ToListAsync();
+
+        var region = regiones.FirstOrDefault(r => r.Contiene(departamento, ciudad));
+        if (region is not null && !region.TieneCupo)
+            return $"Se ha alcanzado el cupo de la región «{region.Nombre}». No se pueden registrar más inscripciones para esta zona.";
+
+        return null;
+    }
+
+    async Task IncrementarCupoRegion(int eventoId, string departamento, string ciudad)
+    {
+        var regiones = await db.Set<RegionEvento>()
+            .Where(r => r.EventoId == eventoId)
+            .ToListAsync();
+
+        var region = regiones.FirstOrDefault(r => r.Contiene(departamento, ciudad));
+        if (region is not null)
+            region.TotalInscritos++;
     }
 }

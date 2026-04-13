@@ -17,7 +17,8 @@ public static class DatosIniciales
             FechaInicio = new DateTime(2026, 8, 22, 8, 0, 0, DateTimeKind.Utc),
             FechaFin = new DateTime(2026, 8, 23, 18, 0, 0, DateTimeKind.Utc),
             Ubicacion = "Centro de Convenciones",
-            Activo = true
+            Activo = true,
+            CupoTotal = 1000
         };
 
         db.Eventos.Add(evento);

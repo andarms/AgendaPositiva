@@ -49,7 +49,7 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.LoginPath = "/admin/auth/login";
-    options.AccessDeniedPath = "/admin/auth/login";
+    options.AccessDeniedPath = "/admin/auth/acceso-denegado";
 })
 .AddGoogle(options =>
 {

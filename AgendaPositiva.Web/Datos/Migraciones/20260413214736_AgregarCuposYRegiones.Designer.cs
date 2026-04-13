@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AgendaPositiva.Web.Datos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaPositiva.Web.Datos.Migraciones
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260413214736_AgregarCuposYRegiones")]
+    partial class AgregarCuposYRegiones
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,36 +146,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.HasIndex("EventoId");
 
                     b.ToTable("RegionesEvento");
-                });
-
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Admin.Regiones.Dominio.UsuarioRegion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("FechaActualizacion")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("RegionEventoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsuarioAdministradorId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegionEventoId");
-
-                    b.HasIndex("UsuarioAdministradorId", "RegionEventoId")
-                        .IsUnique();
-
-                    b.ToTable("UsuarioRegiones");
                 });
 
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Evento", b =>
@@ -392,25 +365,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.Navigation("Evento");
                 });
 
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Admin.Regiones.Dominio.UsuarioRegion", b =>
-                {
-                    b.HasOne("AgendaPositiva.Web.Features.Admin.Regiones.Dominio.RegionEvento", "Region")
-                        .WithMany("UsuarioRegiones")
-                        .HasForeignKey("RegionEventoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AgendaPositiva.Web.Features.Admin.Auth.Domain.UsuarioAdministrador", "Usuario")
-                        .WithMany("UsuarioRegiones")
-                        .HasForeignKey("UsuarioAdministradorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Inscripcion", b =>
                 {
                     b.HasOne("AgendaPositiva.Web.Features.Inscripciones.Dominio.Evento", "Evento")
@@ -442,16 +396,6 @@ namespace AgendaPositiva.Web.Datos.Migraciones
                     b.Navigation("Persona");
 
                     b.Navigation("RelacionConPersona");
-                });
-
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Admin.Auth.Domain.UsuarioAdministrador", b =>
-                {
-                    b.Navigation("UsuarioRegiones");
-                });
-
-            modelBuilder.Entity("AgendaPositiva.Web.Features.Admin.Regiones.Dominio.RegionEvento", b =>
-                {
-                    b.Navigation("UsuarioRegiones");
                 });
 
             modelBuilder.Entity("AgendaPositiva.Web.Features.Inscripciones.Dominio.Evento", b =>

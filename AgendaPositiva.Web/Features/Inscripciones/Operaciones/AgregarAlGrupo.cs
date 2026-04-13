@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,7 @@ public class AgregarAlGrupo(AppDbContext db)
     {
         var inscripcion = db.Inscripciones
             .Include(i => i.Persona)
+            .Include(i => i.Evento)
             .FirstOrDefault(i => i.Id == inscripcionId);
 
         if (inscripcion is null) return Result.Failure("Inscripción no encontrada.");
@@ -56,6 +58,24 @@ public class AgregarAlGrupo(AppDbContext db)
         }
         else
         {
+            var evento = inscripcion.Evento;
+
+            // Los cupos solo aplican para mayores de 10 años
+            var personaExistente = await db.Personas.FindAsync(personaExistenteId);
+            var esAdulto = personaExistente is not null
+                && personaExistente.FechaNacimiento.AddYears(10) <= DateOnly.FromDateTime(DateTime.UtcNow);
+
+            if (esAdulto)
+            {
+                // Validar cupos antes de crear nueva inscripción
+                if (!evento.TieneCupo)
+                    return Result.Failure("Se ha alcanzado el cupo total del evento. No se pueden registrar más inscripciones.");
+
+                var regionError = await ValidarCupoRegion(eventoId, inscripcion.Departamento, inscripcion.Ciudad);
+                if (regionError is not null)
+                    return Result.Failure(regionError);
+            }
+
             db.Inscripciones.Add(new Inscripcion
             {
                 PersonaId = personaExistenteId,
@@ -65,6 +85,13 @@ public class AgregarAlGrupo(AppDbContext db)
                 Ciudad = inscripcion.Ciudad,
                 Departamento = inscripcion.Departamento,
             });
+
+            // Incrementar contadores (solo mayores de 10 años)
+            if (esAdulto)
+            {
+                evento.TotalInscritos++;
+                await IncrementarCupoRegion(eventoId, inscripcion.Departamento, inscripcion.Ciudad);
+            }
         }
 
         // La relación (ya invertida) se guarda en la inscripción de quien agrega
@@ -85,11 +112,28 @@ public class AgregarAlGrupo(AppDbContext db)
     {
         var inscripcion = db.Inscripciones
             .Include(i => i.Persona)
+            .Include(i => i.Evento)
             .FirstOrDefault(i => i.Id == inscripcionId);
 
         if (inscripcion is null) return Result.Failure("Inscripción no encontrada.");
 
         int eventoId = inscripcion.EventoId;
+
+        var evento = inscripcion.Evento;
+
+        // Los cupos solo aplican para mayores de 10 años
+        var esAdulto = datos.FechaNacimiento.AddYears(10) <= DateOnly.FromDateTime(DateTime.UtcNow);
+
+        if (esAdulto)
+        {
+            // Validar cupos antes de crear nueva inscripción
+            if (!evento.TieneCupo)
+                return Result.Failure("Se ha alcanzado el cupo total del evento. No se pueden registrar más inscripciones.");
+
+            var regionError = await ValidarCupoRegion(eventoId, datos.Departamento, datos.Ciudad);
+            if (regionError is not null)
+                return Result.Failure(regionError);
+        }
 
         var grupoId = await ObtenerOCrearGrupo(inscripcion, inscFamiliar: null);
 
@@ -124,6 +168,13 @@ public class AgregarAlGrupo(AppDbContext db)
             RelacionConPersonaId = relacionConPersonaId,
         });
 
+        // Incrementar contadores (solo mayores de 10 años)
+        if (esAdulto)
+        {
+            evento.TotalInscritos++;
+            await IncrementarCupoRegion(eventoId, datos.Departamento, datos.Ciudad);
+        }
+
         await db.SaveChangesAsync();
         return Result.Success();
     }
@@ -151,5 +202,29 @@ public class AgregarAlGrupo(AppDbContext db)
         await db.SaveChangesAsync();
 
         return grupo.Id;
+    }
+
+    async Task<string?> ValidarCupoRegion(int eventoId, string departamento, string ciudad)
+    {
+        var regiones = await db.Set<RegionEvento>()
+            .Where(r => r.EventoId == eventoId)
+            .ToListAsync();
+
+        var region = regiones.FirstOrDefault(r => r.Contiene(departamento, ciudad));
+        if (region is not null && !region.TieneCupo)
+            return $"Se ha alcanzado el cupo de la región «{region.Nombre}». No se pueden registrar más inscripciones para esta zona.";
+
+        return null;
+    }
+
+    async Task IncrementarCupoRegion(int eventoId, string departamento, string ciudad)
+    {
+        var regiones = await db.Set<RegionEvento>()
+            .Where(r => r.EventoId == eventoId)
+            .ToListAsync();
+
+        var region = regiones.FirstOrDefault(r => r.Contiene(departamento, ciudad));
+        if (region is not null)
+            region.TotalInscritos++;
     }
 }

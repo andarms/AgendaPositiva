@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Commons.Views;
 using AgendaPositiva.Web.Features.Admin.Auditoria;
@@ -49,6 +50,16 @@ public class InscripcionesAdminController : Controller
         return ciudades.Count == 0 || ciudades.Contains(ciudad);
     }
 
+    List<int> RegionIdsAsignados
+    {
+        get
+        {
+            var json = User.FindFirstValue("RegionIds");
+            if (string.IsNullOrEmpty(json)) return [];
+            return JsonSerializer.Deserialize<List<int>>(json) ?? [];
+        }
+    }
+
     IQueryable<Inscripcion> FiltrarPorLocalidades(IQueryable<Inscripcion> query)
     {
         var localidades = LocalidadesAsignadas;
@@ -68,8 +79,52 @@ public class InscripcionesAdminController : Controller
             (deptosParcKeys.Contains(i.Departamento) && ciudadesPermitidas.Contains(i.Ciudad)));
     }
 
+    async Task<CupoInfoViewModel> ObtenerCupoInfo()
+    {
+        if (EsAdministrador)
+        {
+            // Administradores ven el cupo total del evento
+            return new CupoInfoViewModel
+            {
+                NombreRegion = evento.Nombre,
+                TotalInscritos = evento.TotalInscritos,
+                CupoTotal = evento.CupoTotal,
+                CupoDisponible = evento.CupoDisponible
+            };
+        }
+
+        // Colaboradores ven el cupo agregado de sus regiones asignadas
+        var regionIds = RegionIdsAsignados;
+        if (regionIds.Count == 0)
+        {
+            return new CupoInfoViewModel
+            {
+                NombreRegion = "Sin regiones asignadas",
+                TotalInscritos = 0,
+                CupoTotal = 0,
+                CupoDisponible = 0
+            };
+        }
+
+        var regiones = await store.RegionesEvento
+            .Where(r => regionIds.Contains(r.Id))
+            .ToListAsync();
+
+        var totalInscritos = regiones.Sum(r => r.TotalInscritos);
+        var cupoTotal = regiones.Sum(r => r.Cupo);
+
+        return new CupoInfoViewModel
+        {
+            NombreRegion = regiones.Count == 1 ? regiones[0].Nombre : $"{regiones.Count} regiones",
+            TotalInscritos = totalInscritos,
+            CupoTotal = cupoTotal,
+            CupoDisponible = cupoTotal - totalInscritos,
+            Regiones = regiones
+        };
+    }
+
     [HttpGet]
-    public IActionResult Index(
+    public async Task<IActionResult> Index(
         [FromQuery] string? nombre,
         [FromQuery] string? departamento,
         [FromQuery] EstadoInscripcion? estado,
@@ -145,6 +200,7 @@ public class InscripcionesAdminController : Controller
             Pagina = pagina,
             PorPagina = porPagina,
             TotalPaginas = totalPaginas,
+            CupoInfo = await ObtenerCupoInfo(),
         };
 
         return View("~/Features/Admin/Inscripciones/Views/Index.cshtml", vm);

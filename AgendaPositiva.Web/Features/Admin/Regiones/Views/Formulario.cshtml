@@ -1,12 +1,11 @@
-@using AgendaPositiva.Web.Features.Admin.Auth.Domain
-@using AgendaPositiva.Web.Features.Admin.Usuarios
+@using AgendaPositiva.Web.Features.Admin.Regiones
 @using System.Text.Json
-@model UsuarioFormViewModel
+@model RegionFormViewModel
 
 @{
     var esEdicion = Model.Id.HasValue;
-    var titulo = esEdicion ? "Editar usuario" : "Nuevo usuario";
-    var action = esEdicion ? $"/admin/usuarios/editar/{Model.Id}" : "/admin/usuarios/crear";
+    var titulo = esEdicion ? "Editar región" : "Nueva región";
+    var action = esEdicion ? $"/admin/regiones/editar/{Model.Id}" : "/admin/regiones/crear";
 }
 
 @section Styles {
@@ -48,17 +47,6 @@
             outline: none;
             border-color: #0066cc;
             box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
-        }
-
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-check input {
-            width: auto;
-            accent-color: #0066cc;
         }
 
         .localidades-section {
@@ -209,54 +197,11 @@
             font-size: 0.75rem;
             margin-top: 0.25rem;
         }
-
-        .regiones-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 8px;
-            padding: 0.75rem;
-            background: #fafafa;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .region-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8125rem;
-            color: #1d1d1f;
-            padding: 0.35rem 0.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.1s ease;
-        }
-
-        .region-item:hover {
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .region-item input {
-            accent-color: #0066cc;
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .region-cupo {
-            margin-left: auto;
-            font-size: 0.6875rem;
-            color: #86868b;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 0.1rem 0.5rem;
-            border-radius: 100px;
-        }
     </style>
 }
 
 <nav class="breadcrumb">
-    <a href="/admin/usuarios">Usuarios</a>
+    <a href="/admin/regiones">Regiones</a>
     <span class="breadcrumb__separator">/</span>
     <span class="breadcrumb__current">@titulo</span>
 </nav>
@@ -264,44 +209,21 @@
 <div class="card">
     <h1>@titulo</h1>
 
-    <form method="post" action="@action" id="usuario-form">
+    <form method="post" action="@action" id="region-form">
         <div class="form-row">
             <div class="form-group">
-                <label for="Nombre">Nombre</label>
-                <input type="text" id="Nombre" name="Nombre" value="@Model.Nombre" required />
+                <label for="Nombre">Nombre de la región</label>
+                <input type="text" id="Nombre" name="Nombre" value="@Model.Nombre" required
+                       placeholder="Ej: Bogotá, Costa Atlántica, etc." />
             </div>
             <div class="form-group">
-                <label for="Email">Correo electrónico</label>
-                <input type="email" id="Email" name="Email" value="@Model.Email" required />
-                <span asp-validation-for="Email" class="field-error"></span>
+                <label for="Cupo">Cupo de inscripciones</label>
+                <input type="number" id="Cupo" name="Cupo" value="@Model.Cupo" min="0" required />
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="Rol">Rol</label>
-                <select id="Rol" name="Rol">
-                    <option value="@RolAdministrador.Administrador"
-                            selected="@(Model.Rol == RolAdministrador.Administrador)">
-                        Administrador — acceso total
-                    </option>
-                    <option value="@RolAdministrador.Colaborador"
-                            selected="@(Model.Rol == RolAdministrador.Colaborador)">
-                        Colaborador — localidades asignadas
-                    </option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>&nbsp;</label>
-                <div class="form-check">
-                    <input type="checkbox" id="Activo" name="Activo" value="true" checked="@Model.Activo" />
-                    <label for="Activo" style="margin:0; font-weight:400; color:#1d1d1f;">Usuario activo</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group" id="localidades-section">
-            <label>Localidades con acceso</label>
+        <div class="form-group">
+            <label>Localidades de la región</label>
             <div class="localidades-actions">
                 <button type="button" onclick="toggleAllDeptos(true)">Seleccionar todos</button>
                 <button type="button" onclick="toggleAllDeptos(false)">Deseleccionar todos</button>
@@ -324,7 +246,8 @@
                         @if (depto.CiudadesDisponibles.Count > 0)
                         {
                             <div class="ciudades-panel">
-                                <div class="ciudades-note">Sin ciudades seleccionadas = acceso a todas</div>
+                                <div class="ciudades-note">Sin ciudades seleccionadas = todas las ciudades del departamento
+                                </div>
                                 <div class="ciudades-actions">
                                     <button type="button" onclick="toggleCiudades(this, true)">Todas</button>
                                     <button type="button" onclick="toggleCiudades(this, false)">Ninguna</button>
@@ -348,32 +271,9 @@
 
         <input type="hidden" name="LocalidadesJson" id="LocalidadesJson" value="@Model.LocalidadesJson" />
 
-        @if (Model.RegionesDisponibles.Count > 0)
-        {
-            <div class="form-group" id="regiones-section">
-                <label>Regiones asignadas</label>
-                <p style="font-size: 0.75rem; color: #86868b; margin-bottom: 0.5rem;">
-                    Los administradores tienen acceso a todas las regiones. Para colaboradores, seleccione las regiones
-                    permitidas.
-                </p>
-                <div class="regiones-list">
-                    @foreach (var region in Model.RegionesDisponibles)
-                    {
-                        var isChecked = Model.RegionesSeleccionadasIds.Contains(region.Id);
-                        <label class="region-item">
-                            <input type="checkbox" name="RegionesSeleccionadasIds" value="@region.Id" checked="@isChecked"
-                                   class="region-cb" />
-                            <span>@region.Nombre</span>
-                            <span class="region-cupo">@region.TotalInscritos / @region.Cupo</span>
-                        </label>
-                    }
-                </div>
-            </div>
-        }
-
         <div class="form-actions">
-            <button type="submit" class="btn btn--primary">@(esEdicion ? "Guardar cambios" : "Crear usuario")</button>
-            <a href="/admin/usuarios" class="btn btn--secondary">Cancelar</a>
+            <button type="submit" class="btn btn--primary">@(esEdicion ? "Guardar cambios" : "Crear región")</button>
+            <a href="/admin/regiones" class="btn btn--secondary">Cancelar</a>
         </div>
     </form>
 </div>
@@ -382,7 +282,6 @@
     <script>
         const localidadesData = JSON.parse(document.getElementById('LocalidadesJson').value || '{}');
 
-        // Inicializar estado desde localidadesData
         document.querySelectorAll('.depto-block').forEach(block => {
             const deptoName = block.dataset.depto;
             const deptoCb = block.querySelector('.depto-cb');
@@ -465,25 +364,16 @@
             document.querySelectorAll('.depto-block').forEach(block => {
                 const deptoCb = block.querySelector('.depto-cb');
                 if (!deptoCb.checked) return;
+
                 const deptoName = block.dataset.depto;
-                const ciudadesChecked = [...block.querySelectorAll('.ciudad-cb:checked')].map(c => c.value);
-                result[deptoName] = ciudadesChecked;
+                const ciudadesCbs = block.querySelectorAll('.ciudad-cb:checked');
+                const ciudades = Array.from(ciudadesCbs).map(cb => cb.value);
+                result[deptoName] = ciudades;
             });
             document.getElementById('LocalidadesJson').value = JSON.stringify(result);
         }
 
-        // Mostrar/ocultar sección según rol
-        const rolSelect = document.getElementById('Rol');
-        const localidadesSection = document.getElementById('localidades-section');
-
-        function toggleLocalidades() {
-            localidadesSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' ? 'none' : 'block';
-        }
-
-        rolSelect.addEventListener('change', toggleLocalidades);
-        toggleLocalidades();
-
-        // Sincronizar JSON antes de enviar
-        document.getElementById('usuario-form').addEventListener('submit', sincronizarJson);
+        // Sincronizar al enviar
+        document.getElementById('region-form').addEventListener('submit', sincronizarJson);
     </script>
 }

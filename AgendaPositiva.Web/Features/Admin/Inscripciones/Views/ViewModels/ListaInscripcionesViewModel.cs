@@ -1,7 +1,17 @@
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+
+public class CupoInfoViewModel
+{
+    public string NombreRegion { get; set; } = string.Empty;
+    public int TotalInscritos { get; set; }
+    public int CupoTotal { get; set; }
+    public int CupoDisponible { get; set; }
+    public List<RegionEvento> Regiones { get; set; } = [];
+}
 
 public class ListaInscripcionesViewModel
 {
@@ -9,6 +19,7 @@ public class ListaInscripcionesViewModel
     public required List<Inscripcion> Inscripciones { get; init; }
     public required int TotalInscripciones { get; init; }
     public required List<string> Departamentos { get; init; }
+    public CupoInfoViewModel? CupoInfo { get; init; }
 
     // Filtros
     public string? FiltroNombre { get; init; }

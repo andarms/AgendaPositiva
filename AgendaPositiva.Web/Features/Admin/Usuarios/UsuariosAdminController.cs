@@ -1,5 +1,6 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Admin.Auth.Domain;
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,10 @@ public class UsuariosAdminController : Controller
     {
         porPagina = porPagina is 10 or 50 or 100 ? porPagina : 50;
 
-        var query = store.UsuariosAdministradores.OrderBy(u => u.Nombre);
+        var query = store.UsuariosAdministradores
+            .Include(u => u.UsuarioRegiones)
+                .ThenInclude(ur => ur.Region)
+            .OrderBy(u => u.Nombre);
         var total = await query.CountAsync();
         var totalPaginas = (int)Math.Ceiling(total / (double)porPagina);
         if (pagina < 1) pagina = 1;
@@ -54,9 +58,15 @@ public class UsuariosAdminController : Controller
                 CiudadesDisponibles = d.Ciudades
             }).ToList();
 
+        var eventoActivo = store.Eventos.FirstOrDefault(e => e.Activo);
+        var regionesDisponibles = eventoActivo is not null
+            ? store.RegionesEvento.Where(r => r.EventoId == eventoActivo.Id).OrderBy(r => r.Nombre).ToList()
+            : [];
+
         var vm = new UsuarioFormViewModel
         {
-            DepartamentosInfo = departamentosInfo
+            DepartamentosInfo = departamentosInfo,
+            RegionesDisponibles = regionesDisponibles
         };
 
         if (usuario is not null)
@@ -67,6 +77,7 @@ public class UsuariosAdminController : Controller
             vm.Rol = usuario.Rol;
             vm.Activo = usuario.Activo;
             vm.LocalidadesJson = JsonSerializer.Serialize(usuario.Localidades);
+            vm.RegionesSeleccionadasIds = usuario.UsuarioRegiones.Select(ur => ur.RegionEventoId).ToList();
         }
 
         return vm;
@@ -118,13 +129,29 @@ public class UsuariosAdminController : Controller
         store.UsuariosAdministradores.Add(usuario);
         await store.SaveChangesAsync();
 
+        // Guardar regiones asignadas (solo para colaboradores)
+        if (vm.Rol == RolAdministrador.Colaborador && vm.RegionesSeleccionadasIds.Count > 0)
+        {
+            foreach (var regionId in vm.RegionesSeleccionadasIds)
+            {
+                store.UsuarioRegiones.Add(new UsuarioRegion
+                {
+                    UsuarioAdministradorId = usuario.Id,
+                    RegionEventoId = regionId
+                });
+            }
+            await store.SaveChangesAsync();
+        }
+
         return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("editar/{id:int}")]
     public async Task<IActionResult> Editar(int id)
     {
-        var usuario = await store.UsuariosAdministradores.FindAsync(id);
+        var usuario = await store.UsuariosAdministradores
+            .Include(u => u.UsuarioRegiones)
+            .FirstOrDefaultAsync(u => u.Id == id);
         if (usuario is null) return NotFound();
 
         var vm = CrearViewModel(usuario);
@@ -134,7 +161,9 @@ public class UsuariosAdminController : Controller
     [HttpPost("editar/{id:int}")]
     public async Task<IActionResult> EditarPost(int id, UsuarioFormViewModel vm)
     {
-        var usuario = await store.UsuariosAdministradores.FindAsync(id);
+        var usuario = await store.UsuariosAdministradores
+            .Include(u => u.UsuarioRegiones)
+            .FirstOrDefaultAsync(u => u.Id == id);
         if (usuario is null) return NotFound();
 
         if (!ModelState.IsValid)
@@ -167,6 +196,20 @@ public class UsuariosAdminController : Controller
         usuario.Rol = vm.Rol;
         usuario.Activo = vm.Activo;
         usuario.Localidades = vm.ParsearLocalidades();
+
+        // Actualizar regiones asignadas
+        store.UsuarioRegiones.RemoveRange(usuario.UsuarioRegiones);
+        if (vm.Rol == RolAdministrador.Colaborador)
+        {
+            foreach (var regionId in vm.RegionesSeleccionadasIds)
+            {
+                store.UsuarioRegiones.Add(new UsuarioRegion
+                {
+                    UsuarioAdministradorId = usuario.Id,
+                    RegionEventoId = regionId
+                });
+            }
+        }
 
         await store.SaveChangesAsync();
 
@@ -205,6 +248,12 @@ public class UsuarioFormViewModel
 
     /// <summary>Lista de departamentos con sus ciudades disponibles (para renderizar el formulario).</summary>
     public List<DepartamentoFormItem> DepartamentosInfo { get; set; } = [];
+
+    /// <summary>Regiones disponibles del evento activo.</summary>
+    public List<RegionEvento> RegionesDisponibles { get; set; } = [];
+
+    /// <summary>IDs de regiones asignadas al usuario.</summary>
+    public List<int> RegionesSeleccionadasIds { get; set; } = [];
 
     public Dictionary<string, List<string>> ParsearLocalidades()
     {

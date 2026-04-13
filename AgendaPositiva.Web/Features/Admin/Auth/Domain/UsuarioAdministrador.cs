@@ -1,3 +1,4 @@
+using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Commons.Domain;
 
 namespace AgendaPositiva.Web.Features.Admin.Auth.Domain;
@@ -19,4 +20,7 @@ public class UsuarioAdministrador : EntidadBase
     /// Lista vacía = acceso a TODAS las ciudades del departamento.
     /// </summary>
     public Dictionary<string, List<string>> Localidades { get; set; } = [];
+
+    // Navigation
+    public ICollection<UsuarioRegion> UsuarioRegiones { get; set; } = [];
 }
