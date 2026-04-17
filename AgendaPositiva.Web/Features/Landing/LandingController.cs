@@ -23,4 +23,10 @@ public class LandingController(AppDbContext db) : Controller
     {
         return View("~/Features/Landing/Views/PoliticaPrivacidad.cshtml");
     }
+
+    [Route("preguntas-frecuentes")]
+    public IActionResult PreguntasFrecuentes()
+    {
+        return View("~/Features/Landing/Views/PreguntasFrecuentes.cshtml");
+    }
 }

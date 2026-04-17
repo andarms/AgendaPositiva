@@ -1,0 +1,190 @@
+@{
+    Layout = "~/Features/Landing/Views/_Layout.cshtml";
+}
+
+<style>
+    .faq {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        font-family: 'Montserrat', sans-serif;
+        color: #1d1d1f;
+        line-height: 1.8;
+    }
+
+    .faq h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .faq details {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 10px;
+        background: #fff;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+    }
+
+    .faq summary {
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .faq summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .faq summary::after {
+        content: '+';
+        font-size: 1.25rem;
+        font-weight: 300;
+        color: #86868b;
+        flex-shrink: 0;
+    }
+
+    .faq details[open] summary::after {
+        content: '−';
+    }
+
+    .faq details[open] summary {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .faq .faq-answer {
+        padding: 1rem 1.25rem;
+        font-size: 0.8125rem;
+        color: #6e6e73;
+    }
+
+    .faq-footer {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 10px;
+        text-align: center;
+        font-size: 0.8125rem;
+        color: #6e6e73;
+    }
+
+    .faq-footer a {
+        color: #007aff;
+        text-decoration: none;
+    }
+
+    .faq-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="faq">
+    <h1>Preguntas Frecuentes</h1>
+
+    <div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.8125rem;color:#6e6e73;">
+        <p style="margin:0 0 0.5rem;font-weight:600;color:#1d1d1f;">¿Necesitas ayuda?</p>
+        <p style="margin:0;">Escríbenos por WhatsApp al <a href="https://wa.me/573177392885" target="_blank" rel="noopener noreferrer" style="color:#25d366;">3177392885</a>
+        o al correo <a href="mailto:bogota.conferencias@gmail.com" style="color:#007aff;">bogota.conferencias@gmail.com</a></p>
+    </div>
+
+    <details>
+        <summary>¿Cómo inscribo a una persona al evento?</summary>
+        <div class="faq-answer">
+            Inicia sesión en el panel de administración, ve a la sección de Inscripciones y haz clic en
+            "Nueva Inscripción". Deberás verificar el documento de la persona y completar el formulario con sus
+            datos personales. Recuerda contar con la autorización de la persona para registrar su información.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Puedo inscribir a una familia completa?</summary>
+        <div class="faq-answer">
+            Sí. Después de registrar a la persona principal, podrás agregar a su cónyuge, hijos y otros familiares
+            que asistirán al evento. Debes contar con la autorización de cada persona para compartir sus datos.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Cómo indico que una persona requiere hospedaje?</summary>
+        <div class="faq-answer">
+            Durante el proceso de inscripción se presenta la opción de hospedaje. Si la persona lo requiere,
+            selecciona la opción correspondiente y el equipo organizador se encargará de la asignación según
+            la disponibilidad.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Cómo puedo modificar los datos de una persona ya inscrita?</summary>
+        <div class="faq-answer">
+            Solo los administradores pueden editar la información de una inscripción. Si necesitas hacer un cambio,
+            envía un mensaje al WhatsApp <a href="https://wa.me/573177392885" target="_blank" rel="noopener noreferrer">3177392885</a>
+            o al correo <a href="mailto:bogota.conferencias@gmail.com">bogota.conferencias@gmail.com</a>
+            indicando los datos a corregir.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Cómo puedo cancelar la inscripción de una persona?</summary>
+        <div class="faq-answer">
+            Solo los administradores pueden cancelar inscripciones. Si necesitas cancelar una, envía un mensaje
+            al WhatsApp <a href="https://wa.me/573177392885" target="_blank" rel="noopener noreferrer">3177392885</a>
+            o al correo <a href="mailto:bogota.conferencias@gmail.com">bogota.conferencias@gmail.com</a>.
+            Los datos serán eliminados conforme a nuestra
+            <a href="/politica-privacidad">política de privacidad</a>.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Qué pasa con los datos personales de los inscritos?</summary>
+        <div class="faq-answer">
+            Los datos son tratados de forma confidencial y se usan exclusivamente para la organización del evento.
+            No utilizamos plataformas de publicidad ni cookies de seguimiento.
+            Puedes consultar todos los detalles en nuestra
+            <a href="/politica-privacidad">Política de Tratamiento de Datos Personales</a>.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Hay cupos limitados?</summary>
+        <div class="faq-answer">
+            Sí, los cupos son limitados y se asignan por región. Recomendamos inscribir a las personas con
+            anticipación para asegurar su lugar.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Cómo registro alergias alimentarias o necesidades especiales?</summary>
+        <div class="faq-answer">
+            Durante la inscripción encontrarás campos para indicar si la persona tiene alergias alimentarias o
+            necesidades especiales. Esta información será tenida en cuenta por el equipo organizador.
+        </div>
+    </details>
+
+    <details>
+        <summary>¿Qué pasa si no encuentro la localidad en la lista?</summary>
+        <div class="faq-answer">
+            Tratamos de incluir todos los municipios conocidos de Colombia. Si la localidad que buscas no está
+            presente, probablemente se trata de un corregimiento. En ese caso puedes seleccionar el municipio
+            más cercano, o solicitar que se añada a la lista enviando un mensaje al WhatsApp
+            <a href="https://wa.me/573177392885" target="_blank" rel="noopener noreferrer">3177392885</a>
+            o al correo <a href="mailto:bogota.conferencias@gmail.com">bogota.conferencias@gmail.com</a>.
+        </div>
+    </details>
+
+    <div class="faq-footer">
+        <p>¿Tienes otra pregunta? Escríbenos a
+            <a href="mailto:bogota.conferencias@gmail.com">bogota.conferencias@gmail.com</a>
+            o al WhatsApp <a href="https://wa.me/573177392885" target="_blank" rel="noopener noreferrer">3177392885</a>
+        </p>
+        <p style="margin-top:0.5rem;">
+            <a href="/politica-privacidad">Política de privacidad</a>
+        </p>
+    </div>
+</div>
