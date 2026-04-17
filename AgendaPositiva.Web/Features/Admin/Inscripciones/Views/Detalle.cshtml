@@ -165,15 +165,18 @@
         </div>
     </div>
     <div class="detalle-header__actions">
+        <a href="/admin/inscripciones/formulario" class="btn btn--secondary btn--lg">
+            + Nueva inscripción
+        </a>
         @if (User.IsInRole("Administrador"))
         {
-            <a href="/admin/inscripciones/@ins.Id/editar" class="btn btn--primary">
+            <a href="/admin/inscripciones/@ins.Id/editar" class="btn btn--primary btn--lg">
                 ✏️ Editar información
             </a>
         }
         @if (ins.GrupoFamiliar is not null)
         {
-            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary">
+            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary btn--lg">
                 Grupo familiar #@ins.GrupoFamiliar.Id
             </a>
         }
@@ -336,12 +339,10 @@
                             </span>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary"
-                               style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
+                            <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
                                 + Agregar familiar
                             </a>
-                            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary"
-                               style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
+                            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary btn--lg">
                                 Ver grupo completo
                             </a>
                         </div>
@@ -403,8 +404,7 @@
                         <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
                             Grupo Familiar
                         </div>
-                        <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary"
-                           style="font-size: 0.8125rem; padding: 0.4rem 1rem;">
+                        <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
                             + Agregar familiar
                         </a>
                     </div>
