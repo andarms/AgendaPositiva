@@ -17,4 +17,10 @@ public class LandingController(AppDbContext db) : Controller
         Response.StatusCode = 404;
         return View("~/Features/Landing/Views/NoEncontrado.cshtml");
     }
+
+    [Route("politica-privacidad")]
+    public IActionResult PoliticaPrivacidad()
+    {
+        return View("~/Features/Landing/Views/PoliticaPrivacidad.cshtml");
+    }
 }

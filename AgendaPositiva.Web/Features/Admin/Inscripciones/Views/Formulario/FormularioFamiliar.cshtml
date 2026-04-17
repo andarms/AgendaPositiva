@@ -27,6 +27,18 @@
         DepartamentosDisponibles = ViewBag.DepartamentosDisponibles as List<string>
     })
 
+    <div class="form-control" style="margin-top:1.5rem;">
+        <label style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:#1d1d1f;line-height:1.5;cursor:pointer;">
+            <input type="checkbox" name="AceptaPoliticaDatos" value="true" required
+                   style="margin-top:0.2rem;accent-color:#007aff;" />
+            <span>
+                Declaro que cuento con la autorización de la(s) persona(s) registrada(s) para compartir sus datos
+                y autorizo su tratamiento conforme a la
+                <a href="/politica-privacidad" target="_blank" style="color:#007aff;text-decoration:underline;">política de privacidad</a>.
+            </span>
+        </label>
+    </div>
+
     <div class="btn-group">
         <button type="submit" class="btn btn--primary">Guardar Cambios</button>
         <a href="/admin/inscripciones/formulario/verificar-familiares/@Model.InscripcionId"
