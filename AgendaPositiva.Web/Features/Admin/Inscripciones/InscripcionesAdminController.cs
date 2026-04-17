@@ -126,9 +126,8 @@ public class InscripcionesAdminController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         [FromQuery] string? nombre,
+        [FromQuery] string? documento,
         [FromQuery] string? departamento,
-        [FromQuery] EstadoInscripcion? estado,
-        [FromQuery] bool? hospedaje,
         [FromQuery] string? sortLocalidad,
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 50)
@@ -152,19 +151,15 @@ public class InscripcionesAdminController : Controller
                 (i.Persona.Nombres + " " + i.Persona.Apellidos).ToLower().Contains(term));
         }
 
+        if (!string.IsNullOrWhiteSpace(documento))
+        {
+            var term = documento.Trim();
+            query = query.Where(i => i.Persona.NumeroIdentificacion.Contains(term));
+        }
+
         if (!string.IsNullOrWhiteSpace(departamento))
         {
             query = query.Where(i => i.Departamento == departamento);
-        }
-
-        if (estado.HasValue)
-        {
-            query = query.Where(i => i.Estado == estado.Value);
-        }
-
-        if (hospedaje.HasValue)
-        {
-            query = query.Where(i => i.RequiereHospedaje == hospedaje.Value);
         }
 
         var orderedQuery = sortLocalidad switch
@@ -193,9 +188,8 @@ public class InscripcionesAdminController : Controller
                 ? ubicacionService.ObtenerNombresDepartamentos()
                 : DepartamentosAsignados,
             FiltroNombre = nombre,
+            FiltroDocumento = documento,
             FiltroDepartamento = departamento,
-            FiltroEstado = estado,
-            FiltroHospedaje = hospedaje,
             SortLocalidad = sortLocalidad,
             Pagina = pagina,
             PorPagina = porPagina,

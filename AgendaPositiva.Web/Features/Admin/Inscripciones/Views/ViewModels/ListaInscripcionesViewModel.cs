@@ -23,9 +23,8 @@ public class ListaInscripcionesViewModel
 
     // Filtros
     public string? FiltroNombre { get; init; }
+    public string? FiltroDocumento { get; init; }
     public string? FiltroDepartamento { get; init; }
-    public EstadoInscripcion? FiltroEstado { get; init; }
-    public bool? FiltroHospedaje { get; init; }
 
     // Sort
     public string? SortLocalidad { get; init; }
@@ -54,9 +53,8 @@ public class ListaInscripcionesViewModel
         var qs = new Dictionary<string, string?>
         {
             ["nombre"] = FiltroNombre,
+            ["documento"] = FiltroDocumento,
             ["departamento"] = FiltroDepartamento,
-            ["estado"] = FiltroEstado?.ToString(),
-            ["hospedaje"] = FiltroHospedaje?.ToString(),
             ["sortLocalidad"] = sort,
             ["porPagina"] = PorPagina.ToString(),
         };
@@ -72,9 +70,8 @@ public class ListaInscripcionesViewModel
         var qs = new Dictionary<string, string?>
         {
             ["nombre"] = FiltroNombre,
+            ["documento"] = FiltroDocumento,
             ["departamento"] = FiltroDepartamento,
-            ["estado"] = FiltroEstado?.ToString(),
-            ["hospedaje"] = FiltroHospedaje?.ToString(),
             ["sortLocalidad"] = SortLocalidad,
             ["pagina"] = pagina.ToString(),
             ["porPagina"] = (porPaginaOverride ?? PorPagina).ToString(),

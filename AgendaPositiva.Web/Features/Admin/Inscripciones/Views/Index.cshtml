@@ -47,7 +47,7 @@
                     @foreach (var r in cupo.Regiones)
                     {
                         <span
-                            style="font-size:0.6875rem;background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
+                            style="background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
                             @r.Nombre: @r.TotalInscritos/@r.Cupo
                         </span>
                     }
@@ -152,6 +152,11 @@
                        class="form-control" />
             </div>
             <div>
+                <label class="form-label">Nº Documento</label>
+                <input type="text" name="documento" value="@Model.FiltroDocumento" placeholder="Buscar por documento..."
+                       class="form-control" />
+            </div>
+            <div>
                 <label class="form-label">Localidad</label>
                 <select name="departamento" class="form-control">
                     <option value="">Todos</option>
@@ -161,27 +166,6 @@
                     }
                 </select>
             </div>
-            <div>
-                <label class="form-label">Estado</label>
-                <select name="estado" class="form-control">
-                    <option value="">Todos</option>
-                    @foreach (EstadoInscripcion e in Enum.GetValues<EstadoInscripcion>())
-                    {
-                        <option value="@e" selected="@(Model.FiltroEstado != null && Model.FiltroEstado == e)">
-                            @e.Humanize()</option>
-                        }
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label">Hospedaje</label>
-                    <select name="hospedaje" class="form-control">
-                        <option value="">Todos</option>
-                        <option value="true" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == true)">Sí
-                        </option>
-                        <option value="false" selected="@(Model.FiltroHospedaje != null && Model.FiltroHospedaje == false)">No
-                        </option>
-                    </select>
-                </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn btn--primary">Buscar</button>
                     <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
