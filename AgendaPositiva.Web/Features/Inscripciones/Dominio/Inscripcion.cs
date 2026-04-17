@@ -27,6 +27,8 @@ public class Inscripcion : EntidadBase
     public bool ParticipaComunionAncianos { get; set; } = false;
     /// <summary>¿Requiere el servicio de alimentación que ofrece la conferencia?</summary>
     public bool RequiereAlimentacion { get; set; } = false;
+    /// <summary>Preguntas adicionales para niños de 4-10 años (JSONB).</summary>
+    public PreguntasAdicionalesNino? PreguntasAdicionalesNino { get; set; }
 
     // Navigation properties
     public Persona Persona { get; set; } = null!;

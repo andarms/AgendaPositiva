@@ -354,6 +354,7 @@ public class InscripcionesAdminController : Controller
             "Grupo Familiar", "Servicios", "Necesidades Especiales",
             "Alergia Alimentaria", "Descripción Alergia",
             "Comunión Ancianos/Diácono/Diaconisa", "Servicio Alimentación",
+            "Participa FV KIDS", "Tipo de Sangre", "EPS",
             "Fecha Registro" };
 
         for (int i = 0; i < headers.Length; i++)
@@ -406,7 +407,10 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 18).Value = ins.DescripcionAlergia ?? "";
             ws.Cell(row, 19).Value = ins.ParticipaComunionAncianos ? "Sí" : "No";
             ws.Cell(row, 20).Value = ins.RequiereAlimentacion ? "Sí" : "No";
-            ws.Cell(row, 21).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
+            ws.Cell(row, 21).Value = ins.PreguntasAdicionalesNino is not null ? (ins.PreguntasAdicionalesNino.ParticipaFvKids ? "Sí" : "No") : "";
+            ws.Cell(row, 22).Value = ins.PreguntasAdicionalesNino?.TipoSangre?.Descripcion() ?? "";
+            ws.Cell(row, 23).Value = ins.PreguntasAdicionalesNino?.Eps ?? "";
+            ws.Cell(row, 24).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
         }
 
         ws.Columns().AdjustToContents();

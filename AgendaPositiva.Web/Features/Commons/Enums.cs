@@ -71,6 +71,34 @@ public enum ServicioInscripcion
     Otros
 }
 
+public enum TipoSangre
+{
+    OPositivo,
+    ONegativo,
+    APositivo,
+    ANegativo,
+    BPositivo,
+    BNegativo,
+    ABPositivo,
+    ABNegativo
+}
+
+public static class TipoSangreExtensions
+{
+    public static string Descripcion(this TipoSangre tipo) => tipo switch
+    {
+        TipoSangre.OPositivo => "O+",
+        TipoSangre.ONegativo => "O−",
+        TipoSangre.APositivo => "A+",
+        TipoSangre.ANegativo => "A−",
+        TipoSangre.BPositivo => "B+",
+        TipoSangre.BNegativo => "B−",
+        TipoSangre.ABPositivo => "AB+",
+        TipoSangre.ABNegativo => "AB−",
+        _ => tipo.ToString()
+    };
+}
+
 public static class ServicioInscripcionExtensions
 {
     public static string Descripcion(this ServicioInscripcion servicio) => servicio switch

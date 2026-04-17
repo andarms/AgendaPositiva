@@ -23,7 +23,8 @@ public record RegistrarPersonaPrincipalDto(
     bool TieneAlergiaAlimentaria = false,
     string? DescripcionAlergia = null,
     bool ParticipaComunionAncianos = false,
-    bool RequiereAlimentacion = false
+    bool RequiereAlimentacion = false,
+    PreguntasAdicionalesNino? PreguntasAdicionalesNino = null
 );
 
 public class RegistrarPersonaPrincipal
@@ -94,6 +95,7 @@ public class RegistrarPersonaPrincipal
             inscripcion.DescripcionAlergia = command.DescripcionAlergia;
             inscripcion.ParticipaComunionAncianos = command.ParticipaComunionAncianos;
             inscripcion.RequiereAlimentacion = command.RequiereAlimentacion;
+            inscripcion.PreguntasAdicionalesNino = command.PreguntasAdicionalesNino;
         }
         else
         {
@@ -128,6 +130,7 @@ public class RegistrarPersonaPrincipal
                 DescripcionAlergia = command.DescripcionAlergia,
                 ParticipaComunionAncianos = command.ParticipaComunionAncianos,
                 RequiereAlimentacion = command.RequiereAlimentacion,
+                PreguntasAdicionalesNino = command.PreguntasAdicionalesNino,
             };
             db.Inscripciones.Add(inscripcion);
 

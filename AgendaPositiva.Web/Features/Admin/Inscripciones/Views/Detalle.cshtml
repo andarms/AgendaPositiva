@@ -269,6 +269,24 @@
                                 </span>
                             }
                         </div>
+                        @if (ins.PreguntasAdicionalesNino is not null)
+                        {
+                            <div>
+                                <span class="field-label">Participa FV KIDS</span>
+                                <span class="indicator">
+                                    <span class="indicator__dot @(ins.PreguntasAdicionalesNino.ParticipaFvKids ? "indicator__dot--yes" : "indicator__dot--no")"></span>
+                                    @(ins.PreguntasAdicionalesNino.ParticipaFvKids ? "Sí" : "No")
+                                </span>
+                            </div>
+                            <div>
+                                <span class="field-label">Tipo de sangre</span>
+                                <span class="detail-value">@(ins.PreguntasAdicionalesNino.TipoSangre?.Descripcion() ?? "No indicado")</span>
+                            </div>
+                            <div>
+                                <span class="field-label">EPS</span>
+                                <span class="detail-value">@(string.IsNullOrEmpty(ins.PreguntasAdicionalesNino.Eps) ? "No indicada" : ins.PreguntasAdicionalesNino.Eps)</span>
+                            </div>
+                        }
                         <div class="field-span2">
                             <span class="field-label">Necesidades especiales</span>
                             @if (string.IsNullOrEmpty(ins.NecesidadesEspeciales))

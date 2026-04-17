@@ -80,6 +80,11 @@ public static class InscripcionesDbContextExtensions
 
             e.Property(i => i.DescripcionAlergia).HasMaxLength(500);
 
+            e.OwnsOne(i => i.PreguntasAdicionalesNino, pa =>
+            {
+                pa.ToJson();
+            });
+
             e.HasOne(i => i.Persona)
                 .WithMany(p => p.Inscripciones)
                 .HasForeignKey(i => i.PersonaId)

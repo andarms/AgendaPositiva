@@ -146,6 +146,32 @@
                    placeholder="Describa la alergia o intolerancia...">
         </div>
 
+        <div class="form-control form-grid__full" id="@id("ParticipaFvKids")_container" style="display:none">
+            <label for="@id("PreguntasAdicionalesNino_ParticipaFvKids")">¿El niño participará de la conferencia de FV KIDS? <span class="required">*</span></label>
+            <select id="@id("PreguntasAdicionalesNino_ParticipaFvKids")" name="@name("PreguntasAdicionalesNino.ParticipaFvKids")" required>
+                <option value="">-- Seleccione --</option>
+                <option value="false">No</option>
+                <option value="true">Sí</option>
+            </select>
+        </div>
+
+        <div class="form-control form-grid__full" id="@id("TipoSangre")_container" style="display:none">
+            <label for="@id("PreguntasAdicionalesNino_TipoSangre")">Tipo de sangre: <span class="required">*</span></label>
+            <select id="@id("PreguntasAdicionalesNino_TipoSangre")" name="@name("PreguntasAdicionalesNino.TipoSangre")" required>
+                <option value="">-- Seleccione --</option>
+                @foreach (TipoSangre tipo in Enum.GetValues<TipoSangre>())
+                {
+                    <option value="@tipo">@tipo.Descripcion()</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-control form-grid__full" id="@id("Eps")_container" style="display:none">
+            <label for="@id("PreguntasAdicionalesNino_Eps")">EPS: <span class="required">*</span></label>
+            <input type="text" id="@id("PreguntasAdicionalesNino_Eps")" name="@name("PreguntasAdicionalesNino.Eps")"
+                   placeholder="Nombre de la EPS..." required>
+        </div>
+
         <div class="form-control form-grid__full" id="@id("ComunionAncianos")_container" style="display:none">
             <label for="@id("ParticipaComunionAncianos")">¿Va a participar de la comunión de Ancianos, Diácono y
                 Diaconisa? <span class="required">*</span></label>
@@ -266,6 +292,12 @@
                     var alergiaContainer = document.getElementById('@id("AlergiaAlimentaria")_container');
                     var descripcionAlergiaContainer = document.getElementById('@id("DescripcionAlergia")_container');
                     var tieneAlergiaSelect = document.getElementById('@id("TieneAlergiaAlimentaria")');
+                    var participaFvKidsContainer = document.getElementById('@id("ParticipaFvKids")_container');
+                    var participaFvKidsSelect = document.getElementById('@id("PreguntasAdicionalesNino_ParticipaFvKids")');
+                    var tipoSangreContainer = document.getElementById('@id("TipoSangre")_container');
+                    var tipoSangreSelect = document.getElementById('@id("PreguntasAdicionalesNino_TipoSangre")');
+                    var epsContainer = document.getElementById('@id("Eps")_container');
+                    var epsInput = document.getElementById('@id("PreguntasAdicionalesNino_Eps")');
                     var comunionContainer = document.getElementById('@id("ComunionAncianos")_container');
                     var comunionSelect = document.getElementById('@id("ParticipaComunionAncianos")');
 
@@ -282,10 +314,16 @@
                             serviciosContainer.style.display = 'none';
                             alergiaContainer.style.display = 'none';
                             descripcionAlergiaContainer.style.display = 'none';
+                            participaFvKidsContainer.style.display = 'none';
+                            tipoSangreContainer.style.display = 'none';
+                            epsContainer.style.display = 'none';
                             comunionContainer.style.display = 'none';
                             comunionSelect.value = '';
                             comunionSelect.removeAttribute('required');
                             tieneAlergiaSelect.removeAttribute('required');
+                            participaFvKidsSelect.removeAttribute('required');
+                            tipoSangreSelect.removeAttribute('required');
+                            epsInput.removeAttribute('required');
                             return;
                         }
                         var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
@@ -302,14 +340,26 @@
                             comunionSelect.removeAttribute('required');
                         }
 
-                        // Alergia alimentaria: solo niños de 4 a 10 años
+                        // Preguntas para niños de 4 a 10 años
                         var esNino4a10 = edad >= 4 && edad <= 10;
                         alergiaContainer.style.display = esNino4a10 ? '' : 'none';
+                        participaFvKidsContainer.style.display = esNino4a10 ? '' : 'none';
+                        tipoSangreContainer.style.display = esNino4a10 ? '' : 'none';
+                        epsContainer.style.display = esNino4a10 ? '' : 'none';
                         if (esNino4a10) {
                             tieneAlergiaSelect.setAttribute('required', '');
+                            participaFvKidsSelect.setAttribute('required', '');
+                            tipoSangreSelect.setAttribute('required', '');
+                            epsInput.setAttribute('required', '');
                         } else {
                             tieneAlergiaSelect.value = '';
                             tieneAlergiaSelect.removeAttribute('required');
+                            participaFvKidsSelect.value = '';
+                            participaFvKidsSelect.removeAttribute('required');
+                            tipoSangreSelect.value = '';
+                            tipoSangreSelect.removeAttribute('required');
+                            epsInput.value = '';
+                            epsInput.removeAttribute('required');
                             descripcionAlergiaContainer.style.display = 'none';
                         }
                         actualizarDescripcionAlergia();
