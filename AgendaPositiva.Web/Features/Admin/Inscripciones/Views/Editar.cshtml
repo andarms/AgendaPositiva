@@ -1,0 +1,306 @@
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+@model EditarInscripcionViewModel
+@inject UbicacionService Ubicacion
+@{
+    Layout = "~/Features/Admin/Inscripciones/Views/Formulario/_FormularioLayout.cshtml";
+    var ins = Model.Inscripcion;
+    var persona = ins.Persona;
+    var departamentos = Model.DepartamentosDisponibles;
+    var internacional = UbicacionService.Internacional;
+}
+
+<div class="formulario-inscripcion">
+    <hgroup>
+        <h1>Editar Inscripción #@ins.Id</h1>
+        <p>@persona.NombreCompleto — @persona.TipoIdentificacion.Humanize() @persona.NumeroIdentificacion</p>
+    </hgroup>
+
+    @if (ViewBag.Error is string error)
+    {
+        <div class="alert alert--error" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; font-size: 0.875rem;">
+            @error
+        </div>
+    }
+
+    <form method="post" action="/admin/inscripciones/@ins.Id/editar">
+        <h2>Datos personales</h2>
+        <div class="form-grid">
+            <div class="form-control form-grid__half">
+                <label for="Nombres">Nombres: <span class="required">*</span></label>
+                <input type="text" id="Nombres" name="Nombres" value="@persona.Nombres" required>
+            </div>
+            <div class="form-control form-grid__half">
+                <label for="Apellidos">Apellidos: <span class="required">*</span></label>
+                <input type="text" id="Apellidos" name="Apellidos" value="@persona.Apellidos" required>
+            </div>
+            <div class="form-control">
+                <label for="Genero">Sexo: <span class="required">*</span></label>
+                <select id="Genero" name="Genero" required>
+                    @foreach (Genero genero in Enum.GetValues<Genero>())
+                    {
+                        <option value="@genero" selected="@(persona.Genero == genero)">@genero.Humanize()</option>
+                    }
+                </select>
+            </div>
+            <div class="form-control">
+                <label for="FechaNacimiento">Fecha de Nacimiento: <span class="required">*</span></label>
+                <input type="date" id="FechaNacimiento" name="FechaNacimiento"
+                       value="@persona.FechaNacimiento.ToString("yyyy-MM-dd")"
+                       min="1900-01-01" max="@DateOnly.FromDateTime(DateTime.Today.AddYears(-2)).ToString("yyyy-MM-dd")" required>
+            </div>
+            <div class="form-control">
+                <label for="Telefono">Teléfono: <span class="required">*</span></label>
+                <input type="tel" id="Telefono" name="Telefono" value="@persona.Telefono"
+                       pattern="[0-9]+" inputmode="numeric"
+                       oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+            </div>
+            <div class="form-control">
+                <label for="Email">Correo Electrónico:</label>
+                <input type="email" id="Email" name="Email" value="@persona.Email">
+            </div>
+        </div>
+
+        <h2>Ubicación</h2>
+        <div class="form-grid">
+            <div class="form-control">
+                <label for="Departamento">Departamento: <span class="required">*</span></label>
+                <select id="Departamento" name="Departamento" required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach (var dep in departamentos)
+                    {
+                        <option value="@dep" selected="@(dep == ins.Departamento)">@dep</option>
+                    }
+                </select>
+            </div>
+            <div class="form-control" id="Ciudad_container">
+                <label for="Ciudad">Ciudad: <span class="required">*</span></label>
+                <select id="Ciudad" name="Ciudad">
+                    <option value="">-- Seleccione --</option>
+                </select>
+                <input type="text" id="Ciudad_text" name="Ciudad" placeholder="Ej: Miami, Nueva York..."
+                       style="display:none" value="@(ins.Departamento == internacional ? ins.Ciudad : "")">
+            </div>
+        </div>
+
+        <h2>Inscripción</h2>
+        <div class="form-grid">
+            <div class="form-control form-grid__full">
+                <label for="RequiereHospedaje">¿Requiere hospedaje? <span class="required">*</span></label>
+                <select id="RequiereHospedaje" name="RequiereHospedaje" required>
+                    <option value="true" selected="@ins.RequiereHospedaje">Sí</option>
+                    <option value="false" selected="@(!ins.RequiereHospedaje)">No</option>
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full">
+                <label for="RequiereAlimentacion">¿Requiere el servicio de alimentación? <span class="required">*</span></label>
+                <select id="RequiereAlimentacion" name="RequiereAlimentacion" required>
+                    <option value="false" selected="@(!ins.RequiereAlimentacion)">No</option>
+                    <option value="true" selected="@ins.RequiereAlimentacion">Sí</option>
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="ComunionAncianos_container" style="display:none">
+                <label for="ParticipaComunionAncianos">¿Va a participar de la comunión de Ancianos, Diácono y Diaconisa? <span class="required">*</span></label>
+                <select id="ParticipaComunionAncianos" name="ParticipaComunionAncianos" required>
+                    <option value="false" selected="@(!ins.ParticipaComunionAncianos)">No</option>
+                    <option value="true" selected="@ins.ParticipaComunionAncianos">Sí</option>
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="Servicios_container" style="display:none">
+                <label>Actualmente en su localidad está sirviendo en alguno de estos servicios?:</label>
+                <div class="checkbox-group">
+                    @foreach (ServicioInscripcion servicio in Enum.GetValues<ServicioInscripcion>())
+                    {
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="Servicios" value="@servicio"
+                                   @(ins.Servicios.Contains(servicio) ? "checked" : "")> @servicio.Descripcion()
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <div class="form-control form-grid__full" id="AlergiaAlimentaria_container" style="display:none">
+                <label for="TieneAlergiaAlimentaria">¿Presenta alguna intolerancia o alergia alimenticia? <span class="required">*</span></label>
+                <select id="TieneAlergiaAlimentaria" name="TieneAlergiaAlimentaria" required>
+                    <option value="false" selected="@(!ins.TieneAlergiaAlimentaria)">No</option>
+                    <option value="true" selected="@ins.TieneAlergiaAlimentaria">Sí</option>
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="DescripcionAlergia_container" style="display:none">
+                <label for="DescripcionAlergia">Describa cuál:</label>
+                <input type="text" id="DescripcionAlergia" name="DescripcionAlergia"
+                       value="@ins.DescripcionAlergia" placeholder="Describa la alergia o intolerancia...">
+            </div>
+
+            <div class="form-control form-grid__full" id="ParticipaFvKids_container" style="display:none">
+                <label for="PreguntasAdicionalesNino_ParticipaFvKids">¿El niño participará de la conferencia de FV KIDS? <span class="required">*</span></label>
+                <select id="PreguntasAdicionalesNino_ParticipaFvKids" name="PreguntasAdicionalesNino.ParticipaFvKids" required>
+                    <option value="false" selected="@(ins.PreguntasAdicionalesNino is null || !ins.PreguntasAdicionalesNino.ParticipaFvKids)">No</option>
+                    <option value="true" selected="@(ins.PreguntasAdicionalesNino?.ParticipaFvKids == true)">Sí</option>
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="TipoSangre_container" style="display:none">
+                <label for="PreguntasAdicionalesNino_TipoSangre">Tipo de sangre: <span class="required">*</span></label>
+                <select id="PreguntasAdicionalesNino_TipoSangre" name="PreguntasAdicionalesNino.TipoSangre" required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach (TipoSangre tipo in Enum.GetValues<TipoSangre>())
+                    {
+                        <option value="@tipo" selected="@(ins.PreguntasAdicionalesNino?.TipoSangre == tipo)">@tipo.Descripcion()</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="Eps_container" style="display:none">
+                <label for="PreguntasAdicionalesNino_Eps">EPS: <span class="required">*</span></label>
+                <input type="text" id="PreguntasAdicionalesNino_Eps" name="PreguntasAdicionalesNino.Eps"
+                       value="@ins.PreguntasAdicionalesNino?.Eps" placeholder="Nombre de la EPS..." required>
+            </div>
+
+            <div class="form-control form-grid__full">
+                <label for="NecesidadesEspeciales"><strong>NECESIDADES ESPECIALES:</strong></label>
+                <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se encuentran
+                    en recuperación médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí.</p>
+                <textarea id="NecesidadesEspeciales" name="NecesidadesEspeciales">@ins.NecesidadesEspeciales</textarea>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
+            <button type="submit" class="btn btn--primary">Guardar cambios</button>
+            <a href="/admin/inscripciones/@ins.Id" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        var depSelect = document.getElementById('Departamento');
+        var ciudadSelect = document.getElementById('Ciudad');
+        var ciudadText = document.getElementById('Ciudad_text');
+        var internacional = '@internacional';
+        var ciudadDefault = '@ins.Ciudad';
+
+        function actualizarVisibilidad(dep) {
+            if (dep === internacional) {
+                ciudadSelect.style.display = 'none';
+                ciudadSelect.removeAttribute('required');
+                ciudadSelect.removeAttribute('name');
+                ciudadSelect.value = '';
+                ciudadText.style.display = '';
+                ciudadText.setAttribute('required', '');
+                ciudadText.setAttribute('name', 'Ciudad');
+            } else {
+                ciudadSelect.style.display = '';
+                ciudadSelect.setAttribute('required', '');
+                ciudadSelect.setAttribute('name', 'Ciudad');
+                ciudadText.style.display = 'none';
+                ciudadText.removeAttribute('required');
+                ciudadText.removeAttribute('name');
+                ciudadText.value = '';
+            }
+        }
+
+        function cargarCiudades(departamento, ciudadSel) {
+            ciudadSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+            if (!departamento || departamento === internacional) return;
+            fetch('/api/ubicacion/ciudades?departamento=' + encodeURIComponent(departamento))
+                .then(function (r) { return r.json(); })
+                .then(function (ciudades) {
+                    ciudades.forEach(function (c) {
+                        var opt = document.createElement('option');
+                        opt.value = c;
+                        opt.textContent = c;
+                        if (c === ciudadSel) opt.selected = true;
+                        ciudadSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        actualizarVisibilidad(depSelect.value);
+        if (depSelect.value === internacional) {
+            ciudadText.value = ciudadDefault;
+        } else if (depSelect.value) {
+            cargarCiudades(depSelect.value, ciudadDefault);
+        }
+
+        depSelect.addEventListener('change', function () {
+            actualizarVisibilidad(this.value);
+            cargarCiudades(this.value, '');
+        });
+
+        // Conditional fields based on age
+        var fechaNacInput = document.getElementById('FechaNacimiento');
+        var serviciosContainer = document.getElementById('Servicios_container');
+        var alergiaContainer = document.getElementById('AlergiaAlimentaria_container');
+        var descripcionAlergiaContainer = document.getElementById('DescripcionAlergia_container');
+        var tieneAlergiaSelect = document.getElementById('TieneAlergiaAlimentaria');
+        var participaFvKidsContainer = document.getElementById('ParticipaFvKids_container');
+        var participaFvKidsSelect = document.getElementById('PreguntasAdicionalesNino_ParticipaFvKids');
+        var tipoSangreContainer = document.getElementById('TipoSangre_container');
+        var tipoSangreSelect = document.getElementById('PreguntasAdicionalesNino_TipoSangre');
+        var epsContainer = document.getElementById('Eps_container');
+        var epsInput = document.getElementById('PreguntasAdicionalesNino_Eps');
+        var comunionContainer = document.getElementById('ComunionAncianos_container');
+        var comunionSelect = document.getElementById('ParticipaComunionAncianos');
+
+        function calcularEdad(fechaNac) {
+            var hoy = new Date();
+            var edad = hoy.getFullYear() - fechaNac.getFullYear();
+            var m = hoy.getMonth() - fechaNac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
+            return edad;
+        }
+
+        function actualizarCamposCondicionales() {
+            if (!fechaNacInput.value) return;
+            var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
+            var edad = calcularEdad(fechaNac);
+
+            serviciosContainer.style.display = edad >= 16 ? '' : 'none';
+
+            var esMayorDeEdad = edad >= 18;
+            comunionContainer.style.display = esMayorDeEdad ? '' : 'none';
+            if (esMayorDeEdad) {
+                comunionSelect.setAttribute('required', '');
+            } else {
+                comunionSelect.removeAttribute('required');
+            }
+
+            var esNino4a10 = edad >= 4 && edad <= 10;
+            alergiaContainer.style.display = esNino4a10 ? '' : 'none';
+            participaFvKidsContainer.style.display = esNino4a10 ? '' : 'none';
+            tipoSangreContainer.style.display = esNino4a10 ? '' : 'none';
+            epsContainer.style.display = esNino4a10 ? '' : 'none';
+            if (esNino4a10) {
+                tieneAlergiaSelect.setAttribute('required', '');
+                participaFvKidsSelect.setAttribute('required', '');
+                tipoSangreSelect.setAttribute('required', '');
+                epsInput.setAttribute('required', '');
+            } else {
+                tieneAlergiaSelect.removeAttribute('required');
+                participaFvKidsSelect.removeAttribute('required');
+                tipoSangreSelect.removeAttribute('required');
+                epsInput.removeAttribute('required');
+            }
+            actualizarDescripcionAlergia();
+        }
+
+        function actualizarDescripcionAlergia() {
+            if (alergiaContainer.style.display !== 'none' && tieneAlergiaSelect && tieneAlergiaSelect.value === 'true') {
+                descripcionAlergiaContainer.style.display = '';
+            } else {
+                descripcionAlergiaContainer.style.display = 'none';
+            }
+        }
+
+        actualizarCamposCondicionales();
+        fechaNacInput.addEventListener('change', actualizarCamposCondicionales);
+        tieneAlergiaSelect.addEventListener('change', actualizarDescripcionAlergia);
+    })();
+</script>

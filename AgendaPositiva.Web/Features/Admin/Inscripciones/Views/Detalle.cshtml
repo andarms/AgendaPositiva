@@ -164,14 +164,20 @@
             <span>Registrado @ins.FechaCreacion.ToString("dd MMM yyyy, HH:mm")</span>
         </div>
     </div>
-    @if (ins.GrupoFamiliar is not null)
-    {
-        <div class="detalle-header__actions">
+    <div class="detalle-header__actions">
+        @if (User.IsInRole("Administrador"))
+        {
+            <a href="/admin/inscripciones/@ins.Id/editar" class="btn btn--primary">
+                ✏️ Editar información
+            </a>
+        }
+        @if (ins.GrupoFamiliar is not null)
+        {
             <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary">
                 Grupo familiar #@ins.GrupoFamiliar.Id
             </a>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 <div class="detail-grid">

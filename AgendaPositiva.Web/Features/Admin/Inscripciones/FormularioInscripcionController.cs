@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Admin.Auditoria;
 using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Operaciones;
@@ -158,6 +159,16 @@ public class FormularioInscripcionController : Controller
 
         if (result.IsSuccess)
         {
+            var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+            store.AuditoriaAdmin.Add(new AuditoriaAdmin
+            {
+                InscripcionId = result.Value,
+                Usuario = usuario,
+                Accion = "Registro de inscripción",
+                ValorNuevo = $"{command.Nombres} {command.Apellidos} — {command.TipoIdentificacion} {command.NumeroIdentificacion}"
+            });
+            store.SaveChanges();
+
             if (accion == "terminar")
                 return Redirect($"/admin/inscripciones/{result.Value}");
 
@@ -253,6 +264,18 @@ public class FormularioInscripcionController : Controller
         // Si elijo "A es mi Tío", C guarda "Sobrino de A"
         var inverso = parentesco.ObtenerInverso(inscripcion.Persona.Genero);
         await handler.ConPersonaExistente(inscripcionId, personaExistenteId, inverso, personaExistenteId);
+
+        var personaAgregada = store.Personas.Find(personaExistenteId);
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = inscripcionId,
+            Usuario = usuario,
+            Accion = "Familiar existente agregado",
+            ValorNuevo = $"{personaAgregada?.NombreCompleto ?? "Desconocido"} — {parentesco}"
+        });
+        store.SaveChanges();
+
         return RedirectToAction("VerificarFamiliares", new { inscripcionId });
     }
 
@@ -287,7 +310,18 @@ public class FormularioInscripcionController : Controller
         var result = await handler.ConPersonaNueva(inscripcionId, datosConServicios, relacion, inscripcion.PersonaId);
 
         if (result.IsSuccess)
+        {
+            var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+            store.AuditoriaAdmin.Add(new AuditoriaAdmin
+            {
+                InscripcionId = inscripcionId,
+                Usuario = usuario,
+                Accion = "Familiar nuevo registrado",
+                ValorNuevo = $"{datos.Nombres} {datos.Apellidos} — {relacion}"
+            });
+            store.SaveChanges();
             return RedirectToAction("VerificarFamiliares", new { inscripcionId });
+        }
 
         ViewBag.DepartamentosDisponibles = DepartamentosDisponibles;
         return View("~/Features/Admin/Inscripciones/Views/Formulario/FormularioFamiliar.cshtml", new

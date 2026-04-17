@@ -300,6 +300,94 @@ public class InscripcionesAdminController : Controller
         return RedirectToAction(nameof(Detalle), new { id });
     }
 
+    [HttpGet("{id:int}/editar")]
+    [Authorize(Roles = "Administrador")]
+    public IActionResult Editar(int id)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        return View("~/Features/Admin/Inscripciones/Views/Editar.cshtml",
+            new Views.ViewModels.EditarInscripcionViewModel
+            {
+                Inscripcion = inscripcion,
+                DepartamentosDisponibles = ubicacionService.ObtenerNombresDepartamentos()
+            });
+    }
+
+    [HttpPost("{id:int}/editar")]
+    [Authorize(Roles = "Administrador")]
+    public IActionResult PostEditar(
+        int id,
+        [FromForm] string Nombres,
+        [FromForm] string Apellidos,
+        [FromForm] Genero Genero,
+        [FromForm] DateOnly FechaNacimiento,
+        [FromForm] string Telefono,
+        [FromForm] string? Email,
+        [FromForm] string Departamento,
+        [FromForm] string Ciudad,
+        [FromForm] bool RequiereHospedaje,
+        [FromForm] bool RequiereAlimentacion,
+        [FromForm] bool ParticipaComunionAncianos,
+        [FromForm] bool TieneAlergiaAlimentaria,
+        [FromForm] string? DescripcionAlergia,
+        [FromForm] string? NecesidadesEspeciales,
+        [FromForm(Name = "Servicios")] List<ServicioInscripcion>? Servicios,
+        [FromForm] PreguntasAdicionalesNino? PreguntasAdicionalesNino)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        var cambios = new List<string>();
+        var persona = inscripcion.Persona;
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+
+        // Track persona changes
+        if (persona.Nombres != Nombres) { cambios.Add($"Nombres: {persona.Nombres} → {Nombres}"); persona.Nombres = Nombres; }
+        if (persona.Apellidos != Apellidos) { cambios.Add($"Apellidos: {persona.Apellidos} → {Apellidos}"); persona.Apellidos = Apellidos; }
+        if (persona.Genero != Genero) { cambios.Add($"Género: {persona.Genero.Humanize()} → {Genero.Humanize()}"); persona.Genero = Genero; }
+        if (persona.FechaNacimiento != FechaNacimiento) { cambios.Add($"Fecha nacimiento: {persona.FechaNacimiento:dd/MM/yyyy} → {FechaNacimiento:dd/MM/yyyy}"); persona.FechaNacimiento = FechaNacimiento; }
+        if (persona.Telefono != Telefono) { cambios.Add($"Teléfono: {persona.Telefono} → {Telefono}"); persona.Telefono = Telefono; }
+        if (persona.Email != Email) { cambios.Add($"Email: {persona.Email ?? "—"} → {Email ?? "—"}"); persona.Email = Email; }
+
+        // Track inscription changes
+        if (inscripcion.Departamento != Departamento) { cambios.Add($"Departamento: {inscripcion.Departamento} → {Departamento}"); inscripcion.Departamento = Departamento; }
+        if (inscripcion.Ciudad != Ciudad) { cambios.Add($"Ciudad: {inscripcion.Ciudad} → {Ciudad}"); inscripcion.Ciudad = Ciudad; }
+        if (inscripcion.RequiereHospedaje != RequiereHospedaje) { cambios.Add($"Hospedaje: {(inscripcion.RequiereHospedaje ? "Sí" : "No")} → {(RequiereHospedaje ? "Sí" : "No")}"); inscripcion.RequiereHospedaje = RequiereHospedaje; }
+        if (inscripcion.RequiereAlimentacion != RequiereAlimentacion) { cambios.Add($"Alimentación: {(inscripcion.RequiereAlimentacion ? "Sí" : "No")} → {(RequiereAlimentacion ? "Sí" : "No")}"); inscripcion.RequiereAlimentacion = RequiereAlimentacion; }
+        if (inscripcion.ParticipaComunionAncianos != ParticipaComunionAncianos) { cambios.Add($"Comunión: {(inscripcion.ParticipaComunionAncianos ? "Sí" : "No")} → {(ParticipaComunionAncianos ? "Sí" : "No")}"); inscripcion.ParticipaComunionAncianos = ParticipaComunionAncianos; }
+        if (inscripcion.TieneAlergiaAlimentaria != TieneAlergiaAlimentaria) { cambios.Add($"Alergia: {(inscripcion.TieneAlergiaAlimentaria ? "Sí" : "No")} → {(TieneAlergiaAlimentaria ? "Sí" : "No")}"); inscripcion.TieneAlergiaAlimentaria = TieneAlergiaAlimentaria; }
+        if (inscripcion.DescripcionAlergia != DescripcionAlergia) { inscripcion.DescripcionAlergia = DescripcionAlergia; }
+        if (inscripcion.NecesidadesEspeciales != NecesidadesEspeciales) { inscripcion.NecesidadesEspeciales = NecesidadesEspeciales; }
+
+        inscripcion.Servicios = Servicios ?? [];
+        inscripcion.PreguntasAdicionalesNino = PreguntasAdicionalesNino;
+        inscripcion.FechaActualizacion = DateTime.UtcNow;
+
+        if (cambios.Count > 0)
+        {
+            store.AuditoriaAdmin.Add(new AuditoriaAdmin
+            {
+                InscripcionId = id,
+                Usuario = usuario,
+                Accion = "Edición de inscripción",
+                ValorAnterior = string.Join("; ", cambios.Select(c => c.Split(" → ")[0])),
+                ValorNuevo = string.Join("; ", cambios.Select(c => c.Contains(" → ") ? c.Split(" → ")[1] : c))
+            });
+        }
+
+        store.SaveChanges();
+
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
     [HttpGet("grupo/{grupoId:int}")]
     public IActionResult GrupoFamiliar(int grupoId)
     {
@@ -400,7 +488,7 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
             ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
             ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
-            ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "N/A";
+            ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "";
             ws.Cell(row, 15).Value = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
             ws.Cell(row, 16).Value = ins.NecesidadesEspeciales ?? "";
             ws.Cell(row, 17).Value = ins.TieneAlergiaAlimentaria ? "Sí" : "No";
