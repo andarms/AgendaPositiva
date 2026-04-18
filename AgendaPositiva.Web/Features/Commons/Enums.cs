@@ -16,7 +16,8 @@ public enum TipoIdentificacion
     Nit,
     TarjetaIdentidad,
     CedulaExtranjeria,
-    RegistroCivil
+    RegistroCivil,
+    PPT
 }
 
 public enum Parentesco

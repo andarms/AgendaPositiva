@@ -75,7 +75,7 @@
     <div class="form-control">
         <label for="@id("FechaNacimiento")">Fecha de Nacimiento: <span class="required">*</span></label>
         <input type="date" id="@id("FechaNacimiento")" name="@name("FechaNacimiento")" min="1900-01-01"
-               max="@DateOnly.FromDateTime(DateTime.Today.AddYears(-2)).ToString("yyyy-MM-dd")" required>
+               max="@DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd")" required>
     </div>
 
     <div class="form-control">
@@ -147,234 +147,251 @@
         </div>
 
         <div class="form-control form-grid__full" id="@id("ParticipaFvKids")_container" style="display:none">
-            <label for="@id("PreguntasAdicionalesNino_ParticipaFvKids")">¿El niño participará de la conferencia de FV KIDS? <span class="required">*</span></label>
-            <select id="@id("PreguntasAdicionalesNino_ParticipaFvKids")" name="@name("PreguntasAdicionalesNino.ParticipaFvKids")" required>
-                <option value="">-- Seleccione --</option>
-                <option value="false">No</option>
-                <option value="true">Sí</option>
-            </select>
-        </div>
-
-        <div class="form-control form-grid__full" id="@id("TipoSangre")_container" style="display:none">
-            <label for="@id("PreguntasAdicionalesNino_TipoSangre")">Tipo de sangre: <span class="required">*</span></label>
-            <select id="@id("PreguntasAdicionalesNino_TipoSangre")" name="@name("PreguntasAdicionalesNino.TipoSangre")" required>
-                <option value="">-- Seleccione --</option>
-                @foreach (TipoSangre tipo in Enum.GetValues<TipoSangre>())
-                {
-                    <option value="@tipo">@tipo.Descripcion()</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-control form-grid__full" id="@id("Eps")_container" style="display:none">
-            <label for="@id("PreguntasAdicionalesNino_Eps")">EPS: <span class="required">*</span></label>
-            <input type="text" id="@id("PreguntasAdicionalesNino_Eps")" name="@name("PreguntasAdicionalesNino.Eps")"
-                   placeholder="Nombre de la EPS..." required>
-        </div>
-
-        <div class="form-control form-grid__full" id="@id("ComunionAncianos")_container" style="display:none">
-            <label for="@id("ParticipaComunionAncianos")">¿Va a participar de la comunión de Ancianos, Diácono y
-                Diaconisa? <span class="required">*</span></label>
-                <select id="@id("ParticipaComunionAncianos")" name="@name("ParticipaComunionAncianos")" required>
+            <label for="@id("PreguntasAdicionalesNino_ParticipaFvKids")">¿El niño participará de la conferencia de FV KIDS?
+                <span class="required">*</span></label>
+                <select id="@id("PreguntasAdicionalesNino_ParticipaFvKids")"
+                        name="@name("PreguntasAdicionalesNino.ParticipaFvKids")" required>
                     <option value="">-- Seleccione --</option>
                     <option value="false">No</option>
                     <option value="true">Sí</option>
                 </select>
             </div>
 
-            <div class="form-control form-grid__full">
-                <label for="@id("RequiereAlimentacion")">¿Requiere usted el servicio de alimentación que ofrece la
-                    conferencia? <span class="required">*</span></label>
-                    <select id="@id("RequiereAlimentacion")" name="@name("RequiereAlimentacion")" required>
+            <div class="form-control form-grid__full" id="@id("TipoSangre")_container" style="display:none">
+                <label for="@id("PreguntasAdicionalesNino_TipoSangre")">Tipo de sangre: <span class="required">*</span></label>
+                <select id="@id("PreguntasAdicionalesNino_TipoSangre")" name="@name("PreguntasAdicionalesNino.TipoSangre")"
+                        required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach (TipoSangre tipo in Enum.GetValues<TipoSangre>())
+                    {
+                        <option value="@tipo">@tipo.Descripcion()</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-control form-grid__full" id="@id("Eps")_container" style="display:none">
+                <label for="@id("PreguntasAdicionalesNino_Eps")">EPS: <span class="required">*</span></label>
+                <input type="text" id="@id("PreguntasAdicionalesNino_Eps")" name="@name("PreguntasAdicionalesNino.Eps")"
+                       placeholder="Nombre de la EPS..." required>
+            </div>
+
+            <div class="form-control form-grid__full" id="@id("ComunionAncianos")_container" style="display:none">
+                <label for="@id("ParticipaComunionAncianos")">¿Va a participar de la comunión de Ancianos, Diácono y
+                    Diaconisa? <span class="required">*</span></label>
+                    <select id="@id("ParticipaComunionAncianos")" name="@name("ParticipaComunionAncianos")" required>
                         <option value="">-- Seleccione --</option>
                         <option value="false">No</option>
                         <option value="true">Sí</option>
                     </select>
                 </div>
 
-                <div class="form-control form-grid__full">
-                    <label for="@id("NecesidadesEspeciales")"><strong>NECESIDADES ESPECIALES:</strong></label>
-                    <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se
-                        encuentran
-                        en recuperación
-                        médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí.
-                        Esta
-                        información nos ayudará a gestionar el hospedaje de la mejor manera posible y, cuando sea necesario,
-                        procurar
-                        que las personas que requieran apoyo puedan alojarse juntas. Las solicitudes se atenderán según
-                        disponibilidad.
-                    </p>
-                    <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
-                </div>
+                <div class="form-control form-grid__full" id="@id("RequiereAlimentacion")_container" style="display:none">
+                    <label for="@id("RequiereAlimentacion")">¿Requiere usted el servicio de alimentación que ofrece la
+                        conferencia? <span class="required">*</span></label>
+                        <select id="@id("RequiereAlimentacion")" name="@name("RequiereAlimentacion")" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control form-grid__full">
+                        <label for="@id("NecesidadesEspeciales")"><strong>NECESIDADES ESPECIALES:</strong></label>
+                        <p class="helpertext">Si usted o sus acompañantes utilizan silla de ruedas, tienen movilidad reducida, se
+                            encuentran
+                            en recuperación
+                            médica, presentan alguna condición cognitiva o requieren algún apoyo adicional, por favor indíquelo aquí.
+                            Esta
+                            información nos ayudará a gestionar el hospedaje de la mejor manera posible y, cuando sea necesario,
+                            procurar
+                            que las personas que requieran apoyo puedan alojarse juntas. Las solicitudes se atenderán según
+                            disponibilidad.
+                        </p>
+                        <textarea id="@id("NecesidadesEspeciales")" name="@name("NecesidadesEspeciales")"></textarea>
+                    </div>
 
     
 
-            </div>
-
-            @if (Model.MostrarRelacion)
-            {
-                <div class="form-control">
-                    <label for="@id("Parentesco")">Parentesco: <span class="required">*</span></label>
-                    <select id="@id("Parentesco")" name="@name("Parentesco")" required>
-                        <option value="">-- Seleccione --</option>
-                        @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
-                        {
-                            <option value="@rel">@rel.Humanize()</option>
-                        }
-                    </select>
                 </div>
-            }
 
-            <script>
-                (function () {
-                    var depSelect = document.getElementById('@id("Departamento")');
-                    var ciudadSelect = document.getElementById('@id("Ciudad")');
-                    var ciudadText = document.getElementById('@id("Ciudad")_text');
-                    var ciudadContainer = document.getElementById('@id("Ciudad")_container');
-                    if (!depSelect || !ciudadSelect) return;
+                @if (Model.MostrarRelacion)
+                {
+                    <div class="form-control">
+                        <label for="@id("Parentesco")">Parentesco: <span class="required">*</span></label>
+                        <select id="@id("Parentesco")" name="@name("Parentesco")" required>
+                            <option value="">-- Seleccione --</option>
+                            @foreach (Parentesco rel in Enum.GetValues<Parentesco>())
+                            {
+                                <option value="@rel">@rel.Humanize()</option>
+                            }
+                        </select>
+                    </div>
+                }
 
-                    var ciudadDefault = '@Model.CiudadDefault';
-                    var internacional = '@AgendaPositiva.Web.Features.Inscripciones.Dominio.UbicacionService.Internacional';
+                <script>
+                    (function () {
+                        var depSelect = document.getElementById('@id("Departamento")');
+                        var ciudadSelect = document.getElementById('@id("Ciudad")');
+                        var ciudadText = document.getElementById('@id("Ciudad")_text');
+                        var ciudadContainer = document.getElementById('@id("Ciudad")_container');
+                        if (!depSelect || !ciudadSelect) return;
 
-                    function actualizarVisibilidad(dep) {
-                        if (dep === internacional) {
-                            ciudadSelect.style.display = 'none';
-                            ciudadSelect.removeAttribute('required');
-                            ciudadSelect.removeAttribute('name');
-                            ciudadSelect.value = '';
-                            ciudadText.style.display = '';
-                            ciudadText.setAttribute('required', '');
-                            ciudadText.setAttribute('name', '@name("Ciudad")');
-                        } else {
-                            ciudadSelect.style.display = '';
-                            ciudadSelect.setAttribute('required', '');
-                            ciudadSelect.setAttribute('name', '@name("Ciudad")');
-                            ciudadText.style.display = 'none';
-                            ciudadText.removeAttribute('required');
-                            ciudadText.removeAttribute('name');
-                            ciudadText.value = '';
+                        var ciudadDefault = '@Model.CiudadDefault';
+                        var internacional = '@AgendaPositiva.Web.Features.Inscripciones.Dominio.UbicacionService.Internacional';
+
+                        function actualizarVisibilidad(dep) {
+                            if (dep === internacional) {
+                                ciudadSelect.style.display = 'none';
+                                ciudadSelect.removeAttribute('required');
+                                ciudadSelect.removeAttribute('name');
+                                ciudadSelect.value = '';
+                                ciudadText.style.display = '';
+                                ciudadText.setAttribute('required', '');
+                                ciudadText.setAttribute('name', '@name("Ciudad")');
+                            } else {
+                                ciudadSelect.style.display = '';
+                                ciudadSelect.setAttribute('required', '');
+                                ciudadSelect.setAttribute('name', '@name("Ciudad")');
+                                ciudadText.style.display = 'none';
+                                ciudadText.removeAttribute('required');
+                                ciudadText.removeAttribute('name');
+                                ciudadText.value = '';
+                            }
                         }
-                    }
 
-                    function cargarCiudades(departamento, ciudadSel) {
-                        ciudadSelect.innerHTML = '<option value="">-- Seleccione --</option>';
-                        if (!departamento || departamento === internacional) return;
-                        fetch('/api/ubicacion/ciudades?departamento=' + encodeURIComponent(departamento))
-                            .then(function (r) { return r.json(); })
-                            .then(function (ciudades) {
-                                ciudades.forEach(function (c) {
-                                    var opt = document.createElement('option');
-                                    opt.value = c;
-                                    opt.textContent = c;
-                                    if (c === ciudadSel) opt.selected = true;
-                                    ciudadSelect.appendChild(opt);
+                        function cargarCiudades(departamento, ciudadSel) {
+                            ciudadSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+                            if (!departamento || departamento === internacional) return;
+                            fetch('/api/ubicacion/ciudades?departamento=' + encodeURIComponent(departamento))
+                                .then(function (r) { return r.json(); })
+                                .then(function (ciudades) {
+                                    ciudades.forEach(function (c) {
+                                        var opt = document.createElement('option');
+                                        opt.value = c;
+                                        opt.textContent = c;
+                                        if (c === ciudadSel) opt.selected = true;
+                                        ciudadSelect.appendChild(opt);
+                                    });
                                 });
-                            });
-                    }
-
-                    // Inicializar
-                    actualizarVisibilidad(depSelect.value);
-                    if (depSelect.value === internacional) {
-                        ciudadText.value = ciudadDefault;
-                    } else if (depSelect.value) {
-                        cargarCiudades(depSelect.value, ciudadDefault);
-                    }
-
-                    depSelect.addEventListener('change', function () {
-                        actualizarVisibilidad(this.value);
-                        cargarCiudades(this.value, '');
-                    });
-
-                    // Mostrar servicios solo si la persona es mayor de 16 años
-                    // Mostrar preguntas de alergia solo si la persona tiene entre 4 y 10 años
-                    var fechaNacInput = document.getElementById('@id("FechaNacimiento")');
-                    var serviciosContainer = document.getElementById('@id("Servicios")_container');
-                    var alergiaContainer = document.getElementById('@id("AlergiaAlimentaria")_container');
-                    var descripcionAlergiaContainer = document.getElementById('@id("DescripcionAlergia")_container');
-                    var tieneAlergiaSelect = document.getElementById('@id("TieneAlergiaAlimentaria")');
-                    var participaFvKidsContainer = document.getElementById('@id("ParticipaFvKids")_container');
-                    var participaFvKidsSelect = document.getElementById('@id("PreguntasAdicionalesNino_ParticipaFvKids")');
-                    var tipoSangreContainer = document.getElementById('@id("TipoSangre")_container');
-                    var tipoSangreSelect = document.getElementById('@id("PreguntasAdicionalesNino_TipoSangre")');
-                    var epsContainer = document.getElementById('@id("Eps")_container');
-                    var epsInput = document.getElementById('@id("PreguntasAdicionalesNino_Eps")');
-                    var comunionContainer = document.getElementById('@id("ComunionAncianos")_container');
-                    var comunionSelect = document.getElementById('@id("ParticipaComunionAncianos")');
-
-                    function calcularEdad(fechaNac) {
-                        var hoy = new Date();
-                        var edad = hoy.getFullYear() - fechaNac.getFullYear();
-                        var m = hoy.getMonth() - fechaNac.getMonth();
-                        if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
-                        return edad;
-                    }
-
-                    function actualizarServicios() {
-                        if (!fechaNacInput.value) {
-                            serviciosContainer.style.display = 'none';
-                            alergiaContainer.style.display = 'none';
-                            descripcionAlergiaContainer.style.display = 'none';
-                            participaFvKidsContainer.style.display = 'none';
-                            tipoSangreContainer.style.display = 'none';
-                            epsContainer.style.display = 'none';
-                            comunionContainer.style.display = 'none';
-                            comunionSelect.value = '';
-                            comunionSelect.removeAttribute('required');
-                            tieneAlergiaSelect.removeAttribute('required');
-                            participaFvKidsSelect.removeAttribute('required');
-                            tipoSangreSelect.removeAttribute('required');
-                            epsInput.removeAttribute('required');
-                            return;
-                        }
-                        var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
-                        var edad = calcularEdad(fechaNac);
-                        serviciosContainer.style.display = edad >= 16 ? '' : 'none';
-
-                        // Comunión de ancianos: solo mayores de 18 años
-                        var esMayorDeEdad = edad >= 18;
-                        comunionContainer.style.display = esMayorDeEdad ? '' : 'none';
-                        if (esMayorDeEdad) {
-                            comunionSelect.setAttribute('required', '');
-                        } else {
-                            comunionSelect.value = '';
-                            comunionSelect.removeAttribute('required');
                         }
 
-                        // Preguntas para niños de 4 a 10 años
-                        var esNino4a10 = edad >= 4 && edad <= 10;
-                        alergiaContainer.style.display = esNino4a10 ? '' : 'none';
-                        participaFvKidsContainer.style.display = esNino4a10 ? '' : 'none';
-                        tipoSangreContainer.style.display = esNino4a10 ? '' : 'none';
-                        epsContainer.style.display = esNino4a10 ? '' : 'none';
-                        if (esNino4a10) {
-                            tieneAlergiaSelect.setAttribute('required', '');
-                            participaFvKidsSelect.setAttribute('required', '');
-                            tipoSangreSelect.setAttribute('required', '');
-                            epsInput.setAttribute('required', '');
-                        } else {
-                            tieneAlergiaSelect.value = '';
-                            tieneAlergiaSelect.removeAttribute('required');
-                            participaFvKidsSelect.value = '';
-                            participaFvKidsSelect.removeAttribute('required');
-                            tipoSangreSelect.value = '';
-                            tipoSangreSelect.removeAttribute('required');
-                            epsInput.value = '';
-                            epsInput.removeAttribute('required');
-                            descripcionAlergiaContainer.style.display = 'none';
+                        // Inicializar
+                        actualizarVisibilidad(depSelect.value);
+                        if (depSelect.value === internacional) {
+                            ciudadText.value = ciudadDefault;
+                        } else if (depSelect.value) {
+                            cargarCiudades(depSelect.value, ciudadDefault);
                         }
-                        actualizarDescripcionAlergia();
-                    }
 
-                    function actualizarDescripcionAlergia() {
-                        if (alergiaContainer.style.display !== 'none' && tieneAlergiaSelect && tieneAlergiaSelect.value === 'true') {
-                            descripcionAlergiaContainer.style.display = '';
-                        } else {
-                            descripcionAlergiaContainer.style.display = 'none';
+                        depSelect.addEventListener('change', function () {
+                            actualizarVisibilidad(this.value);
+                            cargarCiudades(this.value, '');
+                        });
+
+                        // Mostrar servicios solo si la persona es mayor de 16 años
+                        // Mostrar preguntas de alergia solo si la persona tiene entre 4 y 10 años
+                        var fechaNacInput = document.getElementById('@id("FechaNacimiento")');
+                        var serviciosContainer = document.getElementById('@id("Servicios")_container');
+                        var alergiaContainer = document.getElementById('@id("AlergiaAlimentaria")_container');
+                        var descripcionAlergiaContainer = document.getElementById('@id("DescripcionAlergia")_container');
+                        var tieneAlergiaSelect = document.getElementById('@id("TieneAlergiaAlimentaria")');
+                        var participaFvKidsContainer = document.getElementById('@id("ParticipaFvKids")_container');
+                        var participaFvKidsSelect = document.getElementById('@id("PreguntasAdicionalesNino_ParticipaFvKids")');
+                        var tipoSangreContainer = document.getElementById('@id("TipoSangre")_container');
+                        var tipoSangreSelect = document.getElementById('@id("PreguntasAdicionalesNino_TipoSangre")');
+                        var epsContainer = document.getElementById('@id("Eps")_container');
+                        var epsInput = document.getElementById('@id("PreguntasAdicionalesNino_Eps")');
+                        var comunionContainer = document.getElementById('@id("ComunionAncianos")_container');
+                        var comunionSelect = document.getElementById('@id("ParticipaComunionAncianos")');
+                        var alimentacionContainer = document.getElementById('@id("RequiereAlimentacion")_container');
+                        var alimentacionSelect = document.getElementById('@id("RequiereAlimentacion")');
+
+                        function calcularEdad(fechaNac) {
+                            var hoy = new Date();
+                            var edad = hoy.getFullYear() - fechaNac.getFullYear();
+                            var m = hoy.getMonth() - fechaNac.getMonth();
+                            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
+                            return edad;
                         }
-                    }
 
-                    actualizarServicios();
-                    fechaNacInput.addEventListener('change', actualizarServicios);
-                    tieneAlergiaSelect.addEventListener('change', actualizarDescripcionAlergia);
-                })();
-            </script>
+                        function actualizarServicios() {
+                            if (!fechaNacInput.value) {
+                                serviciosContainer.style.display = 'none';
+                                alergiaContainer.style.display = 'none';
+                                descripcionAlergiaContainer.style.display = 'none';
+                                participaFvKidsContainer.style.display = 'none';
+                                tipoSangreContainer.style.display = 'none';
+                                epsContainer.style.display = 'none';
+                                comunionContainer.style.display = 'none';
+                                alimentacionContainer.style.display = 'none';
+                                comunionSelect.value = '';
+                                comunionSelect.removeAttribute('required');
+                                tieneAlergiaSelect.removeAttribute('required');
+                                participaFvKidsSelect.removeAttribute('required');
+                                tipoSangreSelect.removeAttribute('required');
+                                epsInput.removeAttribute('required');
+                                alimentacionSelect.removeAttribute('required');
+                                return;
+                            }
+                            var fechaNac = new Date(fechaNacInput.value + 'T00:00:00');
+                            var edad = calcularEdad(fechaNac);
+                            serviciosContainer.style.display = edad >= 16 ? '' : 'none';
+
+                            // Comunión de ancianos: solo mayores de 18 años
+                            var esMayorDeEdad = edad >= 18;
+                            comunionContainer.style.display = esMayorDeEdad ? '' : 'none';
+                            if (esMayorDeEdad) {
+                                comunionSelect.setAttribute('required', '');
+                            } else {
+                                comunionSelect.value = '';
+                                comunionSelect.removeAttribute('required');
+                            }
+
+                            // Alimentación: no se pregunta a bebés de 0 a 3 años
+                            var esBebe = edad >= 0 && edad <= 3;
+                            alimentacionContainer.style.display = esBebe ? 'none' : '';
+                            if (!esBebe) {
+                                alimentacionSelect.setAttribute('required', '');
+                            } else {
+                                alimentacionSelect.value = '';
+                                alimentacionSelect.removeAttribute('required');
+                            }
+
+                            // Preguntas para niños de 4 a 10 años
+                            var esNino4a10 = edad >= 4 && edad <= 10;
+                            alergiaContainer.style.display = esNino4a10 ? '' : 'none';
+                            participaFvKidsContainer.style.display = esNino4a10 ? '' : 'none';
+                            tipoSangreContainer.style.display = esNino4a10 ? '' : 'none';
+                            epsContainer.style.display = esNino4a10 ? '' : 'none';
+                            if (esNino4a10) {
+                                tieneAlergiaSelect.setAttribute('required', '');
+                                participaFvKidsSelect.setAttribute('required', '');
+                                tipoSangreSelect.setAttribute('required', '');
+                                epsInput.setAttribute('required', '');
+                            } else {
+                                tieneAlergiaSelect.value = '';
+                                tieneAlergiaSelect.removeAttribute('required');
+                                participaFvKidsSelect.value = '';
+                                participaFvKidsSelect.removeAttribute('required');
+                                tipoSangreSelect.value = '';
+                                tipoSangreSelect.removeAttribute('required');
+                                epsInput.value = '';
+                                epsInput.removeAttribute('required');
+                                descripcionAlergiaContainer.style.display = 'none';
+                            }
+                            actualizarDescripcionAlergia();
+                        }
+
+                        function actualizarDescripcionAlergia() {
+                            if (alergiaContainer.style.display !== 'none' && tieneAlergiaSelect && tieneAlergiaSelect.value === 'true') {
+                                descripcionAlergiaContainer.style.display = '';
+                            } else {
+                                descripcionAlergiaContainer.style.display = 'none';
+                            }
+                        }
+
+                        actualizarServicios();
+                        fechaNacInput.addEventListener('change', actualizarServicios);
+                        tieneAlergiaSelect.addEventListener('change', actualizarDescripcionAlergia);
+                    })();
+                </script>
