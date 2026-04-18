@@ -29,6 +29,19 @@
         <h2>Datos personales</h2>
         <div class="form-grid">
             <div class="form-control form-grid__half">
+                <label for="TipoIdentificacion">Tipo de identificación: <span class="required">*</span></label>
+                <select id="TipoIdentificacion" name="TipoIdentificacion" required>
+                    @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
+                    {
+                        <option value="@tipo" selected="@(persona.TipoIdentificacion == tipo)">@tipo.Humanize()</option>
+                    }
+                </select>
+            </div>
+            <div class="form-control form-grid__half">
+                <label for="NumeroIdentificacion">Número de identificación: <span class="required">*</span></label>
+                <input type="text" id="NumeroIdentificacion" name="NumeroIdentificacion" value="@persona.NumeroIdentificacion" required>
+            </div>
+            <div class="form-control form-grid__half">
                 <label for="Nombres">Nombres: <span class="required">*</span></label>
                 <input type="text" id="Nombres" name="Nombres" value="@persona.Nombres" required>
             </div>

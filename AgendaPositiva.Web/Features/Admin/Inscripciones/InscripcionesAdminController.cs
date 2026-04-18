@@ -360,6 +360,8 @@ public class InscripcionesAdminController : Controller
         int id,
         [FromForm] string Nombres,
         [FromForm] string Apellidos,
+        [FromForm] TipoIdentificacion TipoIdentificacion,
+        [FromForm] string NumeroIdentificacion,
         [FromForm] Genero Genero,
         [FromForm] DateOnly FechaNacimiento,
         [FromForm] string Telefono,
@@ -386,6 +388,8 @@ public class InscripcionesAdminController : Controller
         var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
 
         // Track persona changes
+        if (persona.TipoIdentificacion != TipoIdentificacion) { cambios.Add($"Tipo identificación: {persona.TipoIdentificacion.Humanize()} → {TipoIdentificacion.Humanize()}"); persona.TipoIdentificacion = TipoIdentificacion; }
+        if (persona.NumeroIdentificacion != NumeroIdentificacion) { cambios.Add($"Número identificación: {persona.NumeroIdentificacion} → {NumeroIdentificacion}"); persona.NumeroIdentificacion = NumeroIdentificacion; }
         if (persona.Nombres != Nombres) { cambios.Add($"Nombres: {persona.Nombres} → {Nombres}"); persona.Nombres = Nombres; }
         if (persona.Apellidos != Apellidos) { cambios.Add($"Apellidos: {persona.Apellidos} → {Apellidos}"); persona.Apellidos = Apellidos; }
         if (persona.Genero != Genero) { cambios.Add($"Género: {persona.Genero.Humanize()} → {Genero.Humanize()}"); persona.Genero = Genero; }
@@ -422,6 +426,34 @@ public class InscripcionesAdminController : Controller
         store.SaveChanges();
 
         return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    [HttpPost("{id:int}/eliminar")]
+    [Authorize(Roles = "Administrador")]
+    public IActionResult Eliminar(int id)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        // Remove audit trail for this inscription
+        var auditoria = store.AuditoriaAdmin.Where(a => a.InscripcionId == id);
+        store.AuditoriaAdmin.RemoveRange(auditoria);
+
+        store.Inscripciones.Remove(inscripcion);
+
+        // If persona has no other inscriptions, remove persona too
+        var otraInscripcion = store.Inscripciones.Any(i => i.PersonaId == inscripcion.PersonaId && i.Id != id);
+        if (!otraInscripcion)
+        {
+            store.Personas.Remove(inscripcion.Persona);
+        }
+
+        store.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("grupo/{grupoId:int}")]

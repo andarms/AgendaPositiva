@@ -440,6 +440,13 @@
                             <button type="submit" class="btn btn--primary">Guardar</button>
                         </form>
                     </div>
+                    <div class="admin-action-card">
+                        <h3>Eliminar inscripción</h3>
+                        <p style="font-size: 0.8125rem; color: #86868b; margin-bottom: 0.75rem;">Esta acción es irreversible.</p>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/eliminar" onsubmit="return confirm('¿Está seguro de que desea eliminar esta inscripción? Esta acción no se puede deshacer.');">
+                            <button type="submit" class="btn btn--danger">Eliminar</button>
+                        </form>
+                    </div>
                 </div>
             }
 
