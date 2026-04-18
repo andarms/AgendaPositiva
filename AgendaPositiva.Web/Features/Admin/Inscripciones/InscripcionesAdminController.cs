@@ -102,13 +102,14 @@ public class InscripcionesAdminController : Controller
         if (EsAdministrador)
         {
             var desglose = await ObtenerDesglosePorEdad();
+            var totalAdmin = desglose.Bebes + desglose.Ninos + desglose.Adolescentes + desglose.Adultos;
             // Administradores ven el cupo total del evento
             return new CupoInfoViewModel
             {
                 NombreRegion = evento.Nombre,
-                TotalInscritos = evento.TotalInscritos,
+                TotalInscritos = totalAdmin,
                 CupoTotal = evento.CupoTotal,
-                CupoDisponible = evento.CupoDisponible,
+                CupoDisponible = evento.CupoTotal - totalAdmin,
                 TotalBebes = desglose.Bebes,
                 TotalNinos = desglose.Ninos,
                 TotalAdolescentes = desglose.Adolescentes,
@@ -133,11 +134,12 @@ public class InscripcionesAdminController : Controller
             .Where(r => regionIds.Contains(r.Id))
             .ToListAsync();
 
-        var totalInscritos = regiones.Sum(r => r.TotalInscritos);
         var cupoTotal = regiones.Sum(r => r.Cupo);
 
         var desgloseColab = await ObtenerDesglosePorEdad(
             FiltrarPorLocalidades(store.Inscripciones.Where(i => i.EventoId == evento.Id)));
+
+        var totalInscritos = desgloseColab.Bebes + desgloseColab.Ninos + desgloseColab.Adolescentes + desgloseColab.Adultos;
 
         return new CupoInfoViewModel
         {
@@ -158,6 +160,7 @@ public class InscripcionesAdminController : Controller
         [FromQuery] string? nombre,
         [FromQuery] string? documento,
         [FromQuery] string? departamento,
+        [FromQuery] string? municipio,
         [FromQuery] string? sortLocalidad,
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 50)
@@ -192,6 +195,11 @@ public class InscripcionesAdminController : Controller
             query = query.Where(i => i.Departamento == departamento);
         }
 
+        if (!string.IsNullOrWhiteSpace(municipio))
+        {
+            query = query.Where(i => i.Ciudad == municipio);
+        }
+
         var orderedQuery = sortLocalidad switch
         {
             "asc" => query.OrderBy(i => i.Departamento).ThenBy(i => i.Ciudad),
@@ -217,9 +225,13 @@ public class InscripcionesAdminController : Controller
             Departamentos = EsAdministrador
                 ? ubicacionService.ObtenerNombresDepartamentos()
                 : DepartamentosAsignados,
+            Ciudades = !string.IsNullOrWhiteSpace(departamento)
+                ? ubicacionService.ObtenerCiudades(departamento)
+                : [],
             FiltroNombre = nombre,
             FiltroDocumento = documento,
             FiltroDepartamento = departamento,
+            FiltroMunicipio = municipio,
             SortLocalidad = sortLocalidad,
             Pagina = pagina,
             PorPagina = porPagina,

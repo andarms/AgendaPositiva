@@ -23,12 +23,14 @@ public class ListaInscripcionesViewModel
     public required List<Inscripcion> Inscripciones { get; init; }
     public required int TotalInscripciones { get; init; }
     public required List<string> Departamentos { get; init; }
+    public List<string> Ciudades { get; init; } = [];
     public CupoInfoViewModel? CupoInfo { get; init; }
 
     // Filtros
     public string? FiltroNombre { get; init; }
     public string? FiltroDocumento { get; init; }
     public string? FiltroDepartamento { get; init; }
+    public string? FiltroMunicipio { get; init; }
 
     // Sort
     public string? SortLocalidad { get; init; }
@@ -59,6 +61,7 @@ public class ListaInscripcionesViewModel
             ["nombre"] = FiltroNombre,
             ["documento"] = FiltroDocumento,
             ["departamento"] = FiltroDepartamento,
+            ["municipio"] = FiltroMunicipio,
             ["sortLocalidad"] = sort,
             ["porPagina"] = PorPagina.ToString(),
         };
@@ -76,6 +79,7 @@ public class ListaInscripcionesViewModel
             ["nombre"] = FiltroNombre,
             ["documento"] = FiltroDocumento,
             ["departamento"] = FiltroDepartamento,
+            ["municipio"] = FiltroMunicipio,
             ["sortLocalidad"] = SortLocalidad,
             ["pagina"] = pagina.ToString(),
             ["porPagina"] = (porPaginaOverride ?? PorPagina).ToString(),

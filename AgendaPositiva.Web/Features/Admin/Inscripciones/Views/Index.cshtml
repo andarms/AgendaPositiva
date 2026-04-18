@@ -173,11 +173,21 @@
             </div>
             <div>
                 <label class="form-label">Localidad</label>
-                <select name="departamento" class="form-control">
+                <select name="departamento" id="filtroDepartamento" class="form-control">
                     <option value="">Todos</option>
                     @foreach (var dep in Model.Departamentos)
                     {
                         <option value="@dep" selected="@(Model.FiltroDepartamento == dep)">@dep</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Municipio</label>
+                <select name="municipio" id="filtroMunicipio" class="form-control">
+                    <option value="">Todos</option>
+                    @foreach (var ciudad in Model.Ciudades)
+                    {
+                        <option value="@ciudad" selected="@(Model.FiltroMunicipio == ciudad)">@ciudad</option>
                     }
                 </select>
             </div>
@@ -187,3 +197,24 @@
             </div>
         </div>
     </form>
+
+<script>
+    document.getElementById('filtroDepartamento').addEventListener('change', async function () {
+        const municipioSelect = document.getElementById('filtroMunicipio');
+        municipioSelect.innerHTML = '<option value="">Todos</option>';
+
+        const departamento = this.value;
+        if (!departamento) return;
+
+        const response = await fetch(`/api/ubicacion/ciudades?departamento=${encodeURIComponent(departamento)}`);
+        if (!response.ok) return;
+
+        const ciudades = await response.json();
+        ciudades.forEach(ciudad => {
+            const option = document.createElement('option');
+            option.value = ciudad;
+            option.textContent = ciudad;
+            municipioSelect.appendChild(option);
+        });
+    });
+</script>
