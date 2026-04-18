@@ -438,9 +438,19 @@ public class InscripcionesAdminController : Controller
 
         if (inscripcion is null) return NotFound();
 
-        // Remove audit trail for this inscription
-        var auditoria = store.AuditoriaAdmin.Where(a => a.InscripcionId == id);
-        store.AuditoriaAdmin.RemoveRange(auditoria);
+        var persona = inscripcion.Persona;
+        var nombreCompleto = persona.NombreCompleto;
+        var documento = $"{persona.TipoIdentificacion.Humanize()} {persona.NumeroIdentificacion}";
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = usuario,
+            Accion = "Eliminación de inscripción",
+            ValorAnterior = $"{nombreCompleto} — {documento} — {inscripcion.Localidad}",
+            ValorNuevo = "Registro eliminado"
+        });
 
         store.Inscripciones.Remove(inscripcion);
 
