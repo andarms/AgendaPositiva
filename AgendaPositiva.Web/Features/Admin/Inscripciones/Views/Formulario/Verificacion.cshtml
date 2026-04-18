@@ -18,6 +18,7 @@
     <form action="/admin/inscripciones/formulario/verificacion" method="post">
         <label for="tipoIdentificacion">Tipo de Identificación:</label>
         <select id="tipoIdentificacion" name="tipoIdentificacion" required>
+            <option value="" disabled selected>Seleccione un tipo de identificación</option>
             @foreach (TipoIdentificacion tipo in Enum.GetValues<TipoIdentificacion>())
             {
                 <option value="@tipo">@tipo.Humanize()</option>

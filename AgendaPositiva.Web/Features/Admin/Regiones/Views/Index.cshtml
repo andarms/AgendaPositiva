@@ -369,6 +369,16 @@ else
                         </tr>
                     }
                 </tbody>
+                <tfoot>
+                    <tr style="font-weight: 600;">
+                        <td>Total</td>
+                        <td></td>
+                        <td>@regiones.Sum(r => r.Cupo)</td>
+                        <td>@regiones.Sum(r => r.TotalInscritos)</td>
+                        <td>@regiones.Sum(r => r.CupoDisponible)</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     }
