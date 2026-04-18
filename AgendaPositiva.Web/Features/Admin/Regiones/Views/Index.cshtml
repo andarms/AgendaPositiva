@@ -371,13 +371,33 @@ else
                 </tbody>
                 <tfoot>
                     <tr style="font-weight: 600;">
-                        <td>Total</td>
+                        <td>Total regiones</td>
                         <td></td>
                         <td>@regiones.Sum(r => r.Cupo)</td>
                         <td>@regiones.Sum(r => r.TotalInscritos)</td>
                         <td>@regiones.Sum(r => r.CupoDisponible)</td>
                         <td></td>
                     </tr>
+                    @if (Model.InscritosSinRegion > 0)
+                    {
+                        <tr style="color: #e74c3c;">
+                            <td class="col-name">
+                                <a href="/admin/regiones/sin-region" style="color: #e74c3c; font-weight: 600;">
+                                    ⚠ Sin región asignada
+                                </a>
+                            </td>
+                            <td><span class="text-muted" style="font-size:.8125rem;">Localidades no cubiertas</span></td>
+                            <td>—</td>
+                            <td><strong>@Model.InscritosSinRegion</strong></td>
+                            <td>—</td>
+                            <td>
+                                <a href="/admin/regiones/sin-region"
+                                   style="font-size: 0.8125rem; color: #e74c3c; font-weight: 500;">
+                                    Ver detalle
+                                </a>
+                            </td>
+                        </tr>
+                    }
                 </tfoot>
             </table>
         </div>

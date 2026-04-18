@@ -1,0 +1,66 @@
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@model List<Inscripcion>
+
+@{
+    var agrupados = Model.GroupBy(i => new { i.Departamento, i.Ciudad }).OrderBy(g => g.Key.Departamento).ThenBy(g =>
+g.Key.Ciudad);
+}
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/regiones">Regiones y Cupos</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Sin región asignada</span>
+</nav>
+
+<h1>Inscritos sin región asignada</h1>
+<p class="text-secondary" style="margin-bottom: 1.5rem;">
+    <strong>@Model.Count</strong> inscripciones en localidades que no pertenecen a ninguna región configurada.
+</p>
+
+@foreach (var grupo in agrupados)
+{
+    <div class="card" style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 style="font-size: 0.9375rem; font-weight: 600; margin: 0;">
+                @grupo.Key.Departamento, @grupo.Key.Ciudad
+                <span style="font-weight: 400; color: #86868b; font-size: 0.8125rem;">— @grupo.Count() inscrito(s)</span>
+            </h3>
+        </div>
+        <div class="table-wrapper" style="border: none; border-radius: 0;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                        <th>Edad</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ins in grupo)
+                    {
+                        <tr>
+                            <td class="col-name">
+                                <a href="/admin/inscripciones/@ins.Id">@ins.Persona.NombreCompleto</a>
+                            </td>
+                            <td>@ins.Persona.TipoIdentificacion.Humanize() — @ins.Persona.NumeroIdentificacion</td>
+                            <td>@ins.Persona.FechaNacimiento.CalcularEdad() años</td>
+                            <td><span class="badge @ins.Estado.BadgeCss()">@ins.Estado.Humanize()</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (!agrupados.Any())
+{
+    <div style="text-align: center; padding: 3rem 1rem; color: #86868b;">
+        <h3 style="font-size: 1rem; font-weight: 500; color: #6e6e73;">Todos los inscritos tienen región asignada</h3>
+    </div>
+}

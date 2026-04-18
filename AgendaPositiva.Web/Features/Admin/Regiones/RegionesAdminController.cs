@@ -48,6 +48,15 @@ public class RegionesAdminController : Controller
         var totalAdolescentes = fechasNacimiento.Count(f => f <= corteNino && f > corteAdolescente);
         var totalAdultos = fechasNacimiento.Count(f => f <= corteAdolescente);
 
+        // Calcular inscritos que no pertenecen a ninguna región
+        var inscripcionesLocalidad = await store.Inscripciones
+            .Where(i => i.EventoId == evento.Id)
+            .Select(i => new { i.Departamento, i.Ciudad })
+            .ToListAsync();
+
+        var inscritosSinRegion = inscripcionesLocalidad
+            .Count(i => !regiones.Any(r => r.Contiene(i.Departamento, i.Ciudad)));
+
         var vm = new RegionesIndexViewModel
         {
             Evento = evento,
@@ -56,7 +65,8 @@ public class RegionesAdminController : Controller
             TotalBebes = totalBebes,
             TotalNinos = totalNinos,
             TotalAdolescentes = totalAdolescentes,
-            TotalAdultos = totalAdultos
+            TotalAdultos = totalAdultos,
+            InscritosSinRegion = inscritosSinRegion
         };
 
         return View("~/Features/Admin/Regiones/Views/Index.cshtml", vm);
@@ -204,6 +214,30 @@ public class RegionesAdminController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet("sin-region")]
+    public async Task<IActionResult> SinRegion()
+    {
+        var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
+        if (evento is null) return RedirectToAction(nameof(Index));
+
+        var regiones = await store.RegionesEvento
+            .Where(r => r.EventoId == evento.Id)
+            .ToListAsync();
+
+        var inscripciones = await store.Inscripciones
+            .Include(i => i.Persona)
+            .Where(i => i.EventoId == evento.Id)
+            .ToListAsync();
+
+        var sinRegion = inscripciones
+            .Where(i => !regiones.Any(r => r.Contiene(i.Departamento, i.Ciudad)))
+            .OrderBy(i => i.Departamento)
+            .ThenBy(i => i.Ciudad)
+            .ToList();
+
+        return View("~/Features/Admin/Regiones/Views/SinRegion.cshtml", sinRegion);
+    }
+
     [HttpPost("eliminar/{id:int}")]
     public async Task<IActionResult> Eliminar(int id)
     {
@@ -226,6 +260,7 @@ public class RegionesIndexViewModel
     public int TotalNinos { get; set; }
     public int TotalAdolescentes { get; set; }
     public int TotalAdultos { get; set; }
+    public int InscritosSinRegion { get; set; }
 }
 
 public class DepartamentoRegionItem
