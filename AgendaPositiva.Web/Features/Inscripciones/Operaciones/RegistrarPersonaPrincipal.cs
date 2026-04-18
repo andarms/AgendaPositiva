@@ -99,20 +99,14 @@ public class RegistrarPersonaPrincipal
         }
         else
         {
-            // Los cupos solo aplican para mayores de 10 años
-            var esAdulto = command.FechaNacimiento.AddYears(10) <= DateOnly.FromDateTime(DateTime.UtcNow);
+            // Validar cupo del evento
+            if (!evento.TieneCupo)
+                return Result.Failure<int>("Se ha alcanzado el cupo total del evento. No se pueden registrar más inscripciones.");
 
-            if (esAdulto)
-            {
-                // Validar cupo del evento
-                if (!evento.TieneCupo)
-                    return Result.Failure<int>("Se ha alcanzado el cupo total del evento. No se pueden registrar más inscripciones.");
-
-                // Validar cupo de región
-                var regionError = await ValidarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
-                if (regionError is not null)
-                    return Result.Failure<int>(regionError);
-            }
+            // Validar cupo de región
+            var regionError = await ValidarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
+            if (regionError is not null)
+                return Result.Failure<int>(regionError);
 
             // No se crea grupo familiar aún — se creará cuando se agregue un familiar.
             // Si viaja solo, la inscripción queda sin grupo.
@@ -134,12 +128,9 @@ public class RegistrarPersonaPrincipal
             };
             db.Inscripciones.Add(inscripcion);
 
-            // Incrementar contadores de cupo (solo mayores de 10 años)
-            if (esAdulto)
-            {
-                evento.TotalInscritos++;
-                await IncrementarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
-            }
+            // Incrementar contadores de cupo
+            evento.TotalInscritos++;
+            await IncrementarCupoRegion(evento.Id, command.Departamento, command.Ciudad);
         }
         await db.SaveChangesAsync();
 

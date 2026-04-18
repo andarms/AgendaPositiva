@@ -11,6 +11,10 @@ public class CupoInfoViewModel
     public int CupoTotal { get; set; }
     public int CupoDisponible { get; set; }
     public List<RegionEvento> Regiones { get; set; } = [];
+    public int TotalBebes { get; set; }
+    public int TotalNinos { get; set; }
+    public int TotalAdolescentes { get; set; }
+    public int TotalAdultos { get; set; }
 }
 
 public class ListaInscripcionesViewModel

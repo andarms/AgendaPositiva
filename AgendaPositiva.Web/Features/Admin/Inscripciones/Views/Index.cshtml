@@ -23,7 +23,23 @@
         <div style="display:flex;gap:1.5rem;align-items:center;flex:1;">
             <div style="text-align:center;">
                 <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalInscritos</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Inscritos</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Total inscritos</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalBebes</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Bebés (0–2)</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalNinos</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Niños (3–10)</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalAdolescentes</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Adolescentes (11–17)</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalAdultos</div>
+                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Adultos (18+)</div>
             </div>
             <div style="text-align:center;">
                 <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.CupoTotal</div>
@@ -46,8 +62,7 @@
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                     @foreach (var r in cupo.Regiones)
                     {
-                        <span
-                            style="background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
+                        <span style="background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
                             @r.Nombre: @r.TotalInscritos/@r.Cupo
                         </span>
                     }
@@ -110,7 +125,7 @@
         <div class="pagination">
             <div class="pagination__info">
                 Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
-                                                                                                                                Model.TotalInscripciones)) de @Model.TotalInscripciones
+                                                                                                                                                                Model.TotalInscripciones)) de @Model.TotalInscripciones
             </div>
             <div class="pagination__controls">
                 @if (Model.Pagina > 1)
@@ -166,9 +181,9 @@
                     }
                 </select>
             </div>
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn--primary">Buscar</button>
-                    <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
-                </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn--primary">Buscar</button>
+                <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
             </div>
-        </form>
+        </div>
+    </form>

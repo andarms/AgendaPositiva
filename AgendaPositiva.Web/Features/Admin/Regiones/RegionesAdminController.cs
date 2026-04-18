@@ -32,23 +32,31 @@ public class RegionesAdminController : Controller
             .OrderBy(r => r.Nombre)
             .ToListAsync();
 
-        var fechaCorte = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-10);
-        var totalInscripciones = await store.Inscripciones
+        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        var corteBebe = hoy.AddYears(-3);       // 0-2 años: nacidos después de hace 3 años
+        var corteNino = hoy.AddYears(-11);      // 3-10 años: nacidos entre hace 11 y hace 3 años
+        var corteAdolescente = hoy.AddYears(-18); // 11-17 años: nacidos entre hace 18 y hace 11 años
+
+        var fechasNacimiento = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
-            .CountAsync();
-        var totalAdultos = await store.Inscripciones
-            .Where(i => i.EventoId == evento.Id)
-            .Where(i => i.Persona.FechaNacimiento <= fechaCorte)
-            .CountAsync();
-        var totalNinos = totalInscripciones - totalAdultos;
+            .Select(i => i.Persona.FechaNacimiento)
+            .ToListAsync();
+
+        var totalInscripciones = fechasNacimiento.Count;
+        var totalBebes = fechasNacimiento.Count(f => f > corteBebe);
+        var totalNinos = fechasNacimiento.Count(f => f <= corteBebe && f > corteNino);
+        var totalAdolescentes = fechasNacimiento.Count(f => f <= corteNino && f > corteAdolescente);
+        var totalAdultos = fechasNacimiento.Count(f => f <= corteAdolescente);
 
         var vm = new RegionesIndexViewModel
         {
             Evento = evento,
             Regiones = regiones,
             TotalInscripciones = totalInscripciones,
-            TotalAdultos = totalAdultos,
-            TotalNinos = totalNinos
+            TotalBebes = totalBebes,
+            TotalNinos = totalNinos,
+            TotalAdolescentes = totalAdolescentes,
+            TotalAdultos = totalAdultos
         };
 
         return View("~/Features/Admin/Regiones/Views/Index.cshtml", vm);
@@ -77,22 +85,19 @@ public class RegionesAdminController : Controller
             .Where(r => r.EventoId == evento.Id)
             .ToListAsync();
 
-        var fechaCorte = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-10);
-
-        // Obtener todas las inscripciones de adultos del evento activo
-        var inscripcionesAdultos = await store.Inscripciones
+        // Obtener todas las inscripciones del evento activo
+        var inscripciones = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
-            .Where(i => i.Persona.FechaNacimiento <= fechaCorte)
             .Select(i => new { i.Departamento, i.Ciudad })
             .ToListAsync();
 
-        // Recalcular TotalInscritos del evento (solo adultos)
-        evento.TotalInscritos = inscripcionesAdultos.Count;
+        // Recalcular TotalInscritos del evento (todas las inscripciones)
+        evento.TotalInscritos = inscripciones.Count;
 
         // Recalcular TotalInscritos de cada región
         foreach (var region in regiones)
         {
-            region.TotalInscritos = inscripcionesAdultos
+            region.TotalInscritos = inscripciones
                 .Count(i => region.Contiene(i.Departamento, i.Ciudad));
         }
 
@@ -217,8 +222,10 @@ public class RegionesIndexViewModel
     public Evento? Evento { get; set; }
     public List<RegionEvento> Regiones { get; set; } = [];
     public int TotalInscripciones { get; set; }
-    public int TotalAdultos { get; set; }
+    public int TotalBebes { get; set; }
     public int TotalNinos { get; set; }
+    public int TotalAdolescentes { get; set; }
+    public int TotalAdultos { get; set; }
 }
 
 public class DepartamentoRegionItem

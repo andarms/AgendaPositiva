@@ -79,17 +79,40 @@ public class InscripcionesAdminController : Controller
             (deptosParcKeys.Contains(i.Departamento) && ciudadesPermitidas.Contains(i.Ciudad)));
     }
 
+    async Task<(int Bebes, int Ninos, int Adolescentes, int Adultos)> ObtenerDesglosePorEdad(IQueryable<Inscripcion>? filtro = null)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        var corteBebe = hoy.AddYears(-3);
+        var corteNino = hoy.AddYears(-11);
+        var corteAdolescente = hoy.AddYears(-18);
+
+        var query = filtro ?? store.Inscripciones.Where(i => i.EventoId == evento.Id);
+        var fechas = await query.Select(i => i.Persona.FechaNacimiento).ToListAsync();
+
+        return (
+            fechas.Count(f => f > corteBebe),
+            fechas.Count(f => f <= corteBebe && f > corteNino),
+            fechas.Count(f => f <= corteNino && f > corteAdolescente),
+            fechas.Count(f => f <= corteAdolescente)
+        );
+    }
+
     async Task<CupoInfoViewModel> ObtenerCupoInfo()
     {
         if (EsAdministrador)
         {
+            var desglose = await ObtenerDesglosePorEdad();
             // Administradores ven el cupo total del evento
             return new CupoInfoViewModel
             {
                 NombreRegion = evento.Nombre,
                 TotalInscritos = evento.TotalInscritos,
                 CupoTotal = evento.CupoTotal,
-                CupoDisponible = evento.CupoDisponible
+                CupoDisponible = evento.CupoDisponible,
+                TotalBebes = desglose.Bebes,
+                TotalNinos = desglose.Ninos,
+                TotalAdolescentes = desglose.Adolescentes,
+                TotalAdultos = desglose.Adultos
             };
         }
 
@@ -113,13 +136,20 @@ public class InscripcionesAdminController : Controller
         var totalInscritos = regiones.Sum(r => r.TotalInscritos);
         var cupoTotal = regiones.Sum(r => r.Cupo);
 
+        var desgloseColab = await ObtenerDesglosePorEdad(
+            FiltrarPorLocalidades(store.Inscripciones.Where(i => i.EventoId == evento.Id)));
+
         return new CupoInfoViewModel
         {
             NombreRegion = regiones.Count == 1 ? regiones[0].Nombre : $"{regiones.Count} regiones",
             TotalInscritos = totalInscritos,
             CupoTotal = cupoTotal,
             CupoDisponible = cupoTotal - totalInscritos,
-            Regiones = regiones
+            Regiones = regiones,
+            TotalBebes = desgloseColab.Bebes,
+            TotalNinos = desgloseColab.Ninos,
+            TotalAdolescentes = desgloseColab.Adolescentes,
+            TotalAdultos = desgloseColab.Adultos
         };
     }
 
