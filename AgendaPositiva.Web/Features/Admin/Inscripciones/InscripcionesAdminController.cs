@@ -385,7 +385,8 @@ public class InscripcionesAdminController : Controller
         [FromForm] string? DescripcionAlergia,
         [FromForm] string? NecesidadesEspeciales,
         [FromForm(Name = "Servicios")] List<ServicioInscripcion>? Servicios,
-        [FromForm] PreguntasAdicionalesNino? PreguntasAdicionalesNino)
+        [FromForm] PreguntasAdicionalesNino? PreguntasAdicionalesNino,
+        [FromForm] Parentesco? Relacion)
     {
         var inscripcion = store.Inscripciones
             .Include(i => i.Persona)
@@ -408,6 +409,7 @@ public class InscripcionesAdminController : Controller
         if (persona.Email != Email) { cambios.Add($"Email: {persona.Email ?? "—"} → {Email ?? "—"}"); persona.Email = Email; }
 
         // Track inscription changes
+        if (inscripcion.Relacion != Relacion) { cambios.Add($"Parentesco: {(inscripcion.Relacion?.Humanize() ?? "Ninguno")} → {(Relacion?.Humanize() ?? "Ninguno")}"); inscripcion.Relacion = Relacion; }
         if (inscripcion.Departamento != Departamento) { cambios.Add($"Departamento: {inscripcion.Departamento} → {Departamento}"); inscripcion.Departamento = Departamento; }
         if (inscripcion.Ciudad != Ciudad) { cambios.Add($"Ciudad: {inscripcion.Ciudad} → {Ciudad}"); inscripcion.Ciudad = Ciudad; }
         if (inscripcion.RequiereHospedaje != RequiereHospedaje) { cambios.Add($"Hospedaje: {(inscripcion.RequiereHospedaje ? "Sí" : "No")} → {(RequiereHospedaje ? "Sí" : "No")}"); inscripcion.RequiereHospedaje = RequiereHospedaje; }

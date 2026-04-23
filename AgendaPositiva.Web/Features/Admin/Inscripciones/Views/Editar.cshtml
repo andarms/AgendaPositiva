@@ -100,6 +100,20 @@
 
         <h2>Inscripción</h2>
         <div class="form-grid">
+            @if (ins.Relacion.HasValue)
+            {
+                <div class="form-control form-grid__full">
+                    <label for="Relacion">Parentesco:</label>
+                    <select id="Relacion" name="Relacion">
+                        <option value="">— Ninguno —</option>
+                        @foreach (Parentesco parentesco in Enum.GetValues<Parentesco>())
+                        {
+                            <option value="@parentesco" selected="@(ins.Relacion == parentesco)">@parentesco.Humanize()</option>
+                        }
+                    </select>
+                </div>
+            }
+
             <div class="form-control form-grid__full">
                 <label for="RequiereHospedaje">¿Requiere hospedaje? <span class="required">*</span></label>
                 <select id="RequiereHospedaje" name="RequiereHospedaje" required>
