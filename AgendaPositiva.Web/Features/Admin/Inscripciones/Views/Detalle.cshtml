@@ -267,7 +267,7 @@
                                 <span class="indicator">
                                     <span class="indicator__dot indicator__dot--yes"></span>
                                     Sí — @(string.IsNullOrEmpty(ins.DescripcionAlergia) ? "Sin descripción" :
-                                                                                                                                                                                        ins.DescripcionAlergia)
+                                                                                                                                                                                                                            ins.DescripcionAlergia)
                                 </span>
                             }
                             else
@@ -283,7 +283,8 @@
                             <div>
                                 <span class="field-label">Participa FV KIDS</span>
                                 <span class="indicator">
-                                    <span class="indicator__dot @(ins.PreguntasAdicionalesNino.ParticipaFvKids ? "indicator__dot--yes" : "indicator__dot--no")"></span>
+                                    <span
+                                    class="indicator__dot @(ins.PreguntasAdicionalesNino.ParticipaFvKids ? "indicator__dot--yes" : "indicator__dot--no")"></span>
                                     @(ins.PreguntasAdicionalesNino.ParticipaFvKids ? "Sí" : "No")
                                 </span>
                             </div>
@@ -293,275 +294,317 @@
                             </div>
                             <div>
                                 <span class="field-label">EPS</span>
-                                <span class="detail-value">@(string.IsNullOrEmpty(ins.PreguntasAdicionalesNino.Eps) ? "No indicada" : ins.PreguntasAdicionalesNino.Eps)</span>
-                            </div>
-                        }
-                        <div class="field-span2">
-                            <span class="field-label">Necesidades especiales</span>
-                            @if (string.IsNullOrEmpty(ins.NecesidadesEspeciales))
-                            {
-                                <span class="detail-value detail-value--muted">Ninguna</span>
+                                <span class="detail-value">@(string.IsNullOrEmpty(ins.PreguntasAdicionalesNino.Eps) ? "No indicada" :
+                                                        ins.PreguntasAdicionalesNino.Eps)</span>
+                                </div>
                             }
-                            else
+                            <div class="field-span2">
+                                <span class="field-label">Necesidades especiales</span>
+                                @if (string.IsNullOrEmpty(ins.NecesidadesEspeciales))
+                                {
+                                    <span class="detail-value detail-value--muted">Ninguna</span>
+                                }
+                                else
+                                {
+                                    <span class="detail-value">@ins.NecesidadesEspeciales</span>
+                                }
+                            </div>
+                            @if (ins.Servicios.Count > 0)
                             {
-                                <span class="detail-value">@ins.NecesidadesEspeciales</span>
+                                <div class="field-span2">
+                                    <span class="field-label">Servicios</span>
+                                    <div class="servicios-tags">
+                                        @foreach (var servicio in ins.Servicios)
+                                        {
+                                            <span class="servicio-tag">@servicio.Descripcion()</span>
+                                        }
+                                    </div>
+                                </div>
                             }
                         </div>
-                        @if (ins.Servicios.Count > 0)
-                        {
-                            <div class="field-span2">
-                                <span class="field-label">Servicios</span>
-                                <div class="servicios-tags">
-                                    @foreach (var servicio in ins.Servicios)
-                                    {
-                                        <span class="servicio-tag">@servicio.Descripcion()</span>
-                                    }
-                                </div>
-                            </div>
-                        }
                     </div>
                 </div>
-            </div>
 
-            @* ── Estado de pago ── *@
-            <div class="card" style="margin-top: 1.5rem;">
-                <div class="detail-section-title">Estado de pago</div>
-                @if (ins.CategoriaInscripcion is not null)
-                {
-                    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
-                        <div>
-                            <span class="field-label">Categoría</span>
-                            <span class="detail-value"><strong>@ins.CategoriaInscripcion.Nombre</strong></span>
-                        </div>
-                        <div>
-                            <span class="field-label">Precio</span>
-                            <span class="detail-value">$@Model.PrecioCategoria?.ToString("N0")</span>
-                        </div>
-                        <div>
-                            <span class="field-label">Abonado</span>
-                            <span class="detail-value">$@Model.TotalAbonado.ToString("N0")</span>
-                        </div>
-                        <div>
-                            <span class="field-label">Estado</span>
-                            <span class="badge @Model.EstadoPagoBadgeCss">@Model.EstadoPagoTexto</span>
-                        </div>
-                    </div>
-                    <div style="width:100%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;">
-                        <div style="height:100%;border-radius:4px;width:@(Math.Min(Model.PorcentajePago, 100))%;@(Model.PorcentajePago >= 100 ? "background:#34c759;" : Model.PorcentajePago >= 50 ? "background:#ff9500;" : "background:#ff3b30;")">
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <p style="color:#86868b;font-size:0.875rem;">Sin categoría asignada.</p>
-                }
-
-                @if (ins.Abonos.Count > 0)
-                {
-                    <div class="table-wrapper" style="border:none;border-radius:0;margin-top:1rem;">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Monto</th>
-                                    <th>Observaciones</th>
-                                    <th>Registrado por</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var abono in ins.Abonos.OrderByDescending(a => a.FechaCreacion))
-                                {
-                                    <tr>
-                                        <td class="col-date">@abono.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>$@abono.Monto.ToString("N0")</td>
-                                        <td>@(abono.Observaciones ?? "—")</td>
-                                        <td>@abono.RegistradoPorUsuario</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-
-            @* ── Grupo familiar ── *@
-            @if (ins.GrupoFamiliar is not null && ins.GrupoFamiliar.Inscripciones.Count > 0)
-            {
-                var familiares = ins.GrupoFamiliar.Inscripciones
-                    .Where(i => i.Id != ins.Id)
-                    .ToList();
-
+                @* ── Estado de pago ── *@
                 <div class="card" style="margin-top: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-                            Grupo Familiar #@ins.GrupoFamiliar.Id
-                            <span style="font-weight: 400; color: #86868b; text-transform: none; letter-spacing: normal;">
-                                — @ins.GrupoFamiliar.Inscripciones.Count miembro(s)
-                            </span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
-                                + Agregar familiar
-                            </a>
-                            <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary btn--lg">
-                                Ver grupo completo
-                            </a>
-                        </div>
-                    </div>
-
-                    @if (familiares.Count > 0)
+                    <div class="detail-section-title">Estado de pago</div>
+                    @if (ins.CategoriaInscripcion is not null)
                     {
-                        <div class="table-wrapper" style="border: none; border-radius: 0;">
+                        <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+                            <div>
+                                <span class="field-label">Categoría</span>
+                                <span class="detail-value"><strong>@ins.CategoriaInscripcion.Nombre</strong></span>
+                            </div>
+                            <div>
+                                <span class="field-label">Precio</span>
+                                <span class="detail-value">$@Model.PrecioCategoria?.ToString("N0")</span>
+                            </div>
+                            <div>
+                                <span class="field-label">Abonado</span>
+                                <span class="detail-value">$@Model.TotalAbonado.ToString("N0")</span>
+                            </div>
+                            <div>
+                                <span class="field-label">Estado</span>
+                                <span class="badge @Model.EstadoPagoBadgeCss">@Model.EstadoPagoTexto</span>
+                            </div>
+                        </div>
+                        <div style="width:100%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;">
+                            <div
+                                style="height:100%;border-radius:4px;width:@(Math.Min(Model.PorcentajePago, 100))%;@(Model.PorcentajePago >= 100 ? "background:#34c759;" : Model.PorcentajePago >= 50 ? "background:#ff9500;" : "background:#ff3b30;")">
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="color:#86868b;font-size:0.875rem;">Sin categoría asignada.</p>
+                    }
+
+                    @if (ins.Abonos.Count > 0)
+                    {
+                        <div class="table-wrapper" style="border:none;border-radius:0;margin-top:1rem;">
                             <table class="admin-table">
                                 <thead>
                                     <tr>
-                                        <th>Nombre</th>
-                                        <th>Identificación</th>
-                                        <th>Relación</th>
-                                        <th>Estado</th>
-                                        <th>Hospedaje</th>
-                                        <th>Alimentación</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Observaciones</th>
+                                        <th>Registrado por</th>
+                                        @if (User.IsInRole("Administrador"))
+                                        {
+                                            <th></th>
+                                        }
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var familiar in familiares)
+                                    @foreach (var abono in ins.Abonos.OrderByDescending(a => a.FechaCreacion))
                                     {
-                                        <tr>
-                                            <td class="col-name">
-                                                <a href="/admin/inscripciones/@familiar.Id">@familiar.Persona.NombreCompleto</a>
-                                            </td>
-                                            <td>@familiar.Persona.TipoIdentificacion.Humanize() — @familiar.Persona.NumeroIdentificacion</td>
-                                            <td>
-                                                @if (familiar.Relacion.HasValue && familiar.RelacionConPersona is not null)
-                                                {
-                                                    @($"{familiar.Relacion.Value.Humanize()} de {familiar.RelacionConPersona.NombreCompleto}")
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">—</span>
-                                                }
-                                            </td>
-                                            <td><span class="badge @familiar.Estado.BadgeCss()">@familiar.Estado.Humanize()</span></td>
-                                            <td>@(familiar.RequiereHospedaje ? "Sí" : "No")</td>
-                                            <td>@(familiar.RequiereAlimentacion ? "Sí" : "No")</td>
+                                        <tr id="abono-row-@abono.Id">
+                                            <td class="col-date">@abono.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>$@abono.Monto.ToString("N0")</td>
+                                            <td>@(abono.Observaciones ?? "—")</td>
+                                            <td>@abono.RegistradoPorUsuario</td>
+                                            @if (User.IsInRole("Administrador"))
+                                            {
+                                                <td>
+                                                    <button type="button" class="btn btn--secondary"
+                                                            style="font-size:0.75rem;padding:0.2rem 0.5rem;"
+                                                            onclick="document.getElementById('abono-edit-@abono.Id').style.display='table-row'; this.closest('tr').style.display='none';">
+                                                        ✏️
+                                                    </button>
+                                                </td>
+                                            }
                                         </tr>
+                                        @if (User.IsInRole("Administrador"))
+                                        {
+                                            <tr id="abono-edit-@abono.Id" style="display:none;">
+                                                <td colspan="5">
+                                                    <form method="post" action="/admin/inscripciones/@ins.Id/editar-abono/@abono.Id"
+                                                          style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+                                                        <div>
+                                                            <label class="form-label">Monto</label>
+                                                            <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
+                                                                   title="Solo se permiten números" required style="width:140px;"
+                                                                   value="@abono.Monto.ToString("0")"
+                                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
+                                                        </div>
+                                                        <div style="flex:1;min-width:150px;">
+                                                            <label class="form-label">Observaciones</label>
+                                                            <input type="text" name="observaciones" class="form-control"
+                                                                   value="@(abono.Observaciones ?? "")" placeholder="Opcional" />
+                                                        </div>
+                                                        <button type="submit" class="btn btn--primary" style="font-size:0.8125rem;">Guardar</button>
+                                                        <button type="button" class="btn btn--secondary" style="font-size:0.8125rem;"
+                                                                onclick="document.getElementById('abono-row-@abono.Id').style.display=''; this.closest('tr').style.display='none';">Cancelar</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
                                 </tbody>
                             </table>
                         </div>
                     }
-                    else
-                    {
-                        <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.5rem;">
-                            Esta persona es el único miembro del grupo familiar.
-                        </p>
-                    }
                 </div>
-            }
-            else
-            {
-                <div class="card" style="margin-top: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-                            Grupo Familiar
-                        </div>
-                        <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
-                            + Agregar familiar
-                        </a>
-                    </div>
-                    <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.75rem;">
-                        Esta inscripción no tiene grupo familiar asignado.
-                    </p>
-                </div>
-            }
 
-            @* ── Acciones admin ── *@
-            @if (User.IsInRole("Administrador"))
-            {
-                <div class="admin-actions-grid">
-                    <div class="admin-action-card">
-                        <h3>Categoría de inscripción</h3>
-                        <form method="post" action="/admin/inscripciones/@ins.Id/asignar-categoria" class="cambiar-estado__form">
-                            <select name="categoriaInscripcionId" class="form-control" style="width: auto;">
-                                <option value="">— Sin categoría —</option>
-                                @foreach (var cat in Model.CategoriasDisponibles)
-                                {
-                                    <option value="@cat.Id" selected="@(ins.CategoriaInscripcionId == cat.Id)">
-                                        @cat.Nombre — $@cat.Precio.ToString("N0")
-                                    </option>
-                                }
-                            </select>
-                            <button type="submit" class="btn btn--primary">Guardar</button>
-                        </form>
-                    </div>
-                    <div class="admin-action-card">
-                        <h3>Registrar abono</h3>
-                        <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono">
-                            <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
-                                <div>
-                                    <label class="form-label">Monto</label>
-                                    <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
-                                           title="Solo se permiten números" required style="width:140px;"
-                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
-                                </div>
-                                <div style="flex:1;min-width:150px;">
-                                    <label class="form-label">Observaciones</label>
-                                    <input type="text" name="observaciones" class="form-control" placeholder="Opcional" />
-                                </div>
-                                <button type="submit" class="btn btn--primary">Abonar</button>
+                @* ── Grupo familiar ── *@
+                @if (ins.GrupoFamiliar is not null && ins.GrupoFamiliar.Inscripciones.Count > 0)
+                {
+                    var familiares = ins.GrupoFamiliar.Inscripciones
+                        .Where(i => i.Id != ins.Id)
+                        .ToList();
+
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+                                Grupo Familiar #@ins.GrupoFamiliar.Id
+                                <span style="font-weight: 400; color: #86868b; text-transform: none; letter-spacing: normal;">
+                                    — @ins.GrupoFamiliar.Inscripciones.Count miembro(s)
+                                </span>
                             </div>
-                        </form>
-                    </div>
-                    <div class="admin-action-card">
-                        <h3>Cambiar hospedaje</h3>
-                        <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-hospedaje" class="cambiar-estado__form">
-                            <select name="requiereHospedaje" class="form-control" style="width: auto;">
-                                <option value="true" selected="@ins.RequiereHospedaje">Sí</option>
-                                <option value="false" selected="@(!ins.RequiereHospedaje)">No</option>
-                            </select>
-                            <button type="submit" class="btn btn--primary">Guardar</button>
-                        </form>
-                    </div>
-                    <div class="admin-action-card">
-                        <h3>Eliminar inscripción</h3>
-                        <p style="font-size: 0.8125rem; color: #86868b; margin-bottom: 0.75rem;">Esta acción es irreversible.</p>
-                        <form method="post" action="/admin/inscripciones/@ins.Id/eliminar" onsubmit="return confirm('¿Está seguro de que desea eliminar esta inscripción? Esta acción no se puede deshacer.');">
-                            <button type="submit" class="btn btn--danger">Eliminar</button>
-                        </form>
-                    </div>
-                </div>
-            }
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
+                                    + Agregar familiar
+                                </a>
+                                <a href="/admin/inscripciones/grupo/@ins.GrupoFamiliarId" class="btn btn--secondary btn--lg">
+                                    Ver grupo completo
+                                </a>
+                            </div>
+                        </div>
 
-            @* ── Historial de auditoría ── *@
-            @if (Model.Auditoria.Count > 0)
-            {
-                <div class="card" style="margin-top: 1.5rem;">
-                    <div class="detail-section-title">Historial de cambios</div>
+                        @if (familiares.Count > 0)
+                        {
+                            <div class="table-wrapper" style="border: none; border-radius: 0;">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Identificación</th>
+                                            <th>Relación</th>
+                                            <th>Estado</th>
+                                            <th>Hospedaje</th>
+                                            <th>Alimentación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var familiar in familiares)
+                                        {
+                                            <tr>
+                                                <td class="col-name">
+                                                    <a href="/admin/inscripciones/@familiar.Id">@familiar.Persona.NombreCompleto</a>
+                                                </td>
+                                                <td>@familiar.Persona.TipoIdentificacion.Humanize() — @familiar.Persona.NumeroIdentificacion</td>
+                                                <td>
+                                                    @if (familiar.Relacion.HasValue && familiar.RelacionConPersona is not null)
+                                                    {
+                                                        @($"{familiar.Relacion.Value.Humanize()} de {familiar.RelacionConPersona.NombreCompleto}")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">—</span>
+                                                    }
+                                                </td>
+                                                <td><span class="badge @familiar.Estado.BadgeCss()">@familiar.Estado.Humanize()</span></td>
+                                                <td>@(familiar.RequiereHospedaje ? "Sí" : "No")</td>
+                                                <td>@(familiar.RequiereAlimentacion ? "Sí" : "No")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.5rem;">
+                                Esta persona es el único miembro del grupo familiar.
+                            </p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+                                Grupo Familiar
+                            </div>
+                            <a href="/admin/inscripciones/formulario/verificar-familiares/@ins.Id" class="btn btn--primary btn--lg">
+                                + Agregar familiar
+                            </a>
+                        </div>
+                        <p style="color: #86868b; font-size: 0.875rem; margin-top: 0.75rem;">
+                            Esta inscripción no tiene grupo familiar asignado.
+                        </p>
+                    </div>
+                }
 
-                    <div class="table-wrapper" style="border: none; border-radius: 0;">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Usuario</th>
-                                    <th>Acción</th>
-                                    <th>Anterior</th>
-                                    <th>Nuevo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var registro in Model.Auditoria)
-                                {
+                @* ── Acciones admin ── *@
+                @if (User.IsInRole("Administrador"))
+                {
+                    <div class="admin-actions-grid">
+                        <div class="admin-action-card">
+                            <h3>Categoría de inscripción</h3>
+                            <form method="post" action="/admin/inscripciones/@ins.Id/asignar-categoria" class="cambiar-estado__form">
+                                <select name="categoriaInscripcionId" class="form-control" style="width: auto;">
+                                    <option value="">— Sin categoría —</option>
+                                    @foreach (var cat in Model.CategoriasDisponibles)
+                                    {
+                                        <option value="@cat.Id" selected="@(ins.CategoriaInscripcionId == cat.Id)">
+                                            @cat.Nombre — $@cat.Precio.ToString("N0")
+                                        </option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn--primary">Guardar</button>
+                            </form>
+                        </div>
+                        <div class="admin-action-card">
+                            <h3>Registrar abono</h3>
+                            <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono">
+                                <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+                                    <div>
+                                        <label class="form-label">Monto</label>
+                                        <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
+                                               title="Solo se permiten números" required style="width:140px;"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
+                                    </div>
+                                    <div style="flex:1;min-width:150px;">
+                                        <label class="form-label">Observaciones</label>
+                                        <input type="text" name="observaciones" class="form-control" placeholder="Opcional" />
+                                    </div>
+                                    <button type="submit" class="btn btn--primary">Abonar</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="admin-action-card">
+                            <h3>Cambiar hospedaje</h3>
+                            <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-hospedaje" class="cambiar-estado__form">
+                                <select name="requiereHospedaje" class="form-control" style="width: auto;">
+                                    <option value="true" selected="@ins.RequiereHospedaje">Sí</option>
+                                    <option value="false" selected="@(!ins.RequiereHospedaje)">No</option>
+                                </select>
+                                <button type="submit" class="btn btn--primary">Guardar</button>
+                            </form>
+                        </div>
+                        <div class="admin-action-card">
+                            <h3>Eliminar inscripción</h3>
+                            <p style="font-size: 0.8125rem; color: #86868b; margin-bottom: 0.75rem;">Esta acción es irreversible.</p>
+                            <form method="post" action="/admin/inscripciones/@ins.Id/eliminar"
+                                  onsubmit="return confirm('¿Está seguro de que desea eliminar esta inscripción? Esta acción no se puede deshacer.');">
+                                <button type="submit" class="btn btn--danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+
+                @* ── Historial de auditoría ── *@
+                @if (Model.Auditoria.Count > 0)
+                {
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="detail-section-title">Historial de cambios</div>
+
+                        <div class="table-wrapper" style="border: none; border-radius: 0;">
+                            <table class="admin-table">
+                                <thead>
                                     <tr>
-                                        <td class="col-date">@registro.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>@registro.Usuario</td>
-                                        <td>@registro.Accion</td>
-                                        <td>@(registro.ValorAnterior ?? "—")</td>
-                                        <td>@(registro.ValorNuevo ?? "—")</td>
+                                        <th>Fecha</th>
+                                        <th>Usuario</th>
+                                        <th>Acción</th>
+                                        <th>Anterior</th>
+                                        <th>Nuevo</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var registro in Model.Auditoria)
+                                    {
+                                        <tr>
+                                            <td class="col-date">@registro.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@registro.Usuario</td>
+                                            <td>@registro.Accion</td>
+                                            <td>@(registro.ValorAnterior ?? "—")</td>
+                                            <td>@(registro.ValorNuevo ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            }
+                }

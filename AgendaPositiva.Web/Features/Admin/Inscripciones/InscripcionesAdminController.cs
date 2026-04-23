@@ -567,6 +567,35 @@ public class InscripcionesAdminController : Controller
         return RedirectToAction(nameof(Detalle), new { id });
     }
 
+    [HttpPost("{id:int}/editar-abono/{abonoId:int}")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> EditarAbono(int id, int abonoId, [FromForm] decimal monto, [FromForm] string? observaciones)
+    {
+        if (monto <= 0) return BadRequest("El monto debe ser mayor a 0.");
+
+        var abono = await store.AbonosInscripcion
+            .FirstOrDefaultAsync(a => a.Id == abonoId && a.InscripcionId == id);
+        if (abono is null) return NotFound();
+
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+        var montoAnterior = abono.Monto;
+
+        abono.Monto = monto;
+        abono.Observaciones = observaciones?.Trim();
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = usuario,
+            Accion = "Editar abono",
+            ValorAnterior = $"${montoAnterior:N0}",
+            ValorNuevo = $"${monto:N0}"
+        });
+
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
     [HttpGet("exportar")]
     public IActionResult Exportar()
     {
