@@ -107,6 +107,11 @@
                     @foreach (var (inscripcion, index) in Model.Inscripciones.Select((i, idx) => (i, idx)))
                     {
                         var offset = (Model.Pagina - 1) * Model.PorPagina;
+                        var totalAbonado = inscripcion.Abonos.Sum(a => a.Monto);
+                        var precioCategoria = inscripcion.CategoriaInscripcion?.Precio ?? 0;
+                        var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
+                        var badgePago = pctPago >= 100 ? "badge--success" : pctPago >= 50 ? "badge--abono2" : pctPago > 0 ? "badge--abono1" : "badge--warning";
+                        var textoPago = pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
                         <tr>
                             <td class="col-index">@(offset + index + 1)</td>
                             <td class="col-name">
@@ -114,7 +119,7 @@
                             </td>
                             <td>@inscripcion.Persona.TipoIdentificacion.Humanize() — @inscripcion.Persona.NumeroIdentificacion</td>
                             <td>@inscripcion.Localidad</td>
-                            <td><span class="badge @inscripcion.Estado.BadgeCss()">@inscripcion.Estado.Humanize()</span></td>
+                            <td><span class="badge @badgePago">@textoPago</span></td>
                             <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
                         </tr>
                     }

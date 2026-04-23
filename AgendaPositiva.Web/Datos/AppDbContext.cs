@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<RegionEvento> RegionesEvento => Set<RegionEvento>();
     public DbSet<UsuarioRegion> UsuarioRegiones => Set<UsuarioRegion>();
     public DbSet<AuditoriaAdmin> AuditoriaAdmin => Set<AuditoriaAdmin>();
+    public DbSet<CategoriaInscripcion> CategoriasInscripcion => Set<CategoriaInscripcion>();
+    public DbSet<AbonoInscripcion> AbonosInscripcion => Set<AbonoInscripcion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +34,8 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarUsuariosAdministradores();
         modelBuilder.ConfigurarRegionesEvento();
         modelBuilder.ConfigurarUsuarioRegiones();
+        modelBuilder.ConfigurarCategoriasInscripcion();
+        modelBuilder.ConfigurarAbonosInscripcion();
 
         modelBuilder.Entity<AuditoriaAdmin>(e =>
         {

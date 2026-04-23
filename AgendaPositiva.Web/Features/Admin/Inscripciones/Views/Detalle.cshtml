@@ -156,7 +156,7 @@
     <div class="detalle-header__info">
         <h1>@ins.Persona.NombreCompleto</h1>
         <div class="detalle-header__meta">
-            <span class="badge @ins.Estado.BadgeCss()">@ins.Estado.Humanize()</span>
+            <span class="badge @Model.EstadoPagoBadgeCss">@Model.EstadoPagoTexto</span>
             <span>Inscripción #@ins.Id</span>
             <span>·</span>
             <span>@ins.Localidad</span>
@@ -323,6 +323,67 @@
                 </div>
             </div>
 
+            @* ── Estado de pago ── *@
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="detail-section-title">Estado de pago</div>
+                @if (ins.CategoriaInscripcion is not null)
+                {
+                    <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+                        <div>
+                            <span class="field-label">Categoría</span>
+                            <span class="detail-value"><strong>@ins.CategoriaInscripcion.Nombre</strong></span>
+                        </div>
+                        <div>
+                            <span class="field-label">Precio</span>
+                            <span class="detail-value">$@Model.PrecioCategoria?.ToString("N0")</span>
+                        </div>
+                        <div>
+                            <span class="field-label">Abonado</span>
+                            <span class="detail-value">$@Model.TotalAbonado.ToString("N0")</span>
+                        </div>
+                        <div>
+                            <span class="field-label">Estado</span>
+                            <span class="badge @Model.EstadoPagoBadgeCss">@Model.EstadoPagoTexto</span>
+                        </div>
+                    </div>
+                    <div style="width:100%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;">
+                        <div style="height:100%;border-radius:4px;width:@(Math.Min(Model.PorcentajePago, 100))%;@(Model.PorcentajePago >= 100 ? "background:#34c759;" : Model.PorcentajePago >= 50 ? "background:#ff9500;" : "background:#ff3b30;")">
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p style="color:#86868b;font-size:0.875rem;">Sin categoría asignada.</p>
+                }
+
+                @if (ins.Abonos.Count > 0)
+                {
+                    <div class="table-wrapper" style="border:none;border-radius:0;margin-top:1rem;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Observaciones</th>
+                                    <th>Registrado por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var abono in ins.Abonos.OrderByDescending(a => a.FechaCreacion))
+                                {
+                                    <tr>
+                                        <td class="col-date">@abono.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>$@abono.Monto.ToString("N0")</td>
+                                        <td>@(abono.Observaciones ?? "—")</td>
+                                        <td>@abono.RegistradoPorUsuario</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
             @* ── Grupo familiar ── *@
             @if (ins.GrupoFamiliar is not null && ins.GrupoFamiliar.Inscripciones.Count > 0)
             {
@@ -419,15 +480,36 @@
             {
                 <div class="admin-actions-grid">
                     <div class="admin-action-card">
-                        <h3>Cambiar estado</h3>
-                        <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-estado" class="cambiar-estado__form">
-                            <select name="nuevoEstado" class="form-control" style="width: auto;">
-                                @foreach (EstadoInscripcion estado in Enum.GetValues<EstadoInscripcion>())
+                        <h3>Categoría de inscripción</h3>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/asignar-categoria" class="cambiar-estado__form">
+                            <select name="categoriaInscripcionId" class="form-control" style="width: auto;">
+                                <option value="">— Sin categoría —</option>
+                                @foreach (var cat in Model.CategoriasDisponibles)
                                 {
-                                    <option value="@estado" selected="@(ins.Estado == estado)">@estado.Humanize()</option>
+                                    <option value="@cat.Id" selected="@(ins.CategoriaInscripcionId == cat.Id)">
+                                        @cat.Nombre — $@cat.Precio.ToString("N0")
+                                    </option>
                                 }
                             </select>
                             <button type="submit" class="btn btn--primary">Guardar</button>
+                        </form>
+                    </div>
+                    <div class="admin-action-card">
+                        <h3>Registrar abono</h3>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono">
+                            <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+                                <div>
+                                    <label class="form-label">Monto</label>
+                                    <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
+                                           title="Solo se permiten números" required style="width:140px;"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
+                                </div>
+                                <div style="flex:1;min-width:150px;">
+                                    <label class="form-label">Observaciones</label>
+                                    <input type="text" name="observaciones" class="form-control" placeholder="Opcional" />
+                                </div>
+                                <button type="submit" class="btn btn--primary">Abonar</button>
+                            </div>
                         </form>
                     </div>
                     <div class="admin-action-card">

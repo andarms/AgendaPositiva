@@ -13,6 +13,8 @@ public class Inscripcion : EntidadBase
     public Parentesco? Relacion { get; set; }
     /// <summary>¿Con quién tiene esa relación? (PersonaId)</summary>
     public int? RelacionConPersonaId { get; set; }
+    /// <summary>Categoría de inscripción asignada por el administrador.</summary>
+    public int? CategoriaInscripcionId { get; set; }
     /// <summary>Estado actual de la inscripción. Por defecto, pendiente hasta que luego se registren los pagos.</summary>
     public EstadoInscripcion Estado { get; set; } = EstadoInscripcion.Pendiente;
     public List<ServicioInscripcion> Servicios { get; set; } = [];
@@ -35,6 +37,8 @@ public class Inscripcion : EntidadBase
     public Evento Evento { get; set; } = null!;
     public GrupoFamiliar? GrupoFamiliar { get; set; }
     public Persona? RelacionConPersona { get; set; }
+    public CategoriaInscripcion? CategoriaInscripcion { get; set; }
+    public ICollection<AbonoInscripcion> Abonos { get; set; } = [];
 
     public string Localidad => string.IsNullOrEmpty(Ciudad) ? Departamento : $"{Departamento}, {Ciudad}";
 }

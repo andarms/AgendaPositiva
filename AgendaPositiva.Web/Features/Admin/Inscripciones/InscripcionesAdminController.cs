@@ -169,6 +169,8 @@ public class InscripcionesAdminController : Controller
 
         var query = store.Inscripciones
             .Include(i => i.Persona)
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
             .Where(i => i.EventoId == evento.Id);
 
         // Colaboradores solo ven sus localidades asignadas
@@ -243,10 +245,12 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpGet("{id:int}")]
-    public IActionResult Detalle(int id)
+    public async Task<IActionResult> Detalle(int id)
     {
         var inscripcion = store.Inscripciones
             .Include(i => i.Persona)
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
             .Include(i => i.GrupoFamiliar)
                 .ThenInclude(g => g!.Inscripciones)
                     .ThenInclude(i => i.Persona)
@@ -266,10 +270,16 @@ public class InscripcionesAdminController : Controller
             .OrderByDescending(a => a.FechaCreacion)
             .ToList();
 
+        var categorias = await store.CategoriasInscripcion
+            .Where(c => c.Activa)
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+
         return View("~/Features/Admin/Inscripciones/Views/Detalle.cshtml", new Views.ViewModels.DetalleViewModel
         {
             Inscripcion = inscripcion,
-            Auditoria = auditoria
+            Auditoria = auditoria,
+            CategoriasDisponibles = categorias
         });
     }
 
@@ -491,12 +501,78 @@ public class InscripcionesAdminController : Controller
         return View("~/Features/Admin/Inscripciones/Views/GrupoFamiliar.cshtml", grupo);
     }
 
+    [HttpPost("{id:int}/asignar-categoria")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> AsignarCategoria(int id, [FromForm] int? categoriaInscripcionId)
+    {
+        var inscripcion = await store.Inscripciones
+            .Include(i => i.CategoriaInscripcion)
+            .FirstOrDefaultAsync(i => i.Id == id && i.EventoId == evento.Id);
+        if (inscripcion is null) return NotFound();
+
+        var nombreAnterior = inscripcion.CategoriaInscripcion?.Nombre ?? "Sin categoría";
+        inscripcion.CategoriaInscripcionId = categoriaInscripcionId;
+
+        string nombreNuevo = "Sin categoría";
+        if (categoriaInscripcionId.HasValue)
+        {
+            var cat = await store.CategoriasInscripcion.FindAsync(categoriaInscripcionId.Value);
+            nombreNuevo = cat?.Nombre ?? "Desconocida";
+        }
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido",
+            Accion = "Asignar categoría",
+            ValorAnterior = nombreAnterior,
+            ValorNuevo = nombreNuevo
+        });
+
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    [HttpPost("{id:int}/agregar-abono")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> AgregarAbono(int id, [FromForm] decimal monto, [FromForm] string? observaciones)
+    {
+        if (monto <= 0) return BadRequest("El monto debe ser mayor a 0.");
+
+        var inscripcion = await store.Inscripciones
+            .FirstOrDefaultAsync(i => i.Id == id && i.EventoId == evento.Id);
+        if (inscripcion is null) return NotFound();
+
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+
+        store.AbonosInscripcion.Add(new AbonoInscripcion
+        {
+            InscripcionId = id,
+            Monto = monto,
+            Observaciones = observaciones?.Trim(),
+            RegistradoPorUsuario = usuario
+        });
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = usuario,
+            Accion = "Registrar abono",
+            ValorNuevo = $"${monto:N0}"
+        });
+
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
     [HttpGet("exportar")]
     public IActionResult Exportar()
     {
         var query = store.Inscripciones
             .Include(i => i.Persona)
             .Include(i => i.GrupoFamiliar)
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
             .Where(i => i.EventoId == evento.Id);
 
         if (!EsAdministrador)
@@ -521,7 +597,7 @@ public class InscripcionesAdminController : Controller
             "Alergia Alimentaria", "Descripción Alergia",
             "Comunión Ancianos/Diácono/Diaconisa", "Servicio Alimentación",
             "Participa FV KIDS", "Tipo de Sangre", "EPS",
-            "Fecha Registro" };
+            "Fecha Registro", "Categoría", "Precio Categoría", "Total Abonado" };
 
         for (int i = 0; i < headers.Length; i++)
             ws.Cell(1, i + 1).Value = headers[i];
@@ -553,16 +629,12 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 9).Value = ins.Persona.Email ?? "";
             ws.Cell(row, 10).Value = ins.Departamento;
             ws.Cell(row, 11).Value = ins.Ciudad;
-            ws.Cell(row, 12).Value = ins.Estado.Humanize();
-            var estadoColor = ins.Estado switch
-            {
-                EstadoInscripcion.Completado => "#27ae60",
-                EstadoInscripcion.Abono2 => "#6abf4b",
-                EstadoInscripcion.Abono1 => "#a3d977",
-                EstadoInscripcion.Pendiente => "#f39c12",
-                EstadoInscripcion.NoVaAsistir => "#e74c3c",
-                _ => "#999999"
-            };
+            var totalAbonado = ins.Abonos.Sum(a => a.Monto);
+            var precioCategoria = ins.CategoriaInscripcion?.Precio ?? 0;
+            var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
+            var textoPago = pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
+            ws.Cell(row, 12).Value = textoPago;
+            var estadoColor = pctPago >= 100 ? "#27ae60" : pctPago >= 50 ? "#6abf4b" : pctPago > 0 ? "#a3d977" : "#f39c12";
             ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
             ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
             ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
@@ -577,6 +649,11 @@ public class InscripcionesAdminController : Controller
             ws.Cell(row, 22).Value = ins.PreguntasAdicionalesNino?.TipoSangre?.Descripcion() ?? "";
             ws.Cell(row, 23).Value = ins.PreguntasAdicionalesNino?.Eps ?? "";
             ws.Cell(row, 24).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
+            ws.Cell(row, 25).Value = ins.CategoriaInscripcion?.Nombre ?? "";
+            ws.Cell(row, 26).Value = precioCategoria;
+            ws.Cell(row, 26).Style.NumberFormat.Format = "$#,##0";
+            ws.Cell(row, 27).Value = totalAbonado;
+            ws.Cell(row, 27).Style.NumberFormat.Format = "$#,##0";
         }
 
         ws.Columns().AdjustToContents();

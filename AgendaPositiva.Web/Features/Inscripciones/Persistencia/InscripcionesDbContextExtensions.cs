@@ -104,6 +104,11 @@ public static class InscripcionesDbContextExtensions
                 .WithMany()
                 .HasForeignKey(i => i.RelacionConPersonaId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(i => i.CategoriaInscripcion)
+                .WithMany(c => c.Inscripciones)
+                .HasForeignKey(i => i.CategoriaInscripcionId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 
@@ -113,6 +118,34 @@ public static class InscripcionesDbContextExtensions
         {
             e.HasKey(g => g.Id);
             e.Property(g => g.Id).ValueGeneratedOnAdd();
+        });
+    }
+
+    public static void ConfigurarCategoriasInscripcion(this ModelBuilder builder)
+    {
+        builder.Entity<CategoriaInscripcion>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Id).ValueGeneratedOnAdd();
+            e.Property(c => c.Nombre).HasMaxLength(100).IsRequired();
+            e.Property(c => c.Precio).HasColumnType("numeric(12,2)").IsRequired();
+        });
+    }
+
+    public static void ConfigurarAbonosInscripcion(this ModelBuilder builder)
+    {
+        builder.Entity<AbonoInscripcion>(e =>
+        {
+            e.HasKey(a => a.Id);
+            e.Property(a => a.Id).ValueGeneratedOnAdd();
+            e.Property(a => a.Monto).HasColumnType("numeric(12,2)").IsRequired();
+            e.Property(a => a.Observaciones).HasMaxLength(500);
+            e.Property(a => a.RegistradoPorUsuario).HasMaxLength(255).IsRequired();
+
+            e.HasOne(a => a.Inscripcion)
+                .WithMany(i => i.Abonos)
+                .HasForeignKey(a => a.InscripcionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

@@ -1,0 +1,29 @@
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio
+@model CategoriaInscripcion
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/categorias">Categorías</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.Id == 0 ? "Crear" : "Editar")</span>
+</nav>
+
+<h1>@(Model.Id == 0 ? "Nueva Categoría" : "Editar Categoría")</h1>
+
+<div class="card" style="max-width:480px;">
+    <form method="post">
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" value="@Model.Nombre" class="form-control" required />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Precio</label>
+            <input type="number" name="precio" value="@Model.Precio" class="form-control" min="0" step="100" required />
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Guardar</button>
+            <a href="/admin/categorias" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
