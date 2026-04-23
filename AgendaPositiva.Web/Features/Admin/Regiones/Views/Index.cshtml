@@ -271,6 +271,7 @@ else
             <strong>@regiones.Count</strong> regiones configuradas
         </p>
         <div class="page-header__actions">
+            <a href="/admin/regiones/exportar" class="btn btn--secondary">⬇ Descargar Excel</a>
             <form method="post" action="/admin/regiones/reasignar-cupos" style="margin:0;">
                 <button type="submit" class="btn btn--secondary"
                         onclick="return confirm('¿Recalcular los cupos de todas las regiones con las inscripciones actuales?');">

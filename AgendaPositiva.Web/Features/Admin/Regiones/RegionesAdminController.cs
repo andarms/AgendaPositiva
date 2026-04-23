@@ -1,6 +1,7 @@
 using AgendaPositiva.Web.Datos;
 using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -248,6 +249,122 @@ public class RegionesAdminController : Controller
         await store.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("exportar")]
+    public async Task<IActionResult> Exportar()
+    {
+        var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
+        if (evento is null) return NotFound();
+
+        var regiones = await store.RegionesEvento
+            .Where(r => r.EventoId == evento.Id)
+            .OrderBy(r => r.Nombre)
+            .ToListAsync();
+
+        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        var corteBebe = hoy.AddYears(-3);
+        var corteNino = hoy.AddYears(-11);
+        var corteAdolescente = hoy.AddYears(-18);
+
+        var fechasNacimiento = await store.Inscripciones
+            .Where(i => i.EventoId == evento.Id)
+            .Select(i => i.Persona.FechaNacimiento)
+            .ToListAsync();
+
+        var totalInscripciones = fechasNacimiento.Count;
+        var totalBebes = fechasNacimiento.Count(f => f > corteBebe);
+        var totalNinos = fechasNacimiento.Count(f => f <= corteBebe && f > corteNino);
+        var totalAdolescentes = fechasNacimiento.Count(f => f <= corteNino && f > corteAdolescente);
+        var totalAdultos = fechasNacimiento.Count(f => f <= corteAdolescente);
+
+        var inscripcionesLocalidad = await store.Inscripciones
+            .Where(i => i.EventoId == evento.Id)
+            .Select(i => new { i.Departamento, i.Ciudad })
+            .ToListAsync();
+
+        var inscritosSinRegion = inscripcionesLocalidad
+            .Count(i => !regiones.Any(r => r.Contiene(i.Departamento, i.Ciudad)));
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("Regiones y Cupos");
+
+        // Cabecera del evento
+        ws.Cell(1, 1).Value = "Evento";
+        ws.Cell(1, 2).Value = evento.Nombre;
+        ws.Cell(2, 1).Value = "Total Inscritos";
+        ws.Cell(2, 2).Value = totalInscripciones;
+        ws.Cell(3, 1).Value = "Bebés (0–2 años)";
+        ws.Cell(3, 2).Value = totalBebes;
+        ws.Cell(4, 1).Value = "Niños (3–10 años)";
+        ws.Cell(4, 2).Value = totalNinos;
+        ws.Cell(5, 1).Value = "Adolescentes (11–17)";
+        ws.Cell(5, 2).Value = totalAdolescentes;
+        ws.Cell(6, 1).Value = "Adultos (18+)";
+        ws.Cell(6, 2).Value = totalAdultos;
+        ws.Cell(7, 1).Value = "Cupo Total";
+        ws.Cell(7, 2).Value = evento.CupoTotal;
+        ws.Cell(8, 1).Value = "Disponible";
+        ws.Cell(8, 2).Value = evento.CupoDisponible;
+
+        var cabeceraRango = ws.Range(1, 1, 8, 1);
+        cabeceraRango.Style.Font.Bold = true;
+
+        // Tabla de regiones
+        var startRow = 10;
+        var headers = new[] { "Nombre", "Localidades", "Cupo", "Inscritos", "Disponible" };
+        for (int i = 0; i < headers.Length; i++)
+            ws.Cell(startRow, i + 1).Value = headers[i];
+
+        var headerRow = ws.Range(startRow, 1, startRow, headers.Length);
+        headerRow.Style.Font.Bold = true;
+        headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#1a1a2e");
+        headerRow.Style.Font.FontColor = XLColor.White;
+
+        for (int i = 0; i < regiones.Count; i++)
+        {
+            var r = regiones[i];
+            var row = startRow + 1 + i;
+
+            ws.Cell(row, 1).Value = r.Nombre;
+
+            var localidades = string.Join("; ", r.Localidades.Select(kv =>
+                kv.Value.Count == 0
+                    ? kv.Key
+                    : $"{kv.Key} ({string.Join(", ", kv.Value)})"));
+            ws.Cell(row, 2).Value = localidades;
+            ws.Cell(row, 3).Value = r.Cupo;
+            ws.Cell(row, 4).Value = r.TotalInscritos;
+            ws.Cell(row, 5).Value = r.CupoDisponible;
+        }
+
+        // Fila de totales
+        var totalRow = startRow + 1 + regiones.Count;
+        ws.Cell(totalRow, 1).Value = "Total regiones";
+        ws.Cell(totalRow, 3).Value = regiones.Sum(r => r.Cupo);
+        ws.Cell(totalRow, 4).Value = regiones.Sum(r => r.TotalInscritos);
+        ws.Cell(totalRow, 5).Value = regiones.Sum(r => r.CupoDisponible);
+        ws.Range(totalRow, 1, totalRow, headers.Length).Style.Font.Bold = true;
+
+        if (inscritosSinRegion > 0)
+        {
+            var sinRow = totalRow + 1;
+            ws.Cell(sinRow, 1).Value = "Sin región asignada";
+            ws.Cell(sinRow, 4).Value = inscritosSinRegion;
+            ws.Range(sinRow, 1, sinRow, headers.Length).Style.Font.FontColor = XLColor.Red;
+            ws.Range(sinRow, 1, sinRow, headers.Length).Style.Font.Bold = true;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        var fileName = $"Regiones_Cupos_{evento.Nombre.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.xlsx";
+        return File(stream.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName);
     }
 }
 
