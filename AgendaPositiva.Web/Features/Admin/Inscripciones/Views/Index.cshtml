@@ -17,50 +17,116 @@
     var pct = cupo.CupoTotal > 0 ? (double)cupo.TotalInscritos / cupo.CupoTotal * 100 : 100;
     var barClass = pct >= 100 ? "cupo-bar__fill--full" : pct >= 80 ? "cupo-bar__fill--warn" : "cupo-bar__fill--ok";
 
-    <div class="cupo-header-card"
-         style="background:#fff;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1rem;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-        <div style="font-size:0.8125rem;font-weight:600;color:#1d1d1f;">@cupo.NombreRegion</div>
-        <div style="display:flex;gap:1.5rem;align-items:center;flex:1;">
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalInscritos</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Total inscritos</div>
+    <style>
+        .cupo-header-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .cupo-header-card__title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 0.75rem;
+        }
+        .cupo-header-card__stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.75rem 1rem;
+            align-items: start;
+        }
+        .cupo-stat-item {
+            text-align: center;
+        }
+        .cupo-stat-item__value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            line-height: 1;
+        }
+        .cupo-stat-item__label {
+            font-size: 0.625rem;
+            color: #86868b;
+            margin-top: 0.15rem;
+        }
+        .cupo-header-card__bar {
+            margin-top: 0.75rem;
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .cupo-header-card__regions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        @@media (max-width: 480px) {
+            .cupo-header-card {
+                padding: 0.75rem 1rem;
+            }
+            .cupo-header-card__stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.625rem 0.5rem;
+            }
+            .cupo-stat-item__value {
+                font-size: 1.0625rem;
+            }
+        }
+    </style>
+
+    <div class="cupo-header-card">
+        <div class="cupo-header-card__title">@cupo.NombreRegion</div>
+        <div class="cupo-header-card__stats">
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.TotalInscritos</div>
+                <div class="cupo-stat-item__label">Total inscritos</div>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalBebes</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Bebés (0–2)</div>
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.TotalBebes</div>
+                <div class="cupo-stat-item__label">Bebés (0–2)</div>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalNinos</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Niños (3–10)</div>
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.TotalNinos</div>
+                <div class="cupo-stat-item__label">Niños (3–10)</div>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalAdolescentes</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Adolescentes (11–17)</div>
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.TotalAdolescentes</div>
+                <div class="cupo-stat-item__label">Adolescentes (11–17)</div>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.TotalAdultos</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Adultos (18+)</div>
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.TotalAdultos</div>
+                <div class="cupo-stat-item__label">Adultos (18+)</div>
             </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.25rem;font-weight:700;color:#1d1d1f;line-height:1;">@cupo.CupoTotal</div>
-                <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Cupo total</div>
-            </div>
-            <div style="text-align:center;">
-                <div
-                    style="font-size:1.25rem;font-weight:700;color:@(cupo.CupoDisponible <= 0 ? "#ff3b30" : "#1d1d1f");line-height:1;">
-                    @cupo.CupoDisponible</div>
-                    <div style="font-size:0.625rem;color:#86868b;margin-top:0.15rem;">Disponible</div>
-                </div>
-                <div style="width:100px;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;">
-                    <div class="@barClass"
-                         style="height:100%;border-radius:3px;width:@(Math.Min(pct, 100))%;@(pct >= 100 ? "background:#ff3b30;" : pct >= 80 ? "background:#ff9500;" : "background:#34c759;")">
-                    </div>
-                </div>
-            </div>
-            @if (cupo.Regiones.Count > 1)
+            @if (User.IsInRole("Administrador"))
             {
-                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                    @foreach (var r in cupo.Regiones)
+                <div class="cupo-stat-item">
+                    <div class="cupo-stat-item__value" style="color:#007aff;">@(cupo.TotalAdolescentes + cupo.TotalAdultos)</div>
+                    <div class="cupo-stat-item__label">Cupo Salón</div>
+                </div>
+            }
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value">@cupo.CupoTotal</div>
+                <div class="cupo-stat-item__label">Cupo total</div>
+            </div>
+            <div class="cupo-stat-item">
+                <div class="cupo-stat-item__value" style="color:@(cupo.CupoDisponible <= 0 ? "#ff3b30" : "#1d1d1f");">@cupo.CupoDisponible</div>
+                <div class="cupo-stat-item__label">Disponible</div>
+            </div>
+        </div>
+        <div class="cupo-header-card__bar">
+            <div class="@barClass"
+                 style="height:100%;border-radius:3px;width:@(Math.Min(pct, 100))%;@(pct >= 100 ? "background:#ff3b30;" : pct >= 80 ? "background:#ff9500;" : "background:#34c759;")">
+            </div>
+        </div>
+        @if (cupo.Regiones.Count > 1)
+        {
+            <div class="cupo-header-card__regions">
+                @foreach (var r in cupo.Regiones)
                     {
                         <span style="background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
                             @r.Nombre: @r.TotalInscritos/@r.Cupo

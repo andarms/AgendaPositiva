@@ -87,7 +87,9 @@ public class InscripcionesAdminController : Controller
         var corteAdolescente = hoy.AddYears(-18);
 
         var query = filtro ?? store.Inscripciones.Where(i => i.EventoId == evento.Id);
-        var fechas = await query.Select(i => i.Persona.FechaNacimiento).ToListAsync();
+        var fechas = await query
+            .Where(i => i.Estado != EstadoInscripcion.NoVaAsistir)
+            .Select(i => i.Persona.FechaNacimiento).ToListAsync();
 
         return (
             fechas.Count(f => f > corteBebe),
@@ -592,6 +594,30 @@ public class InscripcionesAdminController : Controller
             ValorNuevo = $"${monto:N0}"
         });
 
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    [HttpPost("{id:int}/eliminar-abono/{abonoId:int}")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> EliminarAbono(int id, int abonoId)
+    {
+        var abono = await store.AbonosInscripcion
+            .FirstOrDefaultAsync(a => a.Id == abonoId && a.InscripcionId == id);
+        if (abono is null) return NotFound();
+
+        var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
+
+        store.AuditoriaAdmin.Add(new AuditoriaAdmin
+        {
+            InscripcionId = id,
+            Usuario = usuario,
+            Accion = "Eliminar abono",
+            ValorAnterior = $"${abono.Monto:N0}",
+            ValorNuevo = "Eliminado"
+        });
+
+        store.AbonosInscripcion.Remove(abono);
         await store.SaveChangesAsync();
         return RedirectToAction(nameof(Detalle), new { id });
     }

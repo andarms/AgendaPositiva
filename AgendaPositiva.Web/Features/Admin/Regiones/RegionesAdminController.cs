@@ -52,6 +52,7 @@ public class RegionesAdminController : Controller
         // Calcular inscritos que no pertenecen a ninguna región
         var inscripcionesLocalidad = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
+            .Where(i => i.Estado != Commons.EstadoInscripcion.NoVaAsistir)
             .Select(i => new { i.Departamento, i.Ciudad })
             .ToListAsync();
 
@@ -99,10 +100,11 @@ public class RegionesAdminController : Controller
         // Obtener todas las inscripciones del evento activo
         var inscripciones = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
+            .Where(i => i.Estado != Commons.EstadoInscripcion.NoVaAsistir)
             .Select(i => new { i.Departamento, i.Ciudad })
             .ToListAsync();
 
-        // Recalcular TotalInscritos del evento (todas las inscripciones)
+        // Recalcular TotalInscritos del evento (excluyendo los que no van a asistir)
         evento.TotalInscritos = inscripciones.Count;
 
         // Recalcular TotalInscritos de cada región
@@ -269,6 +271,7 @@ public class RegionesAdminController : Controller
 
         var fechasNacimiento = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
+            .Where(i => i.Estado != Commons.EstadoInscripcion.NoVaAsistir)
             .Select(i => i.Persona.FechaNacimiento)
             .ToListAsync();
 
@@ -280,6 +283,7 @@ public class RegionesAdminController : Controller
 
         var inscripcionesLocalidad = await store.Inscripciones
             .Where(i => i.EventoId == evento.Id)
+            .Where(i => i.Estado != Commons.EstadoInscripcion.NoVaAsistir)
             .Select(i => new { i.Departamento, i.Ciudad })
             .ToListAsync();
 
