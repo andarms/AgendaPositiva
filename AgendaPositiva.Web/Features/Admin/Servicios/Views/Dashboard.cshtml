@@ -1,0 +1,146 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@model DashboardServiciosViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Servicios</span>
+</nav>
+
+<h1>Servicios</h1>
+
+<!-- Resumen general -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
+    <div class="card" style="text-align:center;padding:1.25rem;">
+        <div style="font-size:2rem;font-weight:700;color:#2D3748;">@Model.Servicios.Count(s => s.Activo)</div>
+        <div style="color:#718096;font-size:0.875rem;">Servicios Activos</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1.25rem;">
+        <div style="font-size:2rem;font-weight:700;color:#2D3748;">@Model.TotalGrupos</div>
+        <div style="color:#718096;font-size:0.875rem;">Grupos</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1.25rem;">
+        <div style="font-size:2rem;font-weight:700;color:#2D3748;">@Model.TotalMiembros</div>
+        <div style="color:#718096;font-size:0.875rem;">Miembros Asignados</div>
+    </div>
+</div>
+
+<!-- Links rápidos -->
+<div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem;">
+    <a href="/admin/servicios/listado" class="btn btn--primary btn--lg">📋 Listado de Servicios</a>
+    <a href="/admin/servicios/crear" class="btn btn--secondary btn--lg">+ Nuevo Servicio</a>
+    <a href="/admin/servicios/exportar" class="btn btn--secondary btn--lg">📥 Exportar Excel</a>
+</div>
+
+<!-- Cupo por servicio -->
+@if (Model.Servicios.Any(s => s.Activo))
+{
+    <div class="card" style="margin-bottom:2rem;padding:1.25rem;">
+        <h2 style="margin-top:0;">Cobertura por Servicio</h2>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Requeridos</th>
+                        <th>Asignados</th>
+                        <th>Cobertura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Servicios.Where(s => s.Activo))
+                    {
+                        var asignados = s.Grupos.Sum(g => g.Miembros.Count);
+                        var pct = s.CantidadPersonasRequeridas > 0 ? (int)(100.0 * asignados / s.CantidadPersonasRequeridas) : 0;
+                        var color = pct >= 100 ? "#48BB78" : pct >= 50 ? "#ECC94B" : "#FC8181";
+                        <tr>
+                            <td><a href="/admin/servicios/@s.Id">@s.Nombre</a></td>
+                            <td>@s.CantidadPersonasRequeridas</td>
+                            <td>@asignados</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:0.5rem;">
+                                    <div style="flex:1;background:#E2E8F0;border-radius:4px;height:8px;min-width:80px;">
+                                        <div style="width:@(Math.Min(pct, 100))%;background:@color;height:100%;border-radius:4px;"></div>
+                                    </div>
+                                    <span style="font-size:0.875rem;font-weight:600;">@pct%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- Alertas: No va a asistir -->
+@if (Model.AlertasNoAsiste.Count > 0)
+{
+    <div class="card" style="margin-bottom:2rem;padding:1.25rem;border-left:4px solid #FC8181;">
+        <h2 style="margin-top:0;color:#C53030;">⚠️ Participantes que no van a asistir (@Model.AlertasNoAsiste.Count)</h2>
+        <p style="color:#718096;margin-bottom:1rem;">Estos participantes están asignados a un grupo de servicio pero su inscripción cambió a "No va a asistir".</p>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Persona</th>
+                        <th>Servicio</th>
+                        <th>Grupo</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var alerta in Model.AlertasNoAsiste)
+                    {
+                        <tr>
+                            <td>@alerta.NombrePersona</td>
+                            <td>@alerta.NombreServicio</td>
+                            <td>@alerta.NombreGrupo</td>
+                            <td>
+                                <form method="post" action="/admin/servicios/miembros/@alerta.MiembroId/remover"
+                                      onclick="return confirm('¿Remover a @alerta.NombrePersona del grupo @alerta.NombreGrupo?')">
+                                    <button type="submit" class="btn btn--danger">Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- Alertas: Múltiples servicios -->
+@if (Model.AlertasMultiple.Count > 0)
+{
+    <div class="card" style="margin-bottom:2rem;padding:1.25rem;border-left:4px solid #ECC94B;">
+        <h2 style="margin-top:0;color:#B7791F;">ℹ️ Participantes en múltiples grupos (@Model.AlertasMultiple.Count)</h2>
+        <p style="color:#718096;margin-bottom:1rem;">Estos participantes están asignados a más de un grupo de servicio. Verifique que sea intencional.</p>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Persona</th>
+                        <th>Asignaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var alerta in Model.AlertasMultiple)
+                    {
+                        <tr>
+                            <td>@alerta.NombrePersona</td>
+                            <td>
+                                <ul style="margin:0;padding-left:1.25rem;">
+                                    @foreach (var a in alerta.Asignaciones)
+                                    {
+                                        <li>@a</li>
+                                    }
+                                </ul>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

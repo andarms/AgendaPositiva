@@ -1,0 +1,130 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios.Dominio
+@using AgendaPositiva.Web.Features.Commons
+@model Servicio
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/listado">Listado</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@Model.Nombre</span>
+</nav>
+
+<h1>@Model.Nombre</h1>
+
+@{
+    var totalAsignados = Model.Grupos.Sum(g => g.Miembros.Count);
+    var pct = Model.CantidadPersonasRequeridas > 0 ? (int)(100.0 * totalAsignados / Model.CantidadPersonasRequeridas) : 0;
+}
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;">
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@Model.CantidadPersonasRequeridas</div>
+        <div style="color:#718096;font-size:0.85rem;">Requeridas</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@totalAsignados</div>
+        <div style="color:#718096;font-size:0.85rem;">Asignados (@pct%)</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@Model.Horarios.Count</div>
+        <div style="color:#718096;font-size:0.85rem;">Horarios</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@Model.Grupos.Count</div>
+        <div style="color:#718096;font-size:0.85rem;">Grupos</div>
+    </div>
+</div>
+
+<div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem;">
+    <a href="/admin/servicios/editar/@Model.Id" class="btn btn--secondary">✏️ Editar Servicio</a>
+    <a href="/admin/servicios/@Model.Id/horarios" class="btn btn--secondary">📅 Gestionar Horarios</a>
+    <a href="/admin/servicios/@Model.Id/grupos" class="btn btn--primary">👥 Ver Grupos</a>
+    @if (Model.Activo)
+    {
+        <a href="/admin/servicios/@Model.Id/grupos/crear" class="btn btn--secondary">+ Nuevo Grupo</a>
+    }
+</div>
+
+<!-- Horarios -->
+<div class="card" style="margin-bottom:1.5rem;padding:1.25rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <h2 style="margin:0;">Horarios</h2>
+        <a href="/admin/servicios/@Model.Id/horarios" class="btn btn--secondary" style="font-size:0.85rem;">Gestionar</a>
+    </div>
+    @if (Model.Horarios.Count == 0)
+    {
+        <p style="color:#A0AEC0;margin:0;">Sin horarios registrados.</p>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="admin-table" style="font-size:0.9rem;">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model.Horarios)
+                    {
+                        <tr>
+                            <td>@h.Descripcion</td>
+                            <td>@h.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@h.FechaHoraFin.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Grupos -->
+<div class="card" style="padding:1.25rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <h2 style="margin:0;">Grupos de Servicio</h2>
+        <a href="/admin/servicios/@Model.Id/grupos" class="btn btn--secondary" style="font-size:0.85rem;">Ver todos</a>
+    </div>
+    @if (Model.Grupos.Count == 0)
+    {
+        <p style="color:#A0AEC0;margin:0;">Sin grupos creados.</p>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="admin-table" style="font-size:0.9rem;">
+                <thead>
+                    <tr>
+                        <th>Grupo</th>
+                        <th>Horario</th>
+                        <th>Líder</th>
+                        <th>Miembros</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in Model.Grupos.OrderBy(g => g.Nombre))
+                    {
+                        var noAsiste = g.Miembros.Any(m => m.Inscripcion.Estado == EstadoInscripcion.NoVaAsistir);
+                        <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
+                            <td><a href="/admin/servicios/grupos/@g.Id/editar">@g.Nombre</a></td>
+                            <td>@(g.HorarioServicio?.Descripcion ?? "—")</td>
+                            <td>@(g.LiderInscripcion?.Persona?.NombreCompleto ?? "—")</td>
+                            <td>
+                                @g.Miembros.Count
+                                @if (noAsiste)
+                                {
+                                    <span class="badge badge--danger" style="font-size:0.75rem;margin-left:0.25rem;">⚠️ Alerta</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

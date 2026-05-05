@@ -1,0 +1,78 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@using AgendaPositiva.Web.Features.Admin.Servicios.Dominio
+@model HorariosPageViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/listado">Listado</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId">@Model.ServicioNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Horarios</span>
+</nav>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+    <h1 style="margin:0;">Horarios — @Model.ServicioNombre</h1>
+    <a href="/admin/servicios/@Model.ServicioId/horarios/crear" class="btn btn--primary">+ Nuevo Horario</a>
+</div>
+
+@if (TempData["Error"] is string error)
+{
+    <div style="background:#FED7D7;color:#9B2C2C;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">
+        ✗ @error
+    </div>
+}
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div style="background:#C6F6D5;color:#22543D;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">
+        ✓ @mensaje
+    </div>
+}
+
+@if (Model.Horarios.Count == 0)
+{
+    <p style="color:#718096;">No hay horarios registrados para este servicio.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Fecha inicio</th>
+                    <th>Hora inicio</th>
+                    <th>Fecha fin</th>
+                    <th>Hora fin</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model.Horarios)
+                {
+                    <tr>
+                        <td>@h.Descripcion</td>
+                        <td>@h.FechaHoraInicio.ToString("dd/MM/yyyy")</td>
+                        <td>@h.FechaHoraInicio.ToString("HH:mm")</td>
+                        <td>@h.FechaHoraFin.ToString("dd/MM/yyyy")</td>
+                        <td>@h.FechaHoraFin.ToString("HH:mm")</td>
+                        <td style="display:flex;gap:0.5rem;">
+                            <a href="/admin/servicios/@Model.ServicioId/horarios/@h.Id/editar" class="btn btn--secondary">Editar</a>
+                            <form method="post" action="/admin/servicios/@Model.ServicioId/horarios/@h.Id/eliminar"
+                                  onclick="return confirm('¿Eliminar el horario «@h.Descripcion»?');">
+                                <button type="submit" class="btn btn--danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div style="margin-top:1.5rem;">
+    <a href="/admin/servicios/@Model.ServicioId" class="btn btn--secondary">← Volver al servicio</a>
+</div>

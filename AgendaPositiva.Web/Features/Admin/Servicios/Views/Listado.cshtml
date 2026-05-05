@@ -1,0 +1,81 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios.Dominio
+@model List<Servicio>
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Listado</span>
+</nav>
+
+<h1>Listado de Servicios</h1>
+
+<div class="action-bar" style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+    <a href="/admin/servicios/crear" class="btn btn--primary btn--lg">+ Nuevo Servicio</a>
+    <a href="/admin/servicios/exportar" class="btn btn--secondary btn--lg">📥 Exportar Excel</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <p>No hay servicios registrados.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Personas Requeridas</th>
+                    <th>Horarios</th>
+                    <th>Grupos</th>
+                    <th>Asignados</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    var asignados = s.Grupos.Sum(g => g.Miembros.Count);
+                    <tr>
+                        <td><a href="/admin/servicios/@s.Id">@s.Nombre</a></td>
+                        <td>@s.CantidadPersonasRequeridas</td>
+                        <td>
+                            @if (s.Horarios.Count > 0)
+                            {
+                                <ul style="margin:0;padding-left:1rem;font-size:0.85rem;">
+                                    @foreach (var h in s.Horarios)
+                                    {
+                                        <li>@h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") - @h.FechaHoraFin.ToString("HH:mm"))</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <span style="color:#A0AEC0;">Sin horarios</span>
+                            }
+                        </td>
+                        <td>@s.Grupos.Count</td>
+                        <td>@asignados / @s.CantidadPersonasRequeridas</td>
+                        <td>
+                            <span class="badge @(s.Activo ? "badge--success" : "badge--danger")">
+                                @(s.Activo ? "Activo" : "Inactivo")
+                            </span>
+                        </td>
+                        <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <a href="/admin/servicios/editar/@s.Id" class="btn btn--secondary">Editar</a>
+                            <a href="/admin/servicios/@s.Id/grupos" class="btn btn--secondary">Grupos</a>
+                            <form method="post" action="/admin/servicios/@s.Id/toggle" style="display:inline;">
+                                <button type="submit" class="btn @(s.Activo ? "btn--danger" : "btn--success")">
+                                    @(s.Activo ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

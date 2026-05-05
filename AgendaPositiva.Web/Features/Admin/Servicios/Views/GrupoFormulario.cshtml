@@ -1,0 +1,167 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@using AgendaPositiva.Web.Features.Admin.Servicios.Dominio
+@using AgendaPositiva.Web.Features.Commons
+@model GrupoFormViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId/grupos">@Model.ServicioNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.GrupoId == 0 ? "Crear Grupo" : "Editar Grupo")</span>
+</nav>
+
+<h1>@(Model.GrupoId == 0 ? "Nuevo Grupo" : "Editar Grupo") — @Model.ServicioNombre</h1>
+
+<form method="post">
+    <div class="card" style="max-width:640px;margin-bottom:1.5rem;">
+        <div style="padding:1.25rem;">
+            <div style="margin-bottom:1rem;">
+                <label class="form-label">Nombre del grupo</label>
+                <input type="text" name="nombre" value="@Model.Nombre" class="form-control" required />
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label class="form-label">Horario asignado</label>
+                <select name="horarioServicioId" class="form-control" required>
+                    <option value="">— Seleccionar horario —</option>
+                    @foreach (var h in Model.Horarios)
+                    {
+                        <option value="@h.Id" @(h.Id == Model.HorarioServicioId ? "selected" : "")>
+                            @h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") - @h.FechaHoraFin.ToString("HH:mm"))
+                        </option>
+                    }
+                </select>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label class="form-label">Líder del grupo</label>
+                <select name="liderInscripcionId" class="form-control" id="select-lider">
+                    <option value="">— Sin líder —</option>
+                </select>
+                <small style="color:#718096;">El líder se selecciona de entre los miembros marcados abajo.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selección de miembros -->
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div style="padding:1.25rem;">
+            <h2 style="margin-top:0;">Seleccionar Miembros</h2>
+
+            <!-- Filtros -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;">Buscar por nombre</label>
+                    <input type="text" id="filtro-nombre" class="form-control" placeholder="Nombre o apellido..." />
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;">Filtrar por servicio de inscripción</label>
+                    <select id="filtro-servicio" class="form-control">
+                        <option value="">— Todos —</option>
+                        @foreach (ServicioInscripcion si in Enum.GetValues(typeof(ServicioInscripcion)))
+                        {
+                            <option value="@si">@si.Descripcion()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:0.75rem;display:flex;gap:0.75rem;align-items:center;">
+                <span id="conteo-seleccionados" style="font-weight:600;">0 seleccionados</span>
+                <button type="button" class="btn btn--secondary" onclick="toggleAll()" style="font-size:0.85rem;">Seleccionar/Deseleccionar visibles</button>
+            </div>
+
+            <div class="table-wrapper" style="max-height:400px;overflow-y:auto;">
+                <table class="admin-table" style="font-size:0.875rem;" id="tabla-inscripciones">
+                    <thead style="position:sticky;top:0;z-index:1;">
+                        <tr>
+                            <th style="width:40px;"></th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Localidad</th>
+                            <th>Servicio Inscripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ins in Model.InscripcionesDisponibles)
+                        {
+                            var seleccionado = Model.MiembrosSeleccionadosIds.Contains(ins.Id);
+                            var servicios = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
+                            var serviciosData = string.Join(",", ins.Servicios.Select(s => s.ToString()));
+                            <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()" data-servicios="@serviciosData" data-id="@ins.Id">
+                                <td>
+                                    <input type="checkbox" name="miembrosIds" value="@ins.Id" class="cb-miembro"
+                                           @(seleccionado ? "checked" : "") onchange="actualizarConteo();actualizarLider();" />
+                                </td>
+                                <td>@ins.Persona.NombreCompleto</td>
+                                <td>@ins.Persona.NumeroIdentificacion</td>
+                                <td>@ins.Localidad</td>
+                                <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;">
+        <button type="submit" class="btn btn--primary">Guardar</button>
+        <a href="/admin/servicios/@Model.ServicioId/grupos" class="btn btn--secondary">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    const filtroNombre = document.getElementById('filtro-nombre');
+    const filtroServicio = document.getElementById('filtro-servicio');
+    const filas = document.querySelectorAll('.fila-inscripcion');
+    const selectLider = document.getElementById('select-lider');
+    const liderActual = @(Model.LiderInscripcionId?.ToString() ?? "null");
+
+    function filtrar() {
+        const nombre = filtroNombre.value.toLowerCase();
+        const servicio = filtroServicio.value;
+        filas.forEach(fila => {
+            const matchNombre = !nombre || fila.dataset.nombre.includes(nombre);
+            const matchServicio = !servicio || fila.dataset.servicios.split(',').includes(servicio);
+            fila.style.display = (matchNombre && matchServicio) ? '' : 'none';
+        });
+    }
+
+    filtroNombre.addEventListener('input', filtrar);
+    filtroServicio.addEventListener('change', filtrar);
+
+    function actualizarConteo() {
+        const count = document.querySelectorAll('.cb-miembro:checked').length;
+        document.getElementById('conteo-seleccionados').textContent = count + ' seleccionados';
+    }
+
+    function actualizarLider() {
+        const checked = document.querySelectorAll('.cb-miembro:checked');
+        const currentVal = selectLider.value;
+        selectLider.innerHTML = '<option value="">— Sin líder —</option>';
+        checked.forEach(cb => {
+            const fila = cb.closest('tr');
+            const nombre = fila.querySelector('td:nth-child(2)').textContent;
+            const opt = document.createElement('option');
+            opt.value = cb.value;
+            opt.textContent = nombre;
+            if (cb.value == currentVal) opt.selected = true;
+            selectLider.appendChild(opt);
+        });
+    }
+
+    function toggleAll() {
+        const visibles = Array.from(filas).filter(f => f.style.display !== 'none');
+        const allChecked = visibles.every(f => f.querySelector('.cb-miembro').checked);
+        visibles.forEach(f => f.querySelector('.cb-miembro').checked = !allChecked);
+        actualizarConteo();
+        actualizarLider();
+    }
+
+    // Inicializar
+    actualizarConteo();
+    actualizarLider();
+    if (liderActual) selectLider.value = liderActual;
+</script>

@@ -1,0 +1,79 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@model HorarioFormViewModel
+
+@{
+    var esEdicion = Model.HorarioId.HasValue;
+    var opcionesHora = new List<string>();
+    for (int hr = 0; hr < 24; hr++)
+    {
+        opcionesHora.Add($"{hr:D2}:00");
+        opcionesHora.Add($"{hr:D2}:30");
+    }
+}
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/listado">Listado</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId">@Model.ServicioNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId/horarios">Horarios</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(esEdicion ? "Editar" : "Crear")</span>
+</nav>
+
+<h1>@(esEdicion ? "Editar Horario" : "Nuevo Horario") — @Model.ServicioNombre</h1>
+
+@if (ViewBag.Error is string error)
+{
+    <div style="background:#FED7D7;color:#9B2C2C;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">
+        ✗ @error
+    </div>
+}
+
+<div class="card" style="max-width:700px;">
+    <form method="post" action="/admin/servicios/@Model.ServicioId/horarios/@(esEdicion ? $"{Model.HorarioId}/editar" : "crear")">
+        <div style="margin-bottom:0.75rem;">
+            <label class="form-label">Descripción</label>
+            <input type="text" name="Descripcion" value="@Model.Descripcion" class="form-control"
+                   placeholder="Ej: Viernes mañana" required />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+                <label class="form-label">Fecha inicio</label>
+                <input type="date" name="FechaInicio" value="@Model.FechaInicio" class="form-control" required />
+            </div>
+            <div>
+                <label class="form-label">Hora inicio</label>
+                <select name="HoraInicio" class="form-control" required>
+                    <option value="">--</option>
+                    @foreach (var op in opcionesHora)
+                    {
+                        <option value="@op" @(Model.HoraInicio == op ? "selected" : "")>@op</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Fecha fin</label>
+                <input type="date" name="FechaFin" value="@Model.FechaFin" class="form-control" required />
+            </div>
+            <div>
+                <label class="form-label">Hora fin</label>
+                <select name="HoraFin" class="form-control" required>
+                    <option value="">--</option>
+                    @foreach (var op in opcionesHora)
+                    {
+                        <option value="@op" @(Model.HoraFin == op ? "selected" : "")>@op</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">@(esEdicion ? "Actualizar" : "Crear")</button>
+            <a href="/admin/servicios/@Model.ServicioId/horarios" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

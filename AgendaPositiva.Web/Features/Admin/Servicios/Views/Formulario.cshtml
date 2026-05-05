@@ -1,0 +1,47 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@model ServicioFormViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/listado">Listado</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.Id == 0 ? "Crear" : "Editar")</span>
+</nav>
+
+<h1>@(Model.Id == 0 ? "Nuevo Servicio" : "Editar Servicio")</h1>
+
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div style="background:#C6F6D5;color:#22543D;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">
+        ✓ @mensaje
+    </div>
+}
+
+<div class="card" style="max-width:480px;">
+    <form method="post">
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Nombre del servicio</label>
+            <input type="text" name="Nombre" value="@Model.Nombre" class="form-control" required />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Cantidad de personas requeridas</label>
+            <input type="number" name="CantidadPersonasRequeridas" value="@Model.CantidadPersonasRequeridas"
+                   class="form-control" min="1" required style="max-width:200px;" />
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Guardar</button>
+            <a href="/admin/servicios/listado" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.Id > 0)
+{
+    <div style="margin-top:1.5rem;">
+        <a href="/admin/servicios/@Model.Id/horarios" class="btn btn--secondary btn--lg">📅 Gestionar Horarios</a>
+        <a href="/admin/servicios/@Model.Id/grupos" class="btn btn--secondary btn--lg">👥 Ver Grupos</a>
+    </div>
+}

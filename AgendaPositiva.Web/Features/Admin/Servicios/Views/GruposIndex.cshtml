@@ -1,0 +1,135 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios.Dominio
+@using AgendaPositiva.Web.Features.Commons
+@model Servicio
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/listado">Listado</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@Model.Nombre — Grupos</span>
+</nav>
+
+<h1>Grupos de Servicio: @Model.Nombre</h1>
+
+<div class="action-bar" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+    @if (Model.Activo)
+    {
+        <a href="/admin/servicios/@Model.Id/grupos/crear" class="btn btn--primary btn--lg">+ Nuevo Grupo</a>
+    }
+    <a href="/admin/servicios/listado" class="btn btn--secondary">← Volver a Listado</a>
+</div>
+
+@if (!Model.Activo)
+{
+    <div class="card" style="padding:1rem;border-left:4px solid #FC8181;margin-bottom:1rem;">
+        <strong style="color:#C53030;">Este servicio está inactivo.</strong> No se pueden crear nuevos grupos.
+    </div>
+}
+
+@{
+    var totalAsignados = Model.Grupos.Sum(g => g.Miembros.Count);
+    var pct = Model.CantidadPersonasRequeridas > 0 ? (int)(100.0 * totalAsignados / Model.CantidadPersonasRequeridas) : 0;
+}
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;">
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@Model.Grupos.Count</div>
+        <div style="color:#718096;font-size:0.85rem;">Grupos</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@totalAsignados / @Model.CantidadPersonasRequeridas</div>
+        <div style="color:#718096;font-size:0.85rem;">Asignados (@pct%)</div>
+    </div>
+    <div class="card" style="text-align:center;padding:1rem;">
+        <div style="font-size:1.5rem;font-weight:700;">@Model.Horarios.Count</div>
+        <div style="color:#718096;font-size:0.85rem;">Horarios</div>
+    </div>
+</div>
+
+@if (Model.Grupos.Count == 0)
+{
+    <p>No hay grupos creados para este servicio.</p>
+}
+else
+{
+    @foreach (var grupo in Model.Grupos.OrderBy(g => g.Nombre))
+    {
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                <div>
+                    <h3 style="margin:0;">@grupo.Nombre</h3>
+                    <span style="color:#718096;font-size:0.85rem;">
+                        Horario: @(grupo.HorarioServicio?.Descripcion ?? "—")
+                        @if (grupo.LiderInscripcion?.Persona is not null)
+                        {
+                            <text> · Líder: <strong>@grupo.LiderInscripcion.Persona.NombreCompleto</strong></text>
+                        }
+                    </span>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <a href="/admin/servicios/grupos/@grupo.Id/editar" class="btn btn--secondary">Editar</a>
+                    <form method="post" action="/admin/servicios/grupos/@grupo.Id/eliminar"
+                          onclick="return confirm('¿Eliminar el grupo @grupo.Nombre y todos sus miembros?');">
+                        <button type="submit" class="btn btn--danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+
+            @if (grupo.Miembros.Count == 0)
+            {
+                <p style="color:#A0AEC0;margin:0;">Sin miembros asignados.</p>
+            }
+            else
+            {
+                <div class="table-wrapper">
+                    <table class="admin-table" style="font-size:0.9rem;">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Localidad</th>
+                                <th>Servicio Inscripción</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in grupo.Miembros.OrderBy(m => m.Inscripcion.Persona.Nombres))
+                            {
+                                var esLider = m.InscripcionId == grupo.LiderInscripcionId;
+                                var noAsiste = m.Inscripcion.Estado == AgendaPositiva.Web.Features.Commons.EstadoInscripcion.NoVaAsistir;
+                                <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
+                                    <td>
+                                        @if (esLider)
+                                        {
+                                            <strong> @m.Inscripcion.Persona.NombreCompleto</strong>
+                                        }
+                                        else
+                                        {
+                                            @m.Inscripcion.Persona.NombreCompleto
+                                        }
+                                    </td>
+                                    <td>@m.Inscripcion.Persona.NumeroIdentificacion</td>
+                                    <td>@m.Inscripcion.Localidad</td>
+                                    <td>@string.Join(", ", m.Inscripcion.Servicios.Select(s => s.Descripcion()))</td>
+                                    <td>
+                                        @if (noAsiste)
+                                        {
+                                            <span class="badge badge--danger">No asiste</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge--success">Activo</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+}
