@@ -1,4 +1,5 @@
 using AgendaPositiva.Web.Features.Admin.Auditoria;
+using AgendaPositiva.Web.Features.Commons;
 using AgendaPositiva.Web.Features.Inscripciones.Dominio;
 
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
@@ -16,18 +17,22 @@ public class DetalleViewModel
         ? (double)(TotalAbonado / PrecioCategoria.Value) * 100
         : 0;
 
-    public string EstadoPagoTexto => PorcentajePago switch
-    {
-        >= 100 => "Completado",
-        > 0 => $"Abono ({PorcentajePago:F0}%)",
-        _ => "Pendiente"
-    };
+    public string EstadoPagoTexto => Inscripcion.Estado == EstadoInscripcion.NoVaAsistir
+        ? "No va a asistir"
+        : PorcentajePago switch
+        {
+            >= 100 => "Completado",
+            > 0 => $"Abono ({PorcentajePago:F0}%)",
+            _ => "Pendiente"
+        };
 
-    public string EstadoPagoBadgeCss => PorcentajePago switch
-    {
-        >= 100 => "badge--success",
-        >= 50 => "badge--abono2",
-        > 0 => "badge--abono1",
-        _ => "badge--warning"
-    };
+    public string EstadoPagoBadgeCss => Inscripcion.Estado == EstadoInscripcion.NoVaAsistir
+        ? "badge--danger"
+        : PorcentajePago switch
+        {
+            >= 100 => "badge--success",
+            >= 50 => "badge--abono2",
+            > 0 => "badge--abono1",
+            _ => "badge--warning"
+        };
 }

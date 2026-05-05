@@ -576,11 +576,12 @@
                             </form>
                         </div>
                         <div class="admin-action-card">
-                            <h3>Eliminar inscripción</h3>
-                            <p style="font-size: 0.8125rem; color: #86868b; margin-bottom: 0.75rem;">Esta acción es irreversible.</p>
-                            <form method="post" action="/admin/inscripciones/@ins.Id/eliminar"
-                                  onsubmit="return confirm('¿Está seguro de que desea eliminar esta inscripción? Esta acción no se puede deshacer.');">
-                                <button type="submit" class="btn btn--danger">Eliminar</button>
+                            <h3>Marcar como No va a asistir</h3>
+                            <p style="font-size: 0.8125rem; color: #86868b; margin-bottom: 0.75rem;">Cambia el estado de la inscripción a "No va a asistir".</p>
+                            <form method="post" action="/admin/inscripciones/@ins.Id/cambiar-estado"
+                                  onsubmit="return confirm('¿Está seguro de que desea marcar esta inscripción como No va a asistir?');">
+                                <input type="hidden" name="nuevoEstado" value="NoVaAsistir" />
+                                <button type="submit" class="btn btn--danger">No va a asistir</button>
                             </form>
                         </div>
                     </div>

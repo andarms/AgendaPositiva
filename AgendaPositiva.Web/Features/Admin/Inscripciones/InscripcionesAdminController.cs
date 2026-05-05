@@ -689,9 +689,11 @@ public class InscripcionesAdminController : Controller
             var totalAbonado = ins.Abonos.Sum(a => a.Monto);
             var precioCategoria = ins.CategoriaInscripcion?.Precio ?? 0;
             var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
-            var textoPago = pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
+            var textoPago = ins.Estado == EstadoInscripcion.NoVaAsistir ? "No va a asistir"
+                : pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
             ws.Cell(row, 12).Value = textoPago;
-            var estadoColor = pctPago >= 100 ? "#27ae60" : pctPago >= 50 ? "#6abf4b" : pctPago > 0 ? "#a3d977" : "#f39c12";
+            var estadoColor = ins.Estado == EstadoInscripcion.NoVaAsistir ? "#e74c3c"
+                : pctPago >= 100 ? "#27ae60" : pctPago >= 50 ? "#6abf4b" : pctPago > 0 ? "#a3d977" : "#f39c12";
             ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
             ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
             ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
