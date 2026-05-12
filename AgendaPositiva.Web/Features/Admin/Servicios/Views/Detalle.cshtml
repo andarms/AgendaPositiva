@@ -57,7 +57,8 @@
 <div class="card" style="margin-bottom:1.5rem;padding:1.25rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
         <h2 style="margin:0;">Horarios</h2>
-        <a href="/admin/servicios/@Model.Id/horarios" class="btn btn--secondary" style="font-size:0.85rem;">Gestionar</a>
+        <a href="/admin/servicios/@Model.Id/horarios" class="btn btn--secondary"
+           style="font-size:0.85rem;">Gestionar</a>
     </div>
     @if (Model.Horarios.Count == 0)
     {
@@ -93,7 +94,8 @@
 <div class="card" style="margin-bottom:1.5rem;padding:1.25rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
         <h2 style="margin:0;">Ubicaciones</h2>
-        <a href="/admin/servicios/@Model.Id/ubicaciones" class="btn btn--secondary" style="font-size:0.85rem;">Gestionar</a>
+        <a href="/admin/servicios/@Model.Id/ubicaciones" class="btn btn--secondary"
+           style="font-size:0.85rem;">Gestionar</a>
     </div>
     @if (Model.Ubicaciones.Count == 0)
     {
@@ -137,20 +139,21 @@
                     {
                         var noAsiste = g.Miembros.Any(m => m.Inscripcion.Estado == EstadoInscripcion.NoVaAsistir);
                         <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
-                            <td><a href="/admin/servicios/grupos/@g.Id/editar">@g.Nombre</a></td>
+                            <td><a href="/admin/servicios/grupos/@g.Id">@g.Nombre</a></td>
                             <td>@(g.HorarioServicio?.Descripcion ?? "—")</td>
                             <td>@(g.LiderInscripcion?.Persona?.NombreCompleto ?? "—")</td>
                             <td>
                                 @g.Miembros.Count
                                 @if (noAsiste)
                                 {
-                                    <span class="badge badge--danger" style="font-size:0.75rem;margin-left:0.25rem;">⚠️ Alerta</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-</div>
+                                    <span class="badge badge--danger" style="font-size:0.75rem;margin-left:0.25rem;">⚠️
+                                        Alerta</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>

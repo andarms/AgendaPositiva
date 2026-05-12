@@ -666,7 +666,7 @@ public class ServiciosAdminController : Controller
             .Include(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
             .Include(s => s.Grupos).ThenInclude(g => g.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
-            .Include(s => s.Grupos).ThenInclude(g => g.LiderInscripcion).ThenInclude(i => i!.Persona)
+            .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.UbicacionServicio)
             .OrderBy(s => s.Nombre)
             .ToListAsync();
 
@@ -710,7 +710,7 @@ public class ServiciosAdminController : Controller
 
         // Hoja 2: Grupos de servicio con miembros
         var ws2 = workbook.Worksheets.Add("Grupos de Servicio");
-        var headers2 = new[] { "Servicio", "Grupo", "Horario", "Líder", "Miembro", "Documento", "Departamento", "Ciudad", "Servicio Inscripción" };
+        var headers2 = new[] { "Servicio", "Horario", "Ubicación", "Grupo", "Miembro", "Rol", "Documento", "Departamento", "Ciudad", "Servicio Inscripción" };
         for (int i = 0; i < headers2.Length; i++)
         {
             ws2.Cell(1, i + 1).Value = headers2[i];
@@ -721,30 +721,29 @@ public class ServiciosAdminController : Controller
         int row2 = 2;
         foreach (var s in servicios)
         {
-            foreach (var g in s.Grupos.OrderBy(g => g.Nombre))
+            foreach (var g in s.Grupos.OrderBy(g => g.HorarioServicio?.Descripcion).ThenBy(g => g.Nombre))
             {
-                var lider = g.LiderInscripcion?.Persona?.NombreCompleto ?? "—";
                 if (g.Miembros.Count == 0)
                 {
                     ws2.Cell(row2, 1).Value = s.Nombre;
-                    ws2.Cell(row2, 2).Value = g.Nombre;
-                    ws2.Cell(row2, 3).Value = g.HorarioServicio?.Descripcion ?? "";
-                    ws2.Cell(row2, 4).Value = lider;
+                    ws2.Cell(row2, 2).Value = g.HorarioServicio?.Descripcion ?? "";
+                    ws2.Cell(row2, 4).Value = g.Nombre;
                     row2++;
                 }
                 else
                 {
-                    foreach (var m in g.Miembros)
+                    foreach (var m in g.Miembros.OrderBy(m => m.UbicacionServicio?.Nombre ?? "zzz").ThenBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
                     {
                         ws2.Cell(row2, 1).Value = s.Nombre;
-                        ws2.Cell(row2, 2).Value = g.Nombre;
-                        ws2.Cell(row2, 3).Value = g.HorarioServicio?.Descripcion ?? "";
-                        ws2.Cell(row2, 4).Value = lider;
+                        ws2.Cell(row2, 2).Value = g.HorarioServicio?.Descripcion ?? "";
+                        ws2.Cell(row2, 3).Value = m.UbicacionServicio?.Nombre ?? "—";
+                        ws2.Cell(row2, 4).Value = g.Nombre;
                         ws2.Cell(row2, 5).Value = m.Inscripcion.Persona.NombreCompleto;
-                        ws2.Cell(row2, 6).Value = m.Inscripcion.Persona.NumeroIdentificacion;
-                        ws2.Cell(row2, 7).Value = m.Inscripcion.Departamento;
-                        ws2.Cell(row2, 8).Value = m.Inscripcion.Ciudad;
-                        ws2.Cell(row2, 9).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
+                        ws2.Cell(row2, 6).Value = m.Rol.ToString();
+                        ws2.Cell(row2, 7).Value = m.Inscripcion.Persona.NumeroIdentificacion;
+                        ws2.Cell(row2, 8).Value = m.Inscripcion.Departamento;
+                        ws2.Cell(row2, 9).Value = m.Inscripcion.Ciudad;
+                        ws2.Cell(row2, 10).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
                         row2++;
                     }
                 }
