@@ -73,6 +73,26 @@ public static class ServiciosDbContextExtensions
                 .OnDelete(DeleteBehavior.Restrict);
 
             e.HasIndex(m => new { m.GrupoServicioId, m.InscripcionId }).IsUnique();
+
+            e.HasOne(m => m.UbicacionServicio)
+                .WithMany()
+                .HasForeignKey(m => m.UbicacionServicioId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+    public static void ConfigurarUbicacionesServicio(this ModelBuilder builder)
+    {
+        builder.Entity<UbicacionServicio>(e =>
+        {
+            e.HasKey(u => u.Id);
+            e.Property(u => u.Id).ValueGeneratedOnAdd();
+            e.Property(u => u.Nombre).HasMaxLength(255).IsRequired();
+
+            e.HasOne(u => u.Servicio)
+                .WithMany(s => s.Ubicaciones)
+                .HasForeignKey(u => u.ServicioId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

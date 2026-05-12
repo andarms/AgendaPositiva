@@ -44,102 +44,152 @@
 
     @if (Model.Miembros.Count == 0)
     {
-        <p style="color:#A0AEC0;margin:0;">Sin miembros asignados. Usa el botón "Agregar Personas" para añadir miembros al grupo.</p>
-    }
+        <p style="color:#A0AEC0;margin:0;">Sin miembros asignados. Usa el botón "Agregar Personas" para añadir miembros al
+            grupo.</p>
+        }
     else
-    {
-        <div class="table-wrapper">
-            <table class="admin-table" style="font-size:0.9rem;">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Documento</th>
-                        <th>Localidad</th>
-                        <th>Rol</th>
-                        <th style="width:180px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in Model.Miembros.OrderBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
-                    {
-                        var noAsiste = m.Inscripcion.Estado == EstadoInscripcion.NoVaAsistir;
-                        <tr style="@(noAsiste ? "background:#FFF5F5;" : "")" id="fila-miembro-@m.Id">
-                            <td>
-                                @m.Inscripcion.Persona.NombreCompleto
-                                @if (noAsiste)
-                                {
-                                    <span class="badge badge--danger" style="margin-left:0.25rem;">No asiste</span>
-                                }
-                            </td>
-                            <td>@m.Inscripcion.Persona.NumeroIdentificacion</td>
-                            <td>@m.Inscripcion.Localidad</td>
-                            <td>
-                                <span class="badge @BadgeClass(m.Rol)" id="badge-rol-@m.Id">@m.Rol</span>
-                            </td>
-                            <td>
-                                <div style="display:flex;gap:0.25rem;align-items:center;">
-                                    <button type="button" class="btn btn--secondary" style="font-size:0.8rem;padding:0.25rem 0.5rem;"
-                                            onclick="mostrarEdicionRol(@m.Id, '@m.Rol')">
-                                        Cambiar Rol
-                                    </button>
-                                    <form method="post" action="/admin/servicios/miembros/@m.Id/remover"
-                                          onsubmit="return confirm('¿Remover a @m.Inscripcion.Persona.NombreCompleto del grupo?');"
-                                          style="margin:0;">
-                                        <button type="submit" class="btn btn--danger" style="font-size:0.8rem;padding:0.25rem 0.5rem;">
-                                            Remover
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+        {
+            <div class="table-wrapper">
+                <table class="admin-table" style="font-size:0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Localidad</th>
+                            <th>Rol</th>
+                            <th>Ubicación</th>
+                            <th style="width:220px;">Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-</div>
-
-<!-- Modal para cambiar rol -->
-<div id="modal-rol" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;">
-    <div class="card" style="padding:1.5rem;min-width:320px;">
-        <h3 style="margin-top:0;">Cambiar Rol</h3>
-        <form method="post" id="form-cambiar-rol">
-            <div style="margin-bottom:1rem;">
-                <label class="form-label">Nuevo rol</label>
-                <select name="rol" id="select-rol" class="form-control">
-                    @foreach (RolMiembroGrupoServicio r in Enum.GetValues(typeof(RolMiembroGrupoServicio)))
-                    {
-                        <option value="@r">@r</option>
-                    }
-                </select>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in Model.Miembros.OrderBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
+                        {
+                            var noAsiste = m.Inscripcion.Estado == EstadoInscripcion.NoVaAsistir;
+                            <tr style="@(noAsiste ? "background:#FFF5F5;" : "")" id="fila-miembro-@m.Id">
+                                <td>
+                                    @m.Inscripcion.Persona.NombreCompleto
+                                    @if (noAsiste)
+                                    {
+                                        <span class="badge badge--danger" style="margin-left:0.25rem;">No asiste</span>
+                                    }
+                                </td>
+                                <td>@m.Inscripcion.Persona.NumeroIdentificacion</td>
+                                <td>@m.Inscripcion.Localidad</td>
+                                <td>
+                                    <span class="badge @BadgeClass(m.Rol)" id="badge-rol-@m.Id">@m.Rol</span>
+                                </td>
+                                <td>
+                                    @(m.UbicacionServicio?.Nombre ?? "— Sin ubicación —")
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
+                                        <button type="button" class="btn btn--secondary"
+                                                style="font-size:0.8rem;padding:0.25rem 0.5rem;"
+                                                onclick="mostrarEdicionRol(@m.Id, '@m.Rol')">
+                                            Rol
+                                        </button>
+                                        <button type="button" class="btn btn--secondary"
+                                                style="font-size:0.8rem;padding:0.25rem 0.5rem;"
+                                                onclick="mostrarEdicionUbicacion(@m.Id, '@(m.UbicacionServicioId?.ToString() ?? "")')">
+                                            Ubicación
+                                        </button>
+                                        <form method="post" action="/admin/servicios/miembros/@m.Id/remover"
+                                              onsubmit="return confirm('¿Remover a @m.Inscripcion.Persona.NombreCompleto del grupo?');"
+                                              style="margin:0;">
+                                            <button type="submit" class="btn btn--danger"
+                                                    style="font-size:0.8rem;padding:0.25rem 0.5rem;">
+                                                Remover
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-            <div style="display:flex;gap:0.5rem;">
-                <button type="submit" class="btn btn--primary">Guardar</button>
-                <button type="button" class="btn btn--secondary" onclick="cerrarModal()">Cancelar</button>
-            </div>
-        </form>
+        }
     </div>
-</div>
 
-<script>
-    const modal = document.getElementById('modal-rol');
-    const formCambiarRol = document.getElementById('form-cambiar-rol');
-    const selectRol = document.getElementById('select-rol');
+    <!-- Modal para cambiar rol -->
+    <div id="modal-rol"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div class="card" style="padding:1.5rem;min-width:320px;">
+            <h3 style="margin-top:0;">Cambiar Rol</h3>
+            <form method="post" id="form-cambiar-rol">
+                <div style="margin-bottom:1rem;">
+                    <label class="form-label">Nuevo rol</label>
+                    <select name="rol" id="select-rol" class="form-control">
+                        @foreach (RolMiembroGrupoServicio r in Enum.GetValues(typeof(RolMiembroGrupoServicio)))
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                    <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    function mostrarEdicionRol(miembroId, rolActual) {
-        formCambiarRol.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-rol';
-        selectRol.value = rolActual;
-        modal.style.display = 'flex';
-    }
+    <!-- Modal para cambiar ubicación -->
+    <div id="modal-ubicacion"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div class="card" style="padding:1.5rem;min-width:320px;">
+            <h3 style="margin-top:0;">Cambiar Ubicación</h3>
+            <form method="post" id="form-cambiar-ubicacion">
+                <div style="margin-bottom:1rem;">
+                    <label class="form-label">Ubicación</label>
+                    <select name="ubicacionServicioId" id="select-ubicacion" class="form-control">
+                        <option value="">— Sin ubicación —</option>
+                        @foreach (var u in Model.Servicio.Ubicaciones.OrderBy(u => u.Nombre))
+                        {
+                            <option value="@u.Id">@u.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                    <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    function cerrarModal() {
-        modal.style.display = 'none';
-    }
+    <script>
+        const modalRol = document.getElementById('modal-rol');
+        const modalUbicacion = document.getElementById('modal-ubicacion');
+        const formCambiarRol = document.getElementById('form-cambiar-rol');
+        const formCambiarUbicacion = document.getElementById('form-cambiar-ubicacion');
+        const selectRol = document.getElementById('select-rol');
+        const selectUbicacion = document.getElementById('select-ubicacion');
 
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) cerrarModal();
-    });
-</script>
+        function mostrarEdicionRol(miembroId, rolActual) {
+            formCambiarRol.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-rol';
+            selectRol.value = rolActual;
+            modalRol.style.display = 'flex';
+        }
+
+        function mostrarEdicionUbicacion(miembroId, ubicacionActual) {
+            formCambiarUbicacion.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-ubicacion';
+            selectUbicacion.value = ubicacionActual;
+            modalUbicacion.style.display = 'flex';
+        }
+
+        function cerrarModales() {
+            modalRol.style.display = 'none';
+            modalUbicacion.style.display = 'none';
+        }
+
+        modalRol.addEventListener('click', function (e) {
+            if (e.target === modalRol) cerrarModales();
+        });
+        modalUbicacion.addEventListener('click', function (e) {
+            if (e.target === modalUbicacion) cerrarModales();
+        });
+    </script>
 
 @functions {
     static string BadgeClass(RolMiembroGrupoServicio rol) => rol switch

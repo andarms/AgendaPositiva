@@ -9,4 +9,5 @@ public class Servicio : EntidadBase
     public bool Activo { get; set; } = true;
     public ICollection<HorarioServicio> Horarios { get; set; } = [];
     public ICollection<GrupoServicio> Grupos { get; set; } = [];
+    public ICollection<UbicacionServicio> Ubicaciones { get; set; } = [];
 }

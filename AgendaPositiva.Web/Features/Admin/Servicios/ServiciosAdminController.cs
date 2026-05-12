@@ -152,6 +152,7 @@ public class ServiciosAdminController : Controller
     {
         var servicio = await store.Servicios
             .Include(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
+            .Include(s => s.Ubicaciones.OrderBy(u => u.Nombre))
             .Include(s => s.Grupos).ThenInclude(g => g.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
             .Include(s => s.Grupos).ThenInclude(g => g.LiderInscripcion).ThenInclude(i => i!.Persona)
@@ -341,6 +342,110 @@ public class ServiciosAdminController : Controller
         return RedirectToAction(nameof(HorariosIndex), new { servicioId });
     }
 
+    // ── Ubicaciones: listado ──────────────────────────────────────
+    [HttpGet("{servicioId:int}/ubicaciones")]
+    public async Task<IActionResult> UbicacionesIndex(int servicioId)
+    {
+        var servicio = await store.Servicios
+            .Include(s => s.Ubicaciones.OrderBy(u => u.Nombre))
+            .FirstOrDefaultAsync(s => s.Id == servicioId);
+        if (servicio is null) return NotFound();
+
+        return View("~/Features/Admin/Servicios/Views/Ubicaciones.cshtml", servicio);
+    }
+
+    // ── Ubicaciones: crear ─────────────────────────────────────────
+    [HttpGet("{servicioId:int}/ubicaciones/crear")]
+    public async Task<IActionResult> UbicacionCrear(int servicioId)
+    {
+        var servicio = await store.Servicios.FindAsync(servicioId);
+        if (servicio is null) return NotFound();
+
+        return View("~/Features/Admin/Servicios/Views/UbicacionFormulario.cshtml",
+            new UbicacionFormViewModel { ServicioId = servicioId, ServicioNombre = servicio.Nombre });
+    }
+
+    [HttpPost("{servicioId:int}/ubicaciones/crear")]
+    public async Task<IActionResult> UbicacionCrearPost(int servicioId, UbicacionFormViewModel form)
+    {
+        var servicio = await store.Servicios.FindAsync(servicioId);
+        if (servicio is null) return NotFound();
+
+        form.ServicioId = servicioId;
+        form.ServicioNombre = servicio.Nombre;
+
+        if (string.IsNullOrWhiteSpace(form.Nombre))
+        {
+            ViewBag.Error = "El nombre de la ubicación es requerido.";
+            return View("~/Features/Admin/Servicios/Views/UbicacionFormulario.cshtml", form);
+        }
+
+        store.UbicacionesServicio.Add(new UbicacionServicio
+        {
+            ServicioId = servicioId,
+            Nombre = form.Nombre.Trim()
+        });
+        await store.SaveChangesAsync();
+        TempData["Mensaje"] = "Ubicación creada.";
+        return RedirectToAction(nameof(UbicacionesIndex), new { servicioId });
+    }
+
+    // ── Ubicaciones: editar ────────────────────────────────────────
+    [HttpGet("{servicioId:int}/ubicaciones/{id:int}/editar")]
+    public async Task<IActionResult> UbicacionEditar(int servicioId, int id)
+    {
+        var servicio = await store.Servicios.FindAsync(servicioId);
+        if (servicio is null) return NotFound();
+
+        var ubicacion = await store.UbicacionesServicio.FirstOrDefaultAsync(u => u.Id == id && u.ServicioId == servicioId);
+        if (ubicacion is null) return NotFound();
+
+        return View("~/Features/Admin/Servicios/Views/UbicacionFormulario.cshtml",
+            new UbicacionFormViewModel
+            {
+                ServicioId = servicioId,
+                ServicioNombre = servicio.Nombre,
+                UbicacionId = id,
+                Nombre = ubicacion.Nombre
+            });
+    }
+
+    [HttpPost("{servicioId:int}/ubicaciones/{id:int}/editar")]
+    public async Task<IActionResult> UbicacionEditarPost(int servicioId, int id, UbicacionFormViewModel form)
+    {
+        var ubicacion = await store.UbicacionesServicio.FirstOrDefaultAsync(u => u.Id == id && u.ServicioId == servicioId);
+        if (ubicacion is null) return NotFound();
+
+        var servicio = await store.Servicios.FindAsync(servicioId);
+        form.ServicioId = servicioId;
+        form.ServicioNombre = servicio?.Nombre ?? "";
+        form.UbicacionId = id;
+
+        if (string.IsNullOrWhiteSpace(form.Nombre))
+        {
+            ViewBag.Error = "El nombre de la ubicación es requerido.";
+            return View("~/Features/Admin/Servicios/Views/UbicacionFormulario.cshtml", form);
+        }
+
+        ubicacion.Nombre = form.Nombre.Trim();
+        await store.SaveChangesAsync();
+        TempData["Mensaje"] = "Ubicación actualizada.";
+        return RedirectToAction(nameof(UbicacionesIndex), new { servicioId });
+    }
+
+    // ── Ubicaciones: eliminar ──────────────────────────────────────
+    [HttpPost("{servicioId:int}/ubicaciones/{id:int}/eliminar")]
+    public async Task<IActionResult> UbicacionEliminar(int servicioId, int id)
+    {
+        var ubicacion = await store.UbicacionesServicio.FirstOrDefaultAsync(u => u.Id == id && u.ServicioId == servicioId);
+        if (ubicacion is null) return NotFound();
+
+        store.UbicacionesServicio.Remove(ubicacion);
+        await store.SaveChangesAsync();
+        TempData["Mensaje"] = "Ubicación eliminada.";
+        return RedirectToAction(nameof(UbicacionesIndex), new { servicioId });
+    }
+
     // ── Grupos: listado ────────────────────────────────────────────
     [HttpGet("{servicioId:int}/grupos")]
     public async Task<IActionResult> GruposIndex(int servicioId)
@@ -402,9 +507,10 @@ public class ServiciosAdminController : Controller
     public async Task<IActionResult> GrupoDetalle(int id)
     {
         var grupo = await store.GruposServicio
-            .Include(g => g.Servicio)
+            .Include(g => g.Servicio).ThenInclude(s => s.Ubicaciones)
             .Include(g => g.HorarioServicio)
             .Include(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .Include(g => g.Miembros).ThenInclude(m => m.UbicacionServicio)
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
 
@@ -470,6 +576,18 @@ public class ServiciosAdminController : Controller
         if (miembro is null) return NotFound();
 
         miembro.Rol = rol;
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
+    }
+
+    // ── Cambiar ubicación de miembro ───────────────────────────────
+    [HttpPost("miembros/{id:int}/cambiar-ubicacion")]
+    public async Task<IActionResult> CambiarUbicacionMiembro(int id, int? ubicacionServicioId)
+    {
+        var miembro = await store.MiembrosGrupoServicio.FindAsync(id);
+        if (miembro is null) return NotFound();
+
+        miembro.UbicacionServicioId = ubicacionServicioId;
         await store.SaveChangesAsync();
         return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
     }
@@ -736,4 +854,12 @@ public class GrupoAgregarMiembrosViewModel
     public string ServicioNombre { get; set; } = "";
     public string GrupoNombre { get; set; } = "";
     public List<Inscripcion> InscripcionesDisponibles { get; set; } = [];
+}
+
+public class UbicacionFormViewModel
+{
+    public int ServicioId { get; set; }
+    public string ServicioNombre { get; set; } = "";
+    public int? UbicacionId { get; set; }
+    public string Nombre { get; set; } = "";
 }

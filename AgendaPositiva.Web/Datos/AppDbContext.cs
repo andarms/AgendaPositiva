@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<HorarioServicio> HorariosServicio => Set<HorarioServicio>();
     public DbSet<GrupoServicio> GruposServicio => Set<GrupoServicio>();
     public DbSet<MiembroGrupoServicio> MiembrosGrupoServicio => Set<MiembroGrupoServicio>();
+    public DbSet<UbicacionServicio> UbicacionesServicio => Set<UbicacionServicio>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +47,7 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarHorariosServicio();
         modelBuilder.ConfigurarGruposServicio();
         modelBuilder.ConfigurarMiembrosGrupoServicio();
+        modelBuilder.ConfigurarUbicacionesServicio();
 
         modelBuilder.Entity<AuditoriaAdmin>(e =>
         {

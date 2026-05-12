@@ -14,7 +14,9 @@ public class MiembroGrupoServicio : EntidadBase
 {
     public int GrupoServicioId { get; set; }
     public int InscripcionId { get; set; }
+    public int? UbicacionServicioId { get; set; }
     public GrupoServicio GrupoServicio { get; set; } = null!;
     public Inscripcion Inscripcion { get; set; } = null!;
+    public UbicacionServicio? UbicacionServicio { get; set; }
     public RolMiembroGrupoServicio Rol { get; set; }
 }

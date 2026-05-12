@@ -39,7 +39,8 @@
 
             <div style="margin-bottom:0.75rem;display:flex;gap:0.75rem;align-items:center;">
                 <span id="conteo-seleccionados" style="font-weight:600;">0 seleccionados</span>
-                <button type="button" class="btn btn--secondary" onclick="toggleAll()" style="font-size:0.85rem;">Seleccionar/Deseleccionar visibles</button>
+                <button type="button" class="btn btn--secondary" onclick="toggleAll()"
+                        style="font-size:0.85rem;">Seleccionar/Deseleccionar visibles</button>
             </div>
 
             <div class="table-wrapper" style="max-height:500px;overflow-y:auto;">
@@ -58,7 +59,8 @@
                         {
                             var servicios = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
                             var serviciosData = string.Join(",", ins.Servicios.Select(s => s.ToString()));
-                            <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()" data-servicios="@serviciosData">
+                            <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()"
+                                data-servicios="@serviciosData">
                                 <td>
                                     <input type="checkbox" name="miembrosIds" value="@ins.Id" class="cb-miembro"
                                            onchange="actualizarConteo();" />

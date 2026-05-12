@@ -61,7 +61,8 @@ else
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
                 <div>
                     <h3 style="margin:0;">
-                        <a href="/admin/servicios/grupos/@grupo.Id" style="text-decoration:none;color:inherit;">@grupo.Nombre</a>
+                        <a href="/admin/servicios/grupos/@grupo.Id"
+                           style="text-decoration:none;color:inherit;">@grupo.Nombre</a>
                     </h3>
                     <span style="color:#718096;font-size:0.85rem;">
                         Horario: @(grupo.HorarioServicio?.Descripcion ?? "—")
@@ -96,7 +97,8 @@ else
                         <tbody>
                             @foreach (var m in grupo.Miembros.OrderBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
                             {
-                                var noAsiste = m.Inscripcion.Estado == AgendaPositiva.Web.Features.Commons.EstadoInscripcion.NoVaAsistir;
+                                var noAsiste = m.Inscripcion.Estado ==
+                AgendaPositiva.Web.Features.Commons.EstadoInscripcion.NoVaAsistir;
                                 <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
                                     <td>@m.Inscripcion.Persona.NombreCompleto</td>
                                     <td><span class="badge @BadgeClass(m.Rol)">@m.Rol</span></td>

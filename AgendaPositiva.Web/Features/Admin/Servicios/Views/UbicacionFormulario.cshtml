@@ -1,0 +1,38 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@model UbicacionFormViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId/ubicaciones">@Model.ServicioNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.UbicacionId.HasValue ? "Editar Ubicación" : "Nueva Ubicación")</span>
+</nav>
+
+<h1>@(Model.UbicacionId.HasValue ? "Editar Ubicación" : "Nueva Ubicación") — @Model.ServicioNombre</h1>
+
+@if (ViewBag.Error is string error)
+{
+    <div class="card" style="padding:1rem;border-left:4px solid #FC8181;margin-bottom:1rem;">
+        <strong style="color:#C53030;">@error</strong>
+    </div>
+}
+
+<form method="post">
+    <div class="card" style="max-width:480px;margin-bottom:1.5rem;">
+        <div style="padding:1.25rem;">
+            <div style="margin-bottom:1rem;">
+                <label class="form-label">Nombre de la ubicación</label>
+                <input type="text" name="nombre" value="@Model.Nombre" class="form-control" required
+                       placeholder="Ej: Entrada principal, Parqueadero, Auditorio..." />
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;">
+        <button type="submit" class="btn btn--primary">Guardar</button>
+        <a href="/admin/servicios/@Model.ServicioId/ubicaciones" class="btn btn--secondary">Cancelar</a>
+    </div>
+</form>
