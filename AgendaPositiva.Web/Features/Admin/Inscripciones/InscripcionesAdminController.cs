@@ -15,7 +15,7 @@ using System.Text.Json;
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
 [Route("admin/inscripciones")]
-[Authorize(Policy = "AdminPanel")]
+[Authorize(Roles = "Administrador,Colaborador")]
 public class InscripcionesAdminController : Controller
 {
     readonly AppDbContext store;

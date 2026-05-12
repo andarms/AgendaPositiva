@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AgendaPositiva.Web.Features.Admin.Auditoria;
 
 [Route("admin/auditoria")]
-[Authorize(Policy = "AdminPanel")]
+[Authorize(Roles = "Administrador")]
 public class AuditoriaAdminController : Controller
 {
     readonly AppDbContext store;

@@ -6,7 +6,8 @@ namespace AgendaPositiva.Web.Features.Admin.Auth.Domain;
 public enum RolAdministrador
 {
     Administrador,
-    Colaborador
+    Colaborador,
+    EditorDeServicios
 }
 
 public class UsuarioAdministrador : EntidadBase

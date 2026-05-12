@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AgendaPositiva.Web.Features.Admin.Servicios;
 
 [Route("admin/servicios")]
-[Authorize(Roles = "Administrador")]
+[Authorize(Roles = "Administrador,EditorDeServicios")]
 public class ServiciosAdminController : Controller
 {
     readonly AppDbContext store;

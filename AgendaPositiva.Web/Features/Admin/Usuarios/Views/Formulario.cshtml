@@ -289,6 +289,10 @@
                             selected="@(Model.Rol == RolAdministrador.Colaborador)">
                         Colaborador — localidades asignadas
                     </option>
+                    <option value="@RolAdministrador.EditorDeServicios"
+                            selected="@(Model.Rol == RolAdministrador.EditorDeServicios)">
+                        Editor de Servicios — solo servicios
+                    </option>
                 </select>
             </div>
             <div class="form-group">
@@ -477,7 +481,7 @@
         const localidadesSection = document.getElementById('localidades-section');
 
         function toggleLocalidades() {
-            localidadesSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' ? 'none' : 'block';
+            localidadesSection.style.display = rolSelect.value === '@RolAdministrador.Administrador' || rolSelect.value === '@RolAdministrador.EditorDeServicios' ? 'none' : 'block';
         }
 
         rolSelect.addEventListener('change', toggleLocalidades);

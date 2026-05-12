@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using AgendaPositiva.Web.Datos;
+using AgendaPositiva.Web.Features.Admin.Auth.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -101,6 +102,9 @@ public class AuthAdminController : Controller
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        if (usuario.Rol == RolAdministrador.EditorDeServicios)
+            return Redirect("/admin/servicios");
 
         return RedirectToAction("Index", "InscripcionesAdmin");
     }
