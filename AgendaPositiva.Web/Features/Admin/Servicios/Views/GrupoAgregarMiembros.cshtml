@@ -1,0 +1,113 @@
+@using AgendaPositiva.Web.Features.Admin.Servicios
+@using AgendaPositiva.Web.Features.Commons
+@model GrupoAgregarMiembrosViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios">Servicios</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/@Model.ServicioId/grupos">@Model.ServicioNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/servicios/grupos/@Model.GrupoId">@Model.GrupoNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Agregar Miembros</span>
+</nav>
+
+<h1>Agregar Miembros — @Model.GrupoNombre</h1>
+
+<form method="post">
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div style="padding:1.25rem;">
+            <!-- Filtros -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;">Buscar por nombre</label>
+                    <input type="text" id="filtro-nombre" class="form-control" placeholder="Nombre o apellido..." />
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;">Filtrar por servicio de inscripción</label>
+                    <select id="filtro-servicio" class="form-control">
+                        <option value="">— Todos —</option>
+                        @foreach (ServicioInscripcion si in Enum.GetValues(typeof(ServicioInscripcion)))
+                        {
+                            <option value="@si">@si.Descripcion()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:0.75rem;display:flex;gap:0.75rem;align-items:center;">
+                <span id="conteo-seleccionados" style="font-weight:600;">0 seleccionados</span>
+                <button type="button" class="btn btn--secondary" onclick="toggleAll()" style="font-size:0.85rem;">Seleccionar/Deseleccionar visibles</button>
+            </div>
+
+            <div class="table-wrapper" style="max-height:500px;overflow-y:auto;">
+                <table class="admin-table" style="font-size:0.875rem;" id="tabla-inscripciones">
+                    <thead style="position:sticky;top:0;z-index:1;">
+                        <tr>
+                            <th style="width:40px;"></th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Localidad</th>
+                            <th>Servicio Inscripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ins in Model.InscripcionesDisponibles)
+                        {
+                            var servicios = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
+                            var serviciosData = string.Join(",", ins.Servicios.Select(s => s.ToString()));
+                            <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()" data-servicios="@serviciosData">
+                                <td>
+                                    <input type="checkbox" name="miembrosIds" value="@ins.Id" class="cb-miembro"
+                                           onchange="actualizarConteo();" />
+                                </td>
+                                <td>@ins.Persona.NombreCompleto</td>
+                                <td>@ins.Persona.NumeroIdentificacion</td>
+                                <td>@ins.Localidad</td>
+                                <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;">
+        <button type="submit" class="btn btn--primary">Agregar Seleccionados</button>
+        <a href="/admin/servicios/grupos/@Model.GrupoId" class="btn btn--secondary">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    const filtroNombre = document.getElementById('filtro-nombre');
+    const filtroServicio = document.getElementById('filtro-servicio');
+    const filas = document.querySelectorAll('.fila-inscripcion');
+
+    function filtrar() {
+        const nombre = filtroNombre.value.toLowerCase();
+        const servicio = filtroServicio.value;
+        filas.forEach(fila => {
+            const matchNombre = !nombre || fila.dataset.nombre.includes(nombre);
+            const matchServicio = !servicio || fila.dataset.servicios.split(',').includes(servicio);
+            fila.style.display = (matchNombre && matchServicio) ? '' : 'none';
+        });
+    }
+
+    filtroNombre.addEventListener('input', filtrar);
+    filtroServicio.addEventListener('change', filtrar);
+
+    function actualizarConteo() {
+        const count = document.querySelectorAll('.cb-miembro:checked').length;
+        document.getElementById('conteo-seleccionados').textContent = count + ' seleccionados';
+    }
+
+    function toggleAll() {
+        const visibles = Array.from(filas).filter(f => f.style.display !== 'none');
+        const allChecked = visibles.every(f => f.querySelector('.cb-miembro').checked);
+        visibles.forEach(f => f.querySelector('.cb-miembro').checked = !allChecked);
+        actualizarConteo();
+    }
+</script>

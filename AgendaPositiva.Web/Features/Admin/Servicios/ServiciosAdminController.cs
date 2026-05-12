@@ -370,7 +370,7 @@ public class ServiciosAdminController : Controller
     }
 
     [HttpPost("{servicioId:int}/grupos/crear")]
-    public async Task<IActionResult> GrupoCrearPost(int servicioId, string nombre, int horarioServicioId, int? liderInscripcionId, List<int> miembrosIds)
+    public async Task<IActionResult> GrupoCrearPost(int servicioId, string nombre, int horarioServicioId)
     {
         var servicio = await store.Servicios
             .Include(s => s.Horarios)
@@ -389,18 +389,89 @@ public class ServiciosAdminController : Controller
         {
             Nombre = nombre.Trim(),
             ServicioId = servicioId,
-            HorarioServicioId = horarioServicioId,
-            LiderInscripcionId = liderInscripcionId
+            HorarioServicioId = horarioServicioId
         };
-
-        foreach (var mid in miembrosIds?.Distinct() ?? [])
-        {
-            grupo.Miembros.Add(new MiembroGrupoServicio { InscripcionId = mid });
-        }
 
         store.GruposServicio.Add(grupo);
         await store.SaveChangesAsync();
-        return RedirectToAction(nameof(GruposIndex), new { servicioId });
+        return RedirectToAction(nameof(GrupoDetalle), new { id = grupo.Id });
+    }
+
+    // ── Grupos: detalle ────────────────────────────────────────────
+    [HttpGet("grupos/{id:int}")]
+    public async Task<IActionResult> GrupoDetalle(int id)
+    {
+        var grupo = await store.GruposServicio
+            .Include(g => g.Servicio)
+            .Include(g => g.HorarioServicio)
+            .Include(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .FirstOrDefaultAsync(g => g.Id == id);
+        if (grupo is null) return NotFound();
+
+        return View("~/Features/Admin/Servicios/Views/GrupoDetalle.cshtml", grupo);
+    }
+
+    // ── Grupos: agregar miembros ───────────────────────────────────
+    [HttpGet("grupos/{id:int}/agregar-miembros")]
+    public async Task<IActionResult> GrupoAgregarMiembros(int id)
+    {
+        var grupo = await store.GruposServicio
+            .Include(g => g.Servicio)
+            .Include(g => g.Miembros)
+            .FirstOrDefaultAsync(g => g.Id == id);
+        if (grupo is null) return NotFound();
+
+        var idsExistentes = grupo.Miembros.Select(m => m.InscripcionId).ToHashSet();
+        var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
+        var inscripciones = evento is null
+            ? new List<Inscripcion>()
+            : await store.Inscripciones
+                .Include(i => i.Persona)
+                .Where(i => i.EventoId == evento.Id
+                    && i.Estado != EstadoInscripcion.NoVaAsistir
+                    && !idsExistentes.Contains(i.Id))
+                .OrderBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos)
+                .ToListAsync();
+
+        return View("~/Features/Admin/Servicios/Views/GrupoAgregarMiembros.cshtml",
+            new GrupoAgregarMiembrosViewModel
+            {
+                GrupoId = grupo.Id,
+                ServicioId = grupo.ServicioId,
+                ServicioNombre = grupo.Servicio.Nombre,
+                GrupoNombre = grupo.Nombre,
+                InscripcionesDisponibles = inscripciones
+            });
+    }
+
+    [HttpPost("grupos/{id:int}/agregar-miembros")]
+    public async Task<IActionResult> GrupoAgregarMiembrosPost(int id, List<int> miembrosIds)
+    {
+        var grupo = await store.GruposServicio
+            .Include(g => g.Miembros)
+            .FirstOrDefaultAsync(g => g.Id == id);
+        if (grupo is null) return NotFound();
+
+        var idsExistentes = grupo.Miembros.Select(m => m.InscripcionId).ToHashSet();
+        foreach (var mid in (miembrosIds ?? []).Distinct().Where(mid => !idsExistentes.Contains(mid)))
+        {
+            grupo.Miembros.Add(new MiembroGrupoServicio { InscripcionId = mid, Rol = RolMiembroGrupoServicio.Servidor });
+        }
+
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(GrupoDetalle), new { id });
+    }
+
+    // ── Cambiar rol de miembro ─────────────────────────────────────
+    [HttpPost("miembros/{id:int}/cambiar-rol")]
+    public async Task<IActionResult> CambiarRolMiembro(int id, RolMiembroGrupoServicio rol)
+    {
+        var miembro = await store.MiembrosGrupoServicio.FindAsync(id);
+        if (miembro is null) return NotFound();
+
+        miembro.Rol = rol;
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
     }
 
     // ── Grupos: editar ─────────────────────────────────────────────
@@ -409,7 +480,6 @@ public class ServiciosAdminController : Controller
     {
         var grupo = await store.GruposServicio
             .Include(g => g.Servicio).ThenInclude(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
-            .Include(g => g.Miembros)
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
 
@@ -417,16 +487,13 @@ public class ServiciosAdminController : Controller
         vm.GrupoId = grupo.Id;
         vm.Nombre = grupo.Nombre;
         vm.HorarioServicioId = grupo.HorarioServicioId;
-        vm.LiderInscripcionId = grupo.LiderInscripcionId;
-        vm.MiembrosSeleccionadosIds = grupo.Miembros.Select(m => m.InscripcionId).ToList();
         return View("~/Features/Admin/Servicios/Views/GrupoFormulario.cshtml", vm);
     }
 
     [HttpPost("grupos/{id:int}/editar")]
-    public async Task<IActionResult> GrupoEditarPost(int id, string nombre, int horarioServicioId, int? liderInscripcionId, List<int> miembrosIds)
+    public async Task<IActionResult> GrupoEditarPost(int id, string nombre, int horarioServicioId)
     {
         var grupo = await store.GruposServicio
-            .Include(g => g.Miembros)
             .Include(g => g.Servicio).ThenInclude(s => s.Horarios)
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
@@ -442,21 +509,9 @@ public class ServiciosAdminController : Controller
 
         grupo.Nombre = nombre.Trim();
         grupo.HorarioServicioId = horarioServicioId;
-        grupo.LiderInscripcionId = liderInscripcionId;
-
-        // Sync miembros
-        var nuevosIds = (miembrosIds ?? []).Distinct().ToHashSet();
-        var existentes = grupo.Miembros.ToList();
-
-        foreach (var m in existentes.Where(m => !nuevosIds.Contains(m.InscripcionId)))
-            store.MiembrosGrupoServicio.Remove(m);
-
-        var idsExistentes = existentes.Select(m => m.InscripcionId).ToHashSet();
-        foreach (var mid in nuevosIds.Where(mid => !idsExistentes.Contains(mid)))
-            grupo.Miembros.Add(new MiembroGrupoServicio { InscripcionId = mid });
 
         await store.SaveChangesAsync();
-        return RedirectToAction(nameof(GruposIndex), new { servicioId = grupo.ServicioId });
+        return RedirectToAction(nameof(GrupoDetalle), new { id });
     }
 
     // ── Grupos: eliminar ───────────────────────────────────────────
@@ -472,16 +527,17 @@ public class ServiciosAdminController : Controller
         return RedirectToAction(nameof(GruposIndex), new { servicioId });
     }
 
-    // ── Remover miembro (desde dashboard) ──────────────────────────
+    // ── Remover miembro ───────────────────────────────────────────
     [HttpPost("miembros/{id:int}/remover")]
     public async Task<IActionResult> RemoverMiembro(int id)
     {
         var miembro = await store.MiembrosGrupoServicio.FindAsync(id);
         if (miembro is null) return NotFound();
 
+        var grupoId = miembro.GrupoServicioId;
         store.MiembrosGrupoServicio.Remove(miembro);
         await store.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(GrupoDetalle), new { id = grupoId });
     }
 
     // ── Excel export ───────────────────────────────────────────────
@@ -587,21 +643,11 @@ public class ServiciosAdminController : Controller
     // ── Helpers ─────────────────────────────────────────────────────
     async Task<GrupoFormViewModel> BuildGrupoFormViewModel(Servicio servicio)
     {
-        var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
-        var inscripciones = evento is null
-            ? []
-            : await store.Inscripciones
-                .Include(i => i.Persona)
-                .Where(i => i.EventoId == evento.Id && i.Estado != EstadoInscripcion.NoVaAsistir)
-                .OrderBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos)
-                .ToListAsync();
-
         return new GrupoFormViewModel
         {
             ServicioId = servicio.Id,
             ServicioNombre = servicio.Nombre,
-            Horarios = servicio.Horarios.ToList(),
-            InscripcionesDisponibles = inscripciones
+            Horarios = servicio.Horarios.ToList()
         };
     }
 }
@@ -680,8 +726,14 @@ public class GrupoFormViewModel
     public string ServicioNombre { get; set; } = "";
     public string Nombre { get; set; } = "";
     public int HorarioServicioId { get; set; }
-    public int? LiderInscripcionId { get; set; }
-    public List<int> MiembrosSeleccionadosIds { get; set; } = [];
     public List<HorarioServicio> Horarios { get; set; } = [];
+}
+
+public class GrupoAgregarMiembrosViewModel
+{
+    public int GrupoId { get; set; }
+    public int ServicioId { get; set; }
+    public string ServicioNombre { get; set; } = "";
+    public string GrupoNombre { get; set; } = "";
     public List<Inscripcion> InscripcionesDisponibles { get; set; } = [];
 }

@@ -60,17 +60,16 @@ else
         <div class="card" style="padding:1.25rem;margin-bottom:1rem;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
                 <div>
-                    <h3 style="margin:0;">@grupo.Nombre</h3>
+                    <h3 style="margin:0;">
+                        <a href="/admin/servicios/grupos/@grupo.Id" style="text-decoration:none;color:inherit;">@grupo.Nombre</a>
+                    </h3>
                     <span style="color:#718096;font-size:0.85rem;">
                         Horario: @(grupo.HorarioServicio?.Descripcion ?? "—")
-                        @if (grupo.LiderInscripcion?.Persona is not null)
-                        {
-                            <text> · Líder: <strong>@grupo.LiderInscripcion.Persona.NombreCompleto</strong></text>
-                        }
+                        · @grupo.Miembros.Count miembros
                     </span>
                 </div>
                 <div style="display:flex;gap:0.5rem;">
-                    <a href="/admin/servicios/grupos/@grupo.Id/editar" class="btn btn--secondary">Editar</a>
+                    <a href="/admin/servicios/grupos/@grupo.Id" class="btn btn--secondary">Ver Detalle</a>
                     <form method="post" action="/admin/servicios/grupos/@grupo.Id/eliminar"
                           onclick="return confirm('¿Eliminar el grupo @grupo.Nombre y todos sus miembros?');">
                         <button type="submit" class="btn btn--danger">Eliminar</button>
@@ -89,31 +88,19 @@ else
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Documento</th>
+                                <th>Rol</th>
                                 <th>Localidad</th>
-                                <th>Servicio Inscripción</th>
                                 <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var m in grupo.Miembros.OrderBy(m => m.Inscripcion.Persona.Nombres))
+                            @foreach (var m in grupo.Miembros.OrderBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
                             {
-                                var esLider = m.InscripcionId == grupo.LiderInscripcionId;
                                 var noAsiste = m.Inscripcion.Estado == AgendaPositiva.Web.Features.Commons.EstadoInscripcion.NoVaAsistir;
                                 <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
-                                    <td>
-                                        @if (esLider)
-                                        {
-                                            <strong> @m.Inscripcion.Persona.NombreCompleto</strong>
-                                        }
-                                        else
-                                        {
-                                            @m.Inscripcion.Persona.NombreCompleto
-                                        }
-                                    </td>
-                                    <td>@m.Inscripcion.Persona.NumeroIdentificacion</td>
+                                    <td>@m.Inscripcion.Persona.NombreCompleto</td>
+                                    <td><span class="badge @BadgeClass(m.Rol)">@m.Rol</span></td>
                                     <td>@m.Inscripcion.Localidad</td>
-                                    <td>@string.Join(", ", m.Inscripcion.Servicios.Select(s => s.Descripcion()))</td>
                                     <td>
                                         @if (noAsiste)
                                         {
@@ -132,4 +119,14 @@ else
             }
         </div>
     }
+}
+
+@functions {
+    static string BadgeClass(RolMiembroGrupoServicio rol) => rol switch
+    {
+        RolMiembroGrupoServicio.Coordinador => "badge--info",
+        RolMiembroGrupoServicio.Lider => "badge--warning",
+        RolMiembroGrupoServicio.Servidor => "badge--success",
+        _ => ""
+    };
 }

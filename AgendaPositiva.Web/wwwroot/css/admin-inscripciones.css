@@ -94,6 +94,9 @@
 .badge--muted {
   background: #86868b;
 }
+.badge--info {
+  background: #007aff;
+}
 
 .text-muted {
   color: #86868b;
