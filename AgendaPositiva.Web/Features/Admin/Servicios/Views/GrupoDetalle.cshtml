@@ -19,9 +19,6 @@
         <p style="margin:0 0 0.25rem;">
             <strong>Servicio:</strong> @Model.Servicio.Nombre
         </p>
-        <p style="margin:0;">
-            <strong>Horario:</strong> @(Model.HorarioServicio?.Descripcion ?? "—")
-        </p>
     </div>
 </div>
 
@@ -57,8 +54,9 @@
                             <th>Documento</th>
                             <th>Localidad</th>
                             <th>Rol</th>
+                            <th>Horario</th>
                             <th>Ubicación</th>
-                            <th style="width:220px;">Acciones</th>
+                            <th style="width:140px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,7 +77,24 @@
                                     <span class="badge @BadgeClass(m.Rol)" id="badge-rol-@m.Id">@m.Rol</span>
                                 </td>
                                 <td>
-                                    @(m.UbicacionServicio?.Nombre ?? "— Sin ubicación —")
+                                    <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
+                                        <span>@(m.HorarioServicio?.Descripcion ?? "— Sin horario —")</span>
+                                        <button type="button" class="btn btn--secondary"
+                                                style="font-size:0.75rem;padding:0.15rem 0.4rem;"
+                                                onclick="mostrarEdicionHorario(@m.Id, '@(m.HorarioServicioId?.ToString() ?? "")')">
+                                            Cambiar
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
+                                        <span>@(m.UbicacionServicio?.Nombre ?? "— Sin ubicación —")</span>
+                                        <button type="button" class="btn btn--secondary"
+                                                style="font-size:0.75rem;padding:0.15rem 0.4rem;"
+                                                onclick="mostrarEdicionUbicacion(@m.Id, '@(m.UbicacionServicioId?.ToString() ?? "")')">
+                                            Cambiar
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
@@ -87,11 +102,6 @@
                                                 style="font-size:0.8rem;padding:0.25rem 0.5rem;"
                                                 onclick="mostrarEdicionRol(@m.Id, '@m.Rol')">
                                             Rol
-                                        </button>
-                                        <button type="button" class="btn btn--secondary"
-                                                style="font-size:0.8rem;padding:0.25rem 0.5rem;"
-                                                onclick="mostrarEdicionUbicacion(@m.Id, '@(m.UbicacionServicioId?.ToString() ?? "")')">
-                                            Ubicación
                                         </button>
                                         <form method="post" action="/admin/servicios/miembros/@m.Id/remover"
                                               onsubmit="return confirm('¿Remover a @m.Inscripcion.Persona.NombreCompleto del grupo?');"
@@ -134,6 +144,30 @@
         </div>
     </div>
 
+    <!-- Modal para cambiar horario -->
+    <div id="modal-horario"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div class="card" style="padding:1.5rem;min-width:320px;">
+            <h3 style="margin-top:0;">Cambiar Horario</h3>
+            <form method="post" id="form-cambiar-horario">
+                <div style="margin-bottom:1rem;">
+                    <label class="form-label">Horario</label>
+                    <select name="horarioServicioId" id="select-horario" class="form-control">
+                        <option value="">— Sin horario —</option>
+                        @foreach (var h in Model.Servicio.Horarios.OrderBy(h => h.FechaHoraInicio))
+                        {
+                            <option value="@h.Id">@h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") - @h.FechaHoraFin.ToString("HH:mm"))</option>
+                        }
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                    <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal para cambiar ubicación -->
     <div id="modal-ubicacion"
          style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
@@ -160,16 +194,25 @@
 
     <script>
         const modalRol = document.getElementById('modal-rol');
+        const modalHorario = document.getElementById('modal-horario');
         const modalUbicacion = document.getElementById('modal-ubicacion');
         const formCambiarRol = document.getElementById('form-cambiar-rol');
+        const formCambiarHorario = document.getElementById('form-cambiar-horario');
         const formCambiarUbicacion = document.getElementById('form-cambiar-ubicacion');
         const selectRol = document.getElementById('select-rol');
+        const selectHorario = document.getElementById('select-horario');
         const selectUbicacion = document.getElementById('select-ubicacion');
 
         function mostrarEdicionRol(miembroId, rolActual) {
             formCambiarRol.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-rol';
             selectRol.value = rolActual;
             modalRol.style.display = 'flex';
+        }
+
+        function mostrarEdicionHorario(miembroId, horarioActual) {
+            formCambiarHorario.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-horario';
+            selectHorario.value = horarioActual;
+            modalHorario.style.display = 'flex';
         }
 
         function mostrarEdicionUbicacion(miembroId, ubicacionActual) {
@@ -180,11 +223,15 @@
 
         function cerrarModales() {
             modalRol.style.display = 'none';
+            modalHorario.style.display = 'none';
             modalUbicacion.style.display = 'none';
         }
 
         modalRol.addEventListener('click', function (e) {
             if (e.target === modalRol) cerrarModales();
+        });
+        modalHorario.addEventListener('click', function (e) {
+            if (e.target === modalHorario) cerrarModales();
         });
         modalUbicacion.addEventListener('click', function (e) {
             if (e.target === modalUbicacion) cerrarModales();

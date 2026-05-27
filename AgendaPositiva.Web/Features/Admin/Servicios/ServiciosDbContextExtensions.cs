@@ -43,11 +43,6 @@ public static class ServiciosDbContextExtensions
                 .HasForeignKey(g => g.ServicioId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasOne(g => g.HorarioServicio)
-                .WithMany(h => h.Grupos)
-                .HasForeignKey(g => g.HorarioServicioId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             e.HasOne(g => g.LiderInscripcion)
                 .WithMany()
                 .HasForeignKey(g => g.LiderInscripcionId)
@@ -71,6 +66,11 @@ public static class ServiciosDbContextExtensions
                 .WithMany()
                 .HasForeignKey(m => m.InscripcionId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(m => m.HorarioServicio)
+                .WithMany(h => h.Miembros)
+                .HasForeignKey(m => m.HorarioServicioId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             e.HasIndex(m => new { m.GrupoServicioId, m.InscripcionId }).IsUnique();
 

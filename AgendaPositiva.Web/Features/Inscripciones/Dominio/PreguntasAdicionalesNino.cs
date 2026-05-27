@@ -3,7 +3,7 @@ using AgendaPositiva.Web.Features.Commons;
 namespace AgendaPositiva.Web.Features.Inscripciones.Dominio;
 
 /// <summary>
-/// Preguntas adicionales exclusivas para niños de 4 a 10 años.
+/// Preguntas adicionales exclusivas para niños de 4 a 11 años.
 /// Se almacena como JSONB en la tabla de inscripciones.
 /// </summary>
 public class PreguntasAdicionalesNino

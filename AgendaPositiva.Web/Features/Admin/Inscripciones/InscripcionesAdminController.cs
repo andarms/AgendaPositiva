@@ -304,6 +304,23 @@ public class InscripcionesAdminController : Controller
         inscripcion.Estado = nuevoEstado;
         inscripcion.FechaActualizacion = DateTime.UtcNow;
 
+        // Ajustar cupos cuando cambia de/a NoVaAsistir
+        var eraNoVa = estadoAnterior == EstadoInscripcion.NoVaAsistir;
+        var ahoraNoVa = nuevoEstado == EstadoInscripcion.NoVaAsistir;
+
+        if (!eraNoVa && ahoraNoVa)
+        {
+            // Liberar cupo
+            evento.TotalInscritos = Math.Max(0, evento.TotalInscritos - 1);
+            DecrementarCupoRegion(inscripcion.Departamento, inscripcion.Ciudad);
+        }
+        else if (eraNoVa && !ahoraNoVa)
+        {
+            // Ocupar cupo nuevamente
+            evento.TotalInscritos++;
+            IncrementarCupoRegion(inscripcion.Departamento, inscripcion.Ciudad);
+        }
+
         store.AuditoriaAdmin.Add(new AuditoriaAdmin
         {
             InscripcionId = id,
@@ -316,6 +333,28 @@ public class InscripcionesAdminController : Controller
         store.SaveChanges();
 
         return RedirectToAction(nameof(Detalle), new { id });
+    }
+
+    void DecrementarCupoRegion(string departamento, string ciudad)
+    {
+        var region = store.RegionesEvento
+            .Where(r => r.EventoId == evento.Id)
+            .AsEnumerable()
+            .FirstOrDefault(r => r.Contiene(departamento, ciudad));
+
+        if (region is not null)
+            region.TotalInscritos = Math.Max(0, region.TotalInscritos - 1);
+    }
+
+    void IncrementarCupoRegion(string departamento, string ciudad)
+    {
+        var region = store.RegionesEvento
+            .Where(r => r.EventoId == evento.Id)
+            .AsEnumerable()
+            .FirstOrDefault(r => r.Contiene(departamento, ciudad));
+
+        if (region is not null)
+            region.TotalInscritos++;
     }
 
     [HttpPost("{id:int}/cambiar-hospedaje")]

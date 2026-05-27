@@ -129,7 +129,7 @@
                 <thead>
                     <tr>
                         <th>Grupo</th>
-                        <th>Horario</th>
+                        <th>Horarios Asignados</th>
                         <th>Líder</th>
                         <th>Miembros</th>
                     </tr>
@@ -138,9 +138,10 @@
                     @foreach (var g in Model.Grupos.OrderBy(g => g.Nombre))
                     {
                         var noAsiste = g.Miembros.Any(m => m.Inscripcion.Estado == EstadoInscripcion.NoVaAsistir);
+                        var totalHorariosAsignados = g.Miembros.Count(m => m.HorarioServicioId.HasValue);
                         <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
                             <td><a href="/admin/servicios/grupos/@g.Id">@g.Nombre</a></td>
-                            <td>@(g.HorarioServicio?.Descripcion ?? "—")</td>
+                            <td>@totalHorariosAsignados / @g.Miembros.Count</td>
                             <td>@(g.LiderInscripcion?.Persona?.NombreCompleto ?? "—")</td>
                             <td>
                                 @g.Miembros.Count

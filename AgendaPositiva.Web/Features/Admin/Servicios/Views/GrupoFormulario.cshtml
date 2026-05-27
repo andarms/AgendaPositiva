@@ -21,18 +21,6 @@
                 <label class="form-label">Nombre del grupo</label>
                 <input type="text" name="nombre" value="@Model.Nombre" class="form-control" required />
             </div>
-            <div style="margin-bottom:1rem;">
-                <label class="form-label">Horario asignado</label>
-                <select name="horarioServicioId" class="form-control" required>
-                    <option value="">— Seleccionar horario —</option>
-                    @foreach (var h in Model.Horarios)
-                    {
-                        <option value="@h.Id" @(h.Id == Model.HorarioServicioId ? "selected" : "")>
-                            @h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") - @h.FechaHoraFin.ToString("HH:mm"))
-                        </option>
-                    }
-                </select>
-            </div>
         </div>
     </div>
 

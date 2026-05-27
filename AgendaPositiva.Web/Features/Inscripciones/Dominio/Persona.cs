@@ -19,7 +19,7 @@ public class Persona : EntidadBase
 
     public float Edad => CalcularEdad();
     public bool EsMayorDeEdad => Edad >= 18;
-    public bool EsNino => Edad <= 10;
+    public bool EsNino => Edad <= 11;
 
     public int CalcularEdad()
     {

@@ -153,8 +153,8 @@ public class ServiciosAdminController : Controller
         var servicio = await store.Servicios
             .Include(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
             .Include(s => s.Ubicaciones.OrderBy(u => u.Nombre))
-            .Include(s => s.Grupos).ThenInclude(g => g.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.LiderInscripcion).ThenInclude(i => i!.Persona)
             .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -329,10 +329,10 @@ public class ServiciosAdminController : Controller
         var horario = await store.HorariosServicio.FirstOrDefaultAsync(h => h.Id == id && h.ServicioId == servicioId);
         if (horario is null) return NotFound();
 
-        var tieneGrupos = await store.GruposServicio.AnyAsync(g => g.HorarioServicioId == id);
-        if (tieneGrupos)
+        var tieneMiembros = await store.MiembrosGrupoServicio.AnyAsync(m => m.HorarioServicioId == id);
+        if (tieneMiembros)
         {
-            TempData["Error"] = "No se puede eliminar el horario porque tiene grupos asignados. Elimine los grupos primero.";
+            TempData["Error"] = "No se puede eliminar el horario porque tiene miembros asignados. Quite el horario de los miembros primero.";
             return RedirectToAction(nameof(HorariosIndex), new { servicioId });
         }
 
@@ -452,8 +452,8 @@ public class ServiciosAdminController : Controller
     {
         var servicio = await store.Servicios
             .Include(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
-            .Include(s => s.Grupos).ThenInclude(g => g.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.LiderInscripcion).ThenInclude(i => i!.Persona)
             .FirstOrDefaultAsync(s => s.Id == servicioId);
 
@@ -475,16 +475,16 @@ public class ServiciosAdminController : Controller
     }
 
     [HttpPost("{servicioId:int}/grupos/crear")]
-    public async Task<IActionResult> GrupoCrearPost(int servicioId, string nombre, int horarioServicioId)
+    public async Task<IActionResult> GrupoCrearPost(int servicioId, string nombre)
     {
         var servicio = await store.Servicios
             .Include(s => s.Horarios)
             .FirstOrDefaultAsync(s => s.Id == servicioId);
         if (servicio is null) return NotFound();
 
-        if (string.IsNullOrWhiteSpace(nombre) || horarioServicioId == 0)
+        if (string.IsNullOrWhiteSpace(nombre))
         {
-            ModelState.AddModelError("", "Nombre y horario son requeridos.");
+            ModelState.AddModelError("", "El nombre es requerido.");
             var vm = await BuildGrupoFormViewModel(servicio);
             vm.Nombre = nombre;
             return View("~/Features/Admin/Servicios/Views/GrupoFormulario.cshtml", vm);
@@ -493,8 +493,7 @@ public class ServiciosAdminController : Controller
         var grupo = new GrupoServicio
         {
             Nombre = nombre.Trim(),
-            ServicioId = servicioId,
-            HorarioServicioId = horarioServicioId
+            ServicioId = servicioId
         };
 
         store.GruposServicio.Add(grupo);
@@ -508,8 +507,9 @@ public class ServiciosAdminController : Controller
     {
         var grupo = await store.GruposServicio
             .Include(g => g.Servicio).ThenInclude(s => s.Ubicaciones)
-            .Include(g => g.HorarioServicio)
+            .Include(g => g.Servicio).ThenInclude(s => s.Horarios)
             .Include(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .Include(g => g.Miembros).ThenInclude(m => m.HorarioServicio)
             .Include(g => g.Miembros).ThenInclude(m => m.UbicacionServicio)
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
@@ -592,6 +592,18 @@ public class ServiciosAdminController : Controller
         return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
     }
 
+    // ── Cambiar horario de miembro ─────────────────────────────────
+    [HttpPost("miembros/{id:int}/cambiar-horario")]
+    public async Task<IActionResult> CambiarHorarioMiembro(int id, int? horarioServicioId)
+    {
+        var miembro = await store.MiembrosGrupoServicio.FindAsync(id);
+        if (miembro is null) return NotFound();
+
+        miembro.HorarioServicioId = horarioServicioId;
+        await store.SaveChangesAsync();
+        return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
+    }
+
     // ── Grupos: editar ─────────────────────────────────────────────
     [HttpGet("grupos/{id:int}/editar")]
     public async Task<IActionResult> GrupoEditar(int id)
@@ -604,21 +616,20 @@ public class ServiciosAdminController : Controller
         var vm = await BuildGrupoFormViewModel(grupo.Servicio);
         vm.GrupoId = grupo.Id;
         vm.Nombre = grupo.Nombre;
-        vm.HorarioServicioId = grupo.HorarioServicioId;
         return View("~/Features/Admin/Servicios/Views/GrupoFormulario.cshtml", vm);
     }
 
     [HttpPost("grupos/{id:int}/editar")]
-    public async Task<IActionResult> GrupoEditarPost(int id, string nombre, int horarioServicioId)
+    public async Task<IActionResult> GrupoEditarPost(int id, string nombre)
     {
         var grupo = await store.GruposServicio
             .Include(g => g.Servicio).ThenInclude(s => s.Horarios)
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
 
-        if (string.IsNullOrWhiteSpace(nombre) || horarioServicioId == 0)
+        if (string.IsNullOrWhiteSpace(nombre))
         {
-            ModelState.AddModelError("", "Nombre y horario son requeridos.");
+            ModelState.AddModelError("", "El nombre es requerido.");
             var vm = await BuildGrupoFormViewModel(grupo.Servicio);
             vm.GrupoId = id;
             vm.Nombre = nombre;
@@ -626,7 +637,6 @@ public class ServiciosAdminController : Controller
         }
 
         grupo.Nombre = nombre.Trim();
-        grupo.HorarioServicioId = horarioServicioId;
 
         await store.SaveChangesAsync();
         return RedirectToAction(nameof(GrupoDetalle), new { id });
@@ -664,8 +674,8 @@ public class ServiciosAdminController : Controller
     {
         var servicios = await store.Servicios
             .Include(s => s.Horarios.OrderBy(h => h.FechaHoraInicio))
-            .Include(s => s.Grupos).ThenInclude(g => g.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.Inscripcion).ThenInclude(i => i.Persona)
+            .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.HorarioServicio)
             .Include(s => s.Grupos).ThenInclude(g => g.Miembros).ThenInclude(m => m.UbicacionServicio)
             .OrderBy(s => s.Nombre)
             .ToListAsync();
@@ -721,21 +731,20 @@ public class ServiciosAdminController : Controller
         int row2 = 2;
         foreach (var s in servicios)
         {
-            foreach (var g in s.Grupos.OrderBy(g => g.HorarioServicio?.Descripcion).ThenBy(g => g.Nombre))
+            foreach (var g in s.Grupos.OrderBy(g => g.Nombre))
             {
                 if (g.Miembros.Count == 0)
                 {
                     ws2.Cell(row2, 1).Value = s.Nombre;
-                    ws2.Cell(row2, 2).Value = g.HorarioServicio?.Descripcion ?? "";
                     ws2.Cell(row2, 4).Value = g.Nombre;
                     row2++;
                 }
                 else
                 {
-                    foreach (var m in g.Miembros.OrderBy(m => m.UbicacionServicio?.Nombre ?? "zzz").ThenBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
+                    foreach (var m in g.Miembros.OrderBy(m => m.UbicacionServicio?.Nombre ?? "zzz").ThenBy(m => m.HorarioServicio?.Descripcion ?? "zzz").ThenBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
                     {
                         ws2.Cell(row2, 1).Value = s.Nombre;
-                        ws2.Cell(row2, 2).Value = g.HorarioServicio?.Descripcion ?? "";
+                        ws2.Cell(row2, 2).Value = m.HorarioServicio?.Descripcion ?? "—";
                         ws2.Cell(row2, 3).Value = m.UbicacionServicio?.Nombre ?? "—";
                         ws2.Cell(row2, 4).Value = g.Nombre;
                         ws2.Cell(row2, 5).Value = m.Inscripcion.Persona.NombreCompleto;
@@ -764,7 +773,6 @@ public class ServiciosAdminController : Controller
         {
             ServicioId = servicio.Id,
             ServicioNombre = servicio.Nombre,
-            Horarios = servicio.Horarios.ToList()
         };
     }
 }
@@ -842,8 +850,6 @@ public class GrupoFormViewModel
     public int ServicioId { get; set; }
     public string ServicioNombre { get; set; } = "";
     public string Nombre { get; set; } = "";
-    public int HorarioServicioId { get; set; }
-    public List<HorarioServicio> Horarios { get; set; } = [];
 }
 
 public class GrupoAgregarMiembrosViewModel

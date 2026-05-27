@@ -9,5 +9,5 @@ public class HorarioServicio : EntidadBase
     public DateTime FechaHoraInicio { get; set; }
     public DateTime FechaHoraFin { get; set; }
     public Servicio Servicio { get; set; } = null!;
-    public ICollection<GrupoServicio> Grupos { get; set; } = [];
+    public ICollection<MiembroGrupoServicio> Miembros { get; set; } = [];
 }

@@ -289,7 +289,7 @@
                         });
 
                         // Mostrar servicios solo si la persona es mayor de 16 años
-                        // Mostrar preguntas de alergia solo si la persona tiene entre 4 y 10 años
+                        // Mostrar preguntas de alergia solo si la persona tiene entre 4 y 11 años
                         var fechaNacInput = document.getElementById('@id("FechaNacimiento")');
                         var serviciosContainer = document.getElementById('@id("Servicios")_container');
                         var alergiaContainer = document.getElementById('@id("AlergiaAlimentaria")_container');
@@ -357,13 +357,13 @@
                                 alimentacionSelect.removeAttribute('required');
                             }
 
-                            // Preguntas para niños de 4 a 10 años
-                            var esNino4a10 = edad >= 4 && edad <= 10;
-                            alergiaContainer.style.display = esNino4a10 ? '' : 'none';
-                            participaFvKidsContainer.style.display = esNino4a10 ? '' : 'none';
-                            tipoSangreContainer.style.display = esNino4a10 ? '' : 'none';
-                            epsContainer.style.display = esNino4a10 ? '' : 'none';
-                            if (esNino4a10) {
+                            // Preguntas para niños de 4 a 11 años
+                            var esNino4a11 = edad >= 4 && edad <= 11;
+                            alergiaContainer.style.display = esNino4a11 ? '' : 'none';
+                            participaFvKidsContainer.style.display = esNino4a11 ? '' : 'none';
+                            tipoSangreContainer.style.display = esNino4a11 ? '' : 'none';
+                            epsContainer.style.display = esNino4a11 ? '' : 'none';
+                            if (esNino4a11) {
                                 tieneAlergiaSelect.setAttribute('required', '');
                                 participaFvKidsSelect.setAttribute('required', '');
                                 tipoSangreSelect.setAttribute('required', '');
