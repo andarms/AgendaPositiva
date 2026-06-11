@@ -59,13 +59,28 @@
                         {
                             var servicios = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
                             var serviciosData = string.Join(",", ins.Servicios.Select(s => s.ToString()));
+                            var yaEnGrupo = Model.IdsYaEnGrupo.Contains(ins.Id);
+                            Model.GrupoDeOtros.TryGetValue(ins.Id, out var otroGrupo);
                             <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()"
-                                data-servicios="@serviciosData">
+                                data-servicios="@serviciosData"
+                                data-otro-grupo="@(otroGrupo ?? "")"
+                                data-nombre-completo="@ins.Persona.NombreCompleto"
+                                style="@(yaEnGrupo ? "opacity:0.55;" : "")">
                                 <td>
                                     <input type="checkbox" name="miembrosIds" value="@ins.Id" class="cb-miembro"
-                                           onchange="actualizarConteo();" />
+                                           onchange="actualizarConteo();" @(yaEnGrupo ? "disabled" : "") />
                                 </td>
-                                <td>@ins.Persona.NombreCompleto</td>
+                                <td>
+                                    @ins.Persona.NombreCompleto
+                                    @if (yaEnGrupo)
+                                    {
+                                        <span style="font-size:0.75rem;color:#718096;margin-left:0.35rem;">(ya en este grupo)</span>
+                                    }
+                                    else if (otroGrupo != null)
+                                    {
+                                        <span style="font-size:0.75rem;color:#d97706;margin-left:0.35rem;" title="@otroGrupo">⚠️ ya en otro grupo</span>
+                                    }
+                                </td>
                                 <td>@ins.Persona.NumeroIdentificacion</td>
                                 <td>@ins.Localidad</td>
                                 <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
@@ -112,4 +127,21 @@
         visibles.forEach(f => f.querySelector('.cb-miembro').checked = !allChecked);
         actualizarConteo();
     }
+
+    // Confirmación al enviar si hay personas ya asignadas a otro grupo
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const conflictos = [];
+        document.querySelectorAll('.cb-miembro:checked').forEach(cb => {
+            const fila = cb.closest('tr');
+            const otroGrupo = fila.dataset.otroGrupo;
+            const nombre = fila.dataset.nombreCompleto;
+            if (otroGrupo) conflictos.push(`• ${nombre} (${otroGrupo})`);
+        });
+        if (conflictos.length === 0) return;
+        e.preventDefault();
+        const mensaje = 'Las siguientes personas ya están asignadas a otro grupo de servicio:\n\n'
+            + conflictos.join('\n')
+            + '\n\n¿Desea agregarlas de todas formas?';
+        if (confirm(mensaje)) this.submit();
+    });
 </script>

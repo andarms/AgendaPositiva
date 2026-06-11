@@ -527,17 +527,30 @@ public class ServiciosAdminController : Controller
             .FirstOrDefaultAsync(g => g.Id == id);
         if (grupo is null) return NotFound();
 
-        var idsExistentes = grupo.Miembros.Select(m => m.InscripcionId).ToHashSet();
+        var idsEnEsteGrupo = grupo.Miembros.Select(m => m.InscripcionId).ToHashSet();
         var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
         var inscripciones = evento is null
             ? new List<Inscripcion>()
             : await store.Inscripciones
                 .Include(i => i.Persona)
                 .Where(i => i.EventoId == evento.Id
-                    && i.Estado != EstadoInscripcion.NoVaAsistir
-                    && !idsExistentes.Contains(i.Id))
+                    && i.Estado != EstadoInscripcion.NoVaAsistir)
                 .OrderBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos)
                 .ToListAsync();
+
+        // Inscripciones asignadas a otros grupos (para mostrar advertencia)
+        var asignacionesOtrosGrupos = await store.MiembrosGrupoServicio
+            .Include(m => m.GrupoServicio).ThenInclude(g => g.Servicio)
+            .Where(m => m.GrupoServicioId != grupo.Id)
+            .Select(m => new { m.InscripcionId, GrupoNombre = m.GrupoServicio.Nombre, ServicioNombre = m.GrupoServicio.Servicio.Nombre })
+            .ToListAsync();
+
+        var grupoDeOtros = asignacionesOtrosGrupos
+            .GroupBy(a => a.InscripcionId)
+            .ToDictionary(
+                g => g.Key,
+                g => string.Join(", ", g.Select(a => $"{a.ServicioNombre} → {a.GrupoNombre}"))
+            );
 
         return View("~/Features/Admin/Servicios/Views/GrupoAgregarMiembros.cshtml",
             new GrupoAgregarMiembrosViewModel
@@ -546,7 +559,9 @@ public class ServiciosAdminController : Controller
                 ServicioId = grupo.ServicioId,
                 ServicioNombre = grupo.Servicio.Nombre,
                 GrupoNombre = grupo.Nombre,
-                InscripcionesDisponibles = inscripciones
+                InscripcionesDisponibles = inscripciones,
+                IdsYaEnGrupo = idsEnEsteGrupo,
+                GrupoDeOtros = grupoDeOtros
             });
     }
 
@@ -720,7 +735,7 @@ public class ServiciosAdminController : Controller
 
         // Hoja 2: Grupos de servicio con miembros
         var ws2 = workbook.Worksheets.Add("Grupos de Servicio");
-        var headers2 = new[] { "Servicio", "Horario", "Ubicación", "Grupo", "Miembro", "Rol", "Documento", "Departamento", "Ciudad", "Servicio Inscripción" };
+        var headers2 = new[] { "Servicio", "Horario", "Ubicación", "Grupo", "Miembro", "Rol", "Documento", "Teléfono", "Departamento", "Ciudad", "Servicio Inscripción" };
         for (int i = 0; i < headers2.Length; i++)
         {
             ws2.Cell(1, i + 1).Value = headers2[i];
@@ -750,9 +765,10 @@ public class ServiciosAdminController : Controller
                         ws2.Cell(row2, 5).Value = m.Inscripcion.Persona.NombreCompleto;
                         ws2.Cell(row2, 6).Value = m.Rol.ToString();
                         ws2.Cell(row2, 7).Value = m.Inscripcion.Persona.NumeroIdentificacion;
-                        ws2.Cell(row2, 8).Value = m.Inscripcion.Departamento;
-                        ws2.Cell(row2, 9).Value = m.Inscripcion.Ciudad;
-                        ws2.Cell(row2, 10).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
+                        ws2.Cell(row2, 8).Value = m.Inscripcion.Persona.Telefono;
+                        ws2.Cell(row2, 9).Value = m.Inscripcion.Departamento;
+                        ws2.Cell(row2, 10).Value = m.Inscripcion.Ciudad;
+                        ws2.Cell(row2, 11).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
                         row2++;
                     }
                 }
@@ -859,6 +875,9 @@ public class GrupoAgregarMiembrosViewModel
     public string ServicioNombre { get; set; } = "";
     public string GrupoNombre { get; set; } = "";
     public List<Inscripcion> InscripcionesDisponibles { get; set; } = [];
+    public HashSet<int> IdsYaEnGrupo { get; set; } = [];
+    /// <summary>InscripcionId → descripción de grupos en los que ya está asignada la persona (excluyendo este grupo)</summary>
+    public Dictionary<int, string> GrupoDeOtros { get; set; } = [];
 }
 
 public class UbicacionFormViewModel
