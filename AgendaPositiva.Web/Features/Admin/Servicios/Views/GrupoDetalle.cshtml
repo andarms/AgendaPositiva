@@ -74,7 +74,7 @@
                                 <td>@m.Inscripcion.Persona.NumeroIdentificacion</td>
                                 <td>@m.Inscripcion.Localidad</td>
                                 <td>
-                                    <span class="badge @BadgeClass(m.Rol)" id="badge-rol-@m.Id">@m.Rol</span>
+                                    <span class="badge @BadgeClass(m.Rol)" id="badge-rol-@m.Id">@m.Rol.NombreParaMostrar()</span>
                                 </td>
                                 <td>
                                     <div style="display:flex;gap:0.25rem;align-items:center;flex-wrap:wrap;">
@@ -132,7 +132,7 @@
                     <select name="rol" id="select-rol" class="form-control">
                         @foreach (RolMiembroGrupoServicio r in Enum.GetValues(typeof(RolMiembroGrupoServicio)))
                         {
-                            <option value="@r">@r</option>
+                            <option value="@r">@r.NombreParaMostrar()</option>
                         }
                     </select>
                 </div>

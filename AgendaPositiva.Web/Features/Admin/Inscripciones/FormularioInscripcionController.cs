@@ -31,7 +31,7 @@ public record VerificacionDto(string NumeroIdentificacion, TipoIdentificacion Ti
 }
 
 [Route("admin/inscripciones/formulario")]
-[Authorize(Roles = "Administrador,Colaborador")]
+[Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
 public class FormularioInscripcionController : Controller
 {
     readonly AppDbContext store;

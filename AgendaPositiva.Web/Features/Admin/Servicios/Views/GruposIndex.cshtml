@@ -100,7 +100,7 @@ else
                 AgendaPositiva.Web.Features.Commons.EstadoInscripcion.NoVaAsistir;
                                 <tr style="@(noAsiste ? "background:#FFF5F5;" : "")">
                                     <td>@m.Inscripcion.Persona.NombreCompleto</td>
-                                    <td><span class="badge @BadgeClass(m.Rol)">@m.Rol</span></td>
+                                    <td><span class="badge @BadgeClass(m.Rol)">@m.Rol.NombreParaMostrar()</span></td>
                                     <td>@m.Inscripcion.Localidad</td>
                                     <td>
                                         @if (noAsiste)

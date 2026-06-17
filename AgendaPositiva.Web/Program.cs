@@ -58,7 +58,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("AdminPanel", policy => policy.RequireRole("Administrador", "Colaborador", "EditorDeServicios"));
+    .AddPolicy("AdminPanel", policy => policy.RequireRole("Administrador", "Colaborador", "EditorDeServicios", "ColaboradorYEditorDeServicios"));
 
 builder.Services.AgregarModuloInscripciones();
 

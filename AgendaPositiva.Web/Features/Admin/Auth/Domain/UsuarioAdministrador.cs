@@ -7,7 +7,8 @@ public enum RolAdministrador
 {
     Administrador,
     Colaborador,
-    EditorDeServicios
+    EditorDeServicios,
+    ColaboradorYEditorDeServicios
 }
 
 public class UsuarioAdministrador : EntidadBase

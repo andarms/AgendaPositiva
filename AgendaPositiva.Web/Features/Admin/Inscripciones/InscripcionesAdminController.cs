@@ -15,7 +15,7 @@ using System.Text.Json;
 namespace AgendaPositiva.Web.Features.Admin.Inscripciones;
 
 [Route("admin/inscripciones")]
-[Authorize(Roles = "Administrador,Colaborador")]
+[Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
 public class InscripcionesAdminController : Controller
 {
     readonly AppDbContext store;
@@ -669,7 +669,9 @@ public class InscripcionesAdminController : Controller
             .Include(i => i.GrupoFamiliar)
             .Include(i => i.CategoriaInscripcion)
             .Include(i => i.Abonos)
-            .Where(i => i.EventoId == evento.Id);
+            .Where(i => i.EventoId == evento.Id)
+            // Excluir a quienes no van a asistir de la base de colaboradores
+            .Where(i => i.Estado != EstadoInscripcion.NoVaAsistir);
 
         if (!EsAdministrador)
         {

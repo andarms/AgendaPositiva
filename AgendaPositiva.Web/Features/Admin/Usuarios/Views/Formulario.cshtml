@@ -293,6 +293,10 @@
                             selected="@(Model.Rol == RolAdministrador.EditorDeServicios)">
                         Editor de Servicios — solo servicios
                     </option>
+                    <option value="@RolAdministrador.ColaboradorYEditorDeServicios"
+                            selected="@(Model.Rol == RolAdministrador.ColaboradorYEditorDeServicios)">
+                        Colaborador y Editor de Servicios — inscripciones + servicios
+                    </option>
                 </select>
             </div>
             <div class="form-group">

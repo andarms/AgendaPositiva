@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AgendaPositiva.Web.Features.Admin.Servicios;
 
 [Route("admin/servicios")]
-[Authorize(Roles = "Administrador,EditorDeServicios")]
+[Authorize(Roles = "Administrador,EditorDeServicios,ColaboradorYEditorDeServicios")]
 public class ServiciosAdminController : Controller
 {
     readonly AppDbContext store;
@@ -748,7 +748,15 @@ public class ServiciosAdminController : Controller
         {
             foreach (var g in s.Grupos.OrderBy(g => g.Nombre))
             {
-                if (g.Miembros.Count == 0)
+                // Excluir a quienes no van a asistir de la base de colaboradores
+                var miembros = g.Miembros
+                    .Where(m => m.Inscripcion.Estado != EstadoInscripcion.NoVaAsistir)
+                    .OrderBy(m => m.UbicacionServicio?.Nombre ?? "zzz")
+                    .ThenBy(m => m.HorarioServicio?.Descripcion ?? "zzz")
+                    .ThenBy(m => m.Rol)
+                    .ThenBy(m => m.Inscripcion.Persona.Nombres)
+                    .ToList();
+                if (miembros.Count == 0)
                 {
                     ws2.Cell(row2, 1).Value = s.Nombre;
                     ws2.Cell(row2, 4).Value = g.Nombre;
@@ -756,14 +764,14 @@ public class ServiciosAdminController : Controller
                 }
                 else
                 {
-                    foreach (var m in g.Miembros.OrderBy(m => m.UbicacionServicio?.Nombre ?? "zzz").ThenBy(m => m.HorarioServicio?.Descripcion ?? "zzz").ThenBy(m => m.Rol).ThenBy(m => m.Inscripcion.Persona.Nombres))
+                    foreach (var m in miembros)
                     {
                         ws2.Cell(row2, 1).Value = s.Nombre;
                         ws2.Cell(row2, 2).Value = m.HorarioServicio?.Descripcion ?? "—";
                         ws2.Cell(row2, 3).Value = m.UbicacionServicio?.Nombre ?? "—";
                         ws2.Cell(row2, 4).Value = g.Nombre;
                         ws2.Cell(row2, 5).Value = m.Inscripcion.Persona.NombreCompleto;
-                        ws2.Cell(row2, 6).Value = m.Rol.ToString();
+                        ws2.Cell(row2, 6).Value = m.Rol.NombreParaMostrar();
                         ws2.Cell(row2, 7).Value = m.Inscripcion.Persona.NumeroIdentificacion;
                         ws2.Cell(row2, 8).Value = m.Inscripcion.Persona.Telefono;
                         ws2.Cell(row2, 9).Value = m.Inscripcion.Departamento;

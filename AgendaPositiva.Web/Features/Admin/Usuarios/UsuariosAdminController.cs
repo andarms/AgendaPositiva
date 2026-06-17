@@ -49,6 +49,10 @@ public class UsuariosAdminController : Controller
         return View("~/Features/Admin/Usuarios/Views/Index.cshtml", usuarios);
     }
 
+    /// <summary>Roles que gestionan inscripciones por localidad/región (Colaborador y la variante combinada).</summary>
+    static bool EsRolColaborador(RolAdministrador rol) =>
+        rol is RolAdministrador.Colaborador or RolAdministrador.ColaboradorYEditorDeServicios;
+
     UsuarioFormViewModel CrearViewModel(UsuarioAdministrador? usuario = null)
     {
         var departamentosInfo = ubicacionService.Departamentos
@@ -130,7 +134,7 @@ public class UsuariosAdminController : Controller
         await store.SaveChangesAsync();
 
         // Guardar regiones asignadas (solo para colaboradores)
-        if (vm.Rol == RolAdministrador.Colaborador && vm.RegionesSeleccionadasIds.Count > 0)
+        if (EsRolColaborador(vm.Rol) && vm.RegionesSeleccionadasIds.Count > 0)
         {
             foreach (var regionId in vm.RegionesSeleccionadasIds)
             {
@@ -199,7 +203,7 @@ public class UsuariosAdminController : Controller
 
         // Actualizar regiones asignadas
         store.UsuarioRegiones.RemoveRange(usuario.UsuarioRegiones);
-        if (vm.Rol == RolAdministrador.Colaborador)
+        if (EsRolColaborador(vm.Rol))
         {
             foreach (var regionId in vm.RegionesSeleccionadasIds)
             {

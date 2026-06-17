@@ -294,7 +294,7 @@
                         <a href="/admin/servicios" class="@(path.StartsWith("/admin/servicios") ? "active" : "")">Servicios</a>
                         <a href="/admin/auditoria" class="@(path.StartsWith("/admin/auditoria") ? "active" : "")">Auditoría</a>
                     }
-                @if (User.IsInRole("EditorDeServicios"))
+                @if (User.IsInRole("EditorDeServicios") || User.IsInRole("ColaboradorYEditorDeServicios"))
                 {
                     <a href="/admin/servicios" class="@(path.StartsWith("/admin/servicios") ? "active" : "")">Servicios</a>
                     }
