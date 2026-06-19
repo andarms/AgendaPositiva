@@ -669,94 +669,101 @@ public class InscripcionesAdminController : Controller
             .Include(i => i.GrupoFamiliar)
             .Include(i => i.CategoriaInscripcion)
             .Include(i => i.Abonos)
-            .Where(i => i.EventoId == evento.Id)
-            // Excluir a quienes no van a asistir de la base de colaboradores
-            .Where(i => i.Estado != EstadoInscripcion.NoVaAsistir);
+            .Where(i => i.EventoId == evento.Id);
 
         if (!EsAdministrador)
         {
             query = FiltrarPorLocalidades(query);
         }
 
+        // Hoja principal: inscritos que sí asistirán.
         var inscripciones = query
+            .Where(i => i.Estado != EstadoInscripcion.NoVaAsistir)
+            .OrderBy(i => i.Departamento)
+            .ThenBy(i => i.Ciudad)
+            .ThenBy(i => i.GrupoFamiliarId)
+            .ToList();
+
+        // Hoja secundaria: inscritos marcados como "No va a asistir".
+        var noVaAsistir = query
+            .Where(i => i.Estado == EstadoInscripcion.NoVaAsistir)
             .OrderBy(i => i.Departamento)
             .ThenBy(i => i.Ciudad)
             .ThenBy(i => i.GrupoFamiliarId)
             .ToList();
 
         using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("Inscripciones");
 
-        // Headers
-        var headers = new[] { "#", "Nombres", "Apellidos", "Género",
-            "Tipo Identificación", "Número Identificación", "Edad",
-            "Teléfono", "Email", "Departamento", "Ciudad", "Estado", "Hospedaje",
-            "Grupo Familiar", "Servicios", "Necesidades Especiales",
-            "Alergia Alimentaria", "Descripción Alergia",
-            "Comunión Ancianos/Diácono/Diaconisa", "Servicio Alimentación",
-            "Participa FV KIDS", "Tipo de Sangre", "EPS",
-            "Fecha Registro", "Categoría", "Precio Categoría", "Total Abonado" };
-
-        for (int i = 0; i < headers.Length; i++)
-            ws.Cell(1, i + 1).Value = headers[i];
-
-        var headerRow = ws.Range(1, 1, 1, headers.Length);
-        headerRow.Style.Font.Bold = true;
-        headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#1a1a2e");
-        headerRow.Style.Font.FontColor = XLColor.White;
-
-
-        // Data
-        for (int i = 0; i < inscripciones.Count; i++)
+        void EscribirHoja(string nombreHoja, List<Inscripcion> filas)
         {
-            var ins = inscripciones[i];
-            string relacion = "";
-            if (ins.Relacion.HasValue)
+            var ws = workbook.Worksheets.Add(nombreHoja);
+
+            var headers = new[] { "#", "Nombres", "Apellidos", "Género",
+                "Tipo Identificación", "Número Identificación", "Edad",
+                "Teléfono", "Email", "Departamento", "Ciudad", "Estado", "Hospedaje",
+                "Grupo Familiar", "Servicios", "Necesidades Especiales",
+                "Alergia Alimentaria", "Descripción Alergia",
+                "Comunión Ancianos/Diácono/Diaconisa", "Servicio Alimentación",
+                "Participa FV KIDS", "Tipo de Sangre", "EPS",
+                "Fecha Registro", "Categoría", "Precio Categoría", "Total Abonado" };
+
+            for (int i = 0; i < headers.Length; i++)
+                ws.Cell(1, i + 1).Value = headers[i];
+
+            var headerRow = ws.Range(1, 1, 1, headers.Length);
+            headerRow.Style.Font.Bold = true;
+            headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#1a1a2e");
+            headerRow.Style.Font.FontColor = XLColor.White;
+
+            for (int i = 0; i < filas.Count; i++)
             {
-                relacion = $"{ins.Relacion.Value.Humanize()} de {ins.RelacionConPersona?.NombreCompleto}";
+                var ins = filas[i];
+                int row = i + 2;
+                ws.Cell(row, 1).Value = i + 1;
+                ws.Cell(row, 3).Value = ins.Persona.Apellidos;
+                ws.Cell(row, 2).Value = ins.Persona.Nombres;
+                ws.Cell(row, 4).Value = ins.Persona.Genero.Humanize();
+                ws.Cell(row, 5).Value = ins.Persona.TipoIdentificacion.Humanize();
+                ws.Cell(row, 6).Value = ins.Persona.NumeroIdentificacion;
+                ws.Cell(row, 7).Value = ins.Persona.Edad;
+                ws.Cell(row, 8).Value = ins.Persona.Telefono;
+                ws.Cell(row, 9).Value = ins.Persona.Email ?? "";
+                ws.Cell(row, 10).Value = ins.Departamento;
+                ws.Cell(row, 11).Value = ins.Ciudad;
+                var totalAbonado = ins.Abonos.Sum(a => a.Monto);
+                var precioCategoria = ins.CategoriaInscripcion?.Precio ?? 0;
+                var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
+                var textoPago = ins.Estado == EstadoInscripcion.NoVaAsistir ? "No va a asistir"
+                    : pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
+                ws.Cell(row, 12).Value = textoPago;
+                var estadoColor = ins.Estado == EstadoInscripcion.NoVaAsistir ? "#e74c3c"
+                    : pctPago >= 100 ? "#27ae60" : pctPago >= 50 ? "#6abf4b" : pctPago > 0 ? "#a3d977" : "#f39c12";
+                ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
+                ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
+                ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
+                ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "";
+                ws.Cell(row, 15).Value = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
+                ws.Cell(row, 16).Value = ins.NecesidadesEspeciales ?? "";
+                ws.Cell(row, 17).Value = ins.TieneAlergiaAlimentaria ? "Sí" : "No";
+                ws.Cell(row, 18).Value = ins.DescripcionAlergia ?? "";
+                ws.Cell(row, 19).Value = ins.ParticipaComunionAncianos ? "Sí" : "No";
+                ws.Cell(row, 20).Value = ins.RequiereAlimentacion ? "Sí" : "No";
+                ws.Cell(row, 21).Value = ins.PreguntasAdicionalesNino is not null ? (ins.PreguntasAdicionalesNino.ParticipaFvKids ? "Sí" : "No") : "";
+                ws.Cell(row, 22).Value = ins.PreguntasAdicionalesNino?.TipoSangre?.Descripcion() ?? "";
+                ws.Cell(row, 23).Value = ins.PreguntasAdicionalesNino?.Eps ?? "";
+                ws.Cell(row, 24).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
+                ws.Cell(row, 25).Value = ins.CategoriaInscripcion?.Nombre ?? "";
+                ws.Cell(row, 26).Value = precioCategoria;
+                ws.Cell(row, 26).Style.NumberFormat.Format = "$#,##0";
+                ws.Cell(row, 27).Value = totalAbonado;
+                ws.Cell(row, 27).Style.NumberFormat.Format = "$#,##0";
             }
-            int row = i + 2;
-            ws.Cell(row, 1).Value = i + 1;
-            ws.Cell(row, 3).Value = ins.Persona.Apellidos;
-            ws.Cell(row, 2).Value = ins.Persona.Nombres;
-            ws.Cell(row, 4).Value = ins.Persona.Genero.Humanize();
-            ws.Cell(row, 5).Value = ins.Persona.TipoIdentificacion.Humanize();
-            ws.Cell(row, 6).Value = ins.Persona.NumeroIdentificacion;
-            ws.Cell(row, 7).Value = ins.Persona.Edad;
-            ws.Cell(row, 8).Value = ins.Persona.Telefono;
-            ws.Cell(row, 9).Value = ins.Persona.Email ?? "";
-            ws.Cell(row, 10).Value = ins.Departamento;
-            ws.Cell(row, 11).Value = ins.Ciudad;
-            var totalAbonado = ins.Abonos.Sum(a => a.Monto);
-            var precioCategoria = ins.CategoriaInscripcion?.Precio ?? 0;
-            var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
-            var textoPago = ins.Estado == EstadoInscripcion.NoVaAsistir ? "No va a asistir"
-                : pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
-            ws.Cell(row, 12).Value = textoPago;
-            var estadoColor = ins.Estado == EstadoInscripcion.NoVaAsistir ? "#e74c3c"
-                : pctPago >= 100 ? "#27ae60" : pctPago >= 50 ? "#6abf4b" : pctPago > 0 ? "#a3d977" : "#f39c12";
-            ws.Cell(row, 12).Style.Font.FontColor = XLColor.White;
-            ws.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml(estadoColor);
-            ws.Cell(row, 13).Value = ins.RequiereHospedaje ? "Sí" : "No";
-            ws.Cell(row, 14).Value = ins.GrupoFamiliar?.Id.ToString() ?? "";
-            ws.Cell(row, 15).Value = string.Join(", ", ins.Servicios.Select(s => s.Descripcion()));
-            ws.Cell(row, 16).Value = ins.NecesidadesEspeciales ?? "";
-            ws.Cell(row, 17).Value = ins.TieneAlergiaAlimentaria ? "Sí" : "No";
-            ws.Cell(row, 18).Value = ins.DescripcionAlergia ?? "";
-            ws.Cell(row, 19).Value = ins.ParticipaComunionAncianos ? "Sí" : "No";
-            ws.Cell(row, 20).Value = ins.RequiereAlimentacion ? "Sí" : "No";
-            ws.Cell(row, 21).Value = ins.PreguntasAdicionalesNino is not null ? (ins.PreguntasAdicionalesNino.ParticipaFvKids ? "Sí" : "No") : "";
-            ws.Cell(row, 22).Value = ins.PreguntasAdicionalesNino?.TipoSangre?.Descripcion() ?? "";
-            ws.Cell(row, 23).Value = ins.PreguntasAdicionalesNino?.Eps ?? "";
-            ws.Cell(row, 24).Value = ins.FechaCreacion.ToString("dd/MM/yyyy HH:mm");
-            ws.Cell(row, 25).Value = ins.CategoriaInscripcion?.Nombre ?? "";
-            ws.Cell(row, 26).Value = precioCategoria;
-            ws.Cell(row, 26).Style.NumberFormat.Format = "$#,##0";
-            ws.Cell(row, 27).Value = totalAbonado;
-            ws.Cell(row, 27).Style.NumberFormat.Format = "$#,##0";
+
+            ws.Columns().AdjustToContents();
         }
 
-        ws.Columns().AdjustToContents();
+        EscribirHoja("Inscripciones", inscripciones);
+        EscribirHoja("No va a asistir", noVaAsistir);
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);

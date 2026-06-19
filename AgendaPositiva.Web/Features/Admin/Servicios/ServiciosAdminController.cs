@@ -585,12 +585,17 @@ public class ServiciosAdminController : Controller
 
     // ── Cambiar rol de miembro ─────────────────────────────────────
     [HttpPost("miembros/{id:int}/cambiar-rol")]
-    public async Task<IActionResult> CambiarRolMiembro(int id, RolMiembroGrupoServicio rol)
+    public async Task<IActionResult> CambiarRolMiembro(int id, [FromForm] string rol)
     {
         var miembro = await store.MiembrosGrupoServicio.FindAsync(id);
         if (miembro is null) return NotFound();
 
-        miembro.Rol = rol;
+        if (!RolMiembroGrupoServicioExtensions.TryParseFlexible(rol, out var nuevoRol))
+        {
+            return BadRequest("El rol seleccionado no es válido.");
+        }
+
+        miembro.Rol = nuevoRol;
         await store.SaveChangesAsync();
         return RedirectToAction(nameof(GrupoDetalle), new { id = miembro.GrupoServicioId });
     }

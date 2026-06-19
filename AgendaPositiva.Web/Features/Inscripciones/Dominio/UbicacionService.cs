@@ -6,6 +6,18 @@ public class UbicacionService
 {
     public const string Internacional = "Internacional";
     public const string Misioneros = "Misioneros";
+    static readonly List<string> MunicipiosInternacionales =
+    [
+        "México",
+        "Ecuador",
+        "Panamá",
+        "Perú",
+        "Venezuela",
+        "EE.UU",
+        "Bolivia",
+        "Brasil",
+        "Chile"
+    ];
 
     public List<DepartamentoInfo> Departamentos { get; }
     readonly JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
@@ -16,8 +28,8 @@ public class UbicacionService
         var json = File.ReadAllText(path);
         var datos = JsonSerializer.Deserialize<List<DepartamentoInfo>>(json, options) ?? [];
 
-        // Agregar opción especial "Internacional" sin ciudades
-        datos.Add(new DepartamentoInfo { Departamento = Internacional, Ciudades = [] });
+        // Agregar opción especial "Internacional" con municipios fijos
+        datos.Add(new DepartamentoInfo { Departamento = Internacional, Ciudades = [.. MunicipiosInternacionales] });
 
         // Agregar departamento "Misioneros" con ciudades CEPEV y PAC
         datos.Add(new DepartamentoInfo { Departamento = Misioneros, Ciudades = ["CEPEV", "PAC"] });

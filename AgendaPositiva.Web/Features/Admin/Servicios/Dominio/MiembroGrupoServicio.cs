@@ -33,6 +33,40 @@ public static class RolMiembroGrupoServicioExtensions
         var miembro = typeof(RolMiembroGrupoServicio).GetMember(rol.ToString()).FirstOrDefault();
         return miembro?.GetCustomAttribute<DisplayAttribute>()?.Name ?? rol.ToString();
     }
+
+    /// <summary>
+    /// Intenta parsear un rol desde nombre de enum, texto de Display o valor numérico.
+    /// </summary>
+    public static bool TryParseFlexible(string? value, out RolMiembroGrupoServicio rol)
+    {
+        rol = default;
+        if (string.IsNullOrWhiteSpace(value)) return false;
+
+        var input = value.Trim();
+
+        if (Enum.TryParse<RolMiembroGrupoServicio>(input, ignoreCase: true, out var byName))
+        {
+            rol = byName;
+            return true;
+        }
+
+        if (int.TryParse(input, out var numeric) && Enum.IsDefined(typeof(RolMiembroGrupoServicio), numeric))
+        {
+            rol = (RolMiembroGrupoServicio)numeric;
+            return true;
+        }
+
+        foreach (RolMiembroGrupoServicio candidate in Enum.GetValues(typeof(RolMiembroGrupoServicio)))
+        {
+            if (string.Equals(candidate.NombreParaMostrar(), input, StringComparison.OrdinalIgnoreCase))
+            {
+                rol = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 public class MiembroGrupoServicio : EntidadBase

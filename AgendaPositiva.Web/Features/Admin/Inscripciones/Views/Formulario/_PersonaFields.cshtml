@@ -102,11 +102,9 @@
 
     <div class="form-control" id="@id("Ciudad")_container">
         <label for="@id("Ciudad")">Ciudad: <span class="required">*</span></label>
-        <select id="@id("Ciudad")" name="@name("Ciudad")">
+        <select id="@id("Ciudad")" name="@name("Ciudad")" required>
             <option value="">-- Seleccione --</option>
         </select>
-        <input type="text" id="@id("Ciudad")_text" name="@name("Ciudad")" placeholder="Ej: Miami, Nueva York..."
-               style="display:none">
     </div>
 
     <div class="form-control form-grid__full">
@@ -232,36 +230,13 @@
                     (function () {
                         var depSelect = document.getElementById('@id("Departamento")');
                         var ciudadSelect = document.getElementById('@id("Ciudad")');
-                        var ciudadText = document.getElementById('@id("Ciudad")_text');
-                        var ciudadContainer = document.getElementById('@id("Ciudad")_container');
                         if (!depSelect || !ciudadSelect) return;
 
                         var ciudadDefault = '@Model.CiudadDefault';
-                        var internacional = '@AgendaPositiva.Web.Features.Inscripciones.Dominio.UbicacionService.Internacional';
-
-                        function actualizarVisibilidad(dep) {
-                            if (dep === internacional) {
-                                ciudadSelect.style.display = 'none';
-                                ciudadSelect.removeAttribute('required');
-                                ciudadSelect.removeAttribute('name');
-                                ciudadSelect.value = '';
-                                ciudadText.style.display = '';
-                                ciudadText.setAttribute('required', '');
-                                ciudadText.setAttribute('name', '@name("Ciudad")');
-                            } else {
-                                ciudadSelect.style.display = '';
-                                ciudadSelect.setAttribute('required', '');
-                                ciudadSelect.setAttribute('name', '@name("Ciudad")');
-                                ciudadText.style.display = 'none';
-                                ciudadText.removeAttribute('required');
-                                ciudadText.removeAttribute('name');
-                                ciudadText.value = '';
-                            }
-                        }
 
                         function cargarCiudades(departamento, ciudadSel) {
                             ciudadSelect.innerHTML = '<option value="">-- Seleccione --</option>';
-                            if (!departamento || departamento === internacional) return;
+                            if (!departamento) return;
                             fetch('/api/ubicacion/ciudades?departamento=' + encodeURIComponent(departamento))
                                 .then(function (r) { return r.json(); })
                                 .then(function (ciudades) {
@@ -276,15 +251,11 @@
                         }
 
                         // Inicializar
-                        actualizarVisibilidad(depSelect.value);
-                        if (depSelect.value === internacional) {
-                            ciudadText.value = ciudadDefault;
-                        } else if (depSelect.value) {
+                        if (depSelect.value) {
                             cargarCiudades(depSelect.value, ciudadDefault);
                         }
 
                         depSelect.addEventListener('change', function () {
-                            actualizarVisibilidad(this.value);
                             cargarCiudades(this.value, '');
                         });
 
