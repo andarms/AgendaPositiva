@@ -156,87 +156,88 @@
                         <option value="">— Sin horario —</option>
                         @foreach (var h in Model.Servicio.Horarios.OrderBy(h => h.FechaHoraInicio))
                         {
-                            <option value="@h.Id">@h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") - @h.FechaHoraFin.ToString("HH:mm"))</option>
-                        }
-                    </select>
-                </div>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="submit" class="btn btn--primary">Guardar</button>
-                    <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
-                </div>
-            </form>
+                            <option value="@h.Id">@h.Descripcion (@h.FechaHoraInicio.ToString("dd/MM HH:mm") -
+                                @h.FechaHoraFin.ToString("HH:mm"))</option>
+                            }
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button type="submit" class="btn btn--primary">Guardar</button>
+                        <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Modal para cambiar ubicación -->
-    <div id="modal-ubicacion"
-         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
-        <div class="card" style="padding:1.5rem;min-width:320px;">
-            <h3 style="margin-top:0;">Cambiar Ubicación</h3>
-            <form method="post" id="form-cambiar-ubicacion">
-                <div style="margin-bottom:1rem;">
-                    <label class="form-label">Ubicación</label>
-                    <select name="ubicacionServicioId" id="select-ubicacion" class="form-control">
-                        <option value="">— Sin ubicación —</option>
-                        @foreach (var u in Model.Servicio.Ubicaciones.OrderBy(u => u.Nombre))
-                        {
-                            <option value="@u.Id">@u.Nombre</option>
-                        }
-                    </select>
-                </div>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="submit" class="btn btn--primary">Guardar</button>
-                    <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
-                </div>
-            </form>
+        <!-- Modal para cambiar ubicación -->
+        <div id="modal-ubicacion"
+             style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+            <div class="card" style="padding:1.5rem;min-width:320px;">
+                <h3 style="margin-top:0;">Cambiar Ubicación</h3>
+                <form method="post" id="form-cambiar-ubicacion">
+                    <div style="margin-bottom:1rem;">
+                        <label class="form-label">Ubicación</label>
+                        <select name="ubicacionServicioId" id="select-ubicacion" class="form-control">
+                            <option value="">— Sin ubicación —</option>
+                            @foreach (var u in Model.Servicio.Ubicaciones.OrderBy(u => u.Nombre))
+                            {
+                                <option value="@u.Id">@u.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button type="submit" class="btn btn--primary">Guardar</button>
+                        <button type="button" class="btn btn--secondary" onclick="cerrarModales()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <script>
-        const modalRol = document.getElementById('modal-rol');
-        const modalHorario = document.getElementById('modal-horario');
-        const modalUbicacion = document.getElementById('modal-ubicacion');
-        const formCambiarRol = document.getElementById('form-cambiar-rol');
-        const formCambiarHorario = document.getElementById('form-cambiar-horario');
-        const formCambiarUbicacion = document.getElementById('form-cambiar-ubicacion');
-        const selectRol = document.getElementById('select-rol');
-        const selectHorario = document.getElementById('select-horario');
-        const selectUbicacion = document.getElementById('select-ubicacion');
+        <script>
+            const modalRol = document.getElementById('modal-rol');
+            const modalHorario = document.getElementById('modal-horario');
+            const modalUbicacion = document.getElementById('modal-ubicacion');
+            const formCambiarRol = document.getElementById('form-cambiar-rol');
+            const formCambiarHorario = document.getElementById('form-cambiar-horario');
+            const formCambiarUbicacion = document.getElementById('form-cambiar-ubicacion');
+            const selectRol = document.getElementById('select-rol');
+            const selectHorario = document.getElementById('select-horario');
+            const selectUbicacion = document.getElementById('select-ubicacion');
 
-        function mostrarEdicionRol(miembroId, rolActual) {
-            formCambiarRol.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-rol';
-            selectRol.value = rolActual;
-            modalRol.style.display = 'flex';
-        }
+            function mostrarEdicionRol(miembroId, rolActual) {
+                formCambiarRol.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-rol';
+                selectRol.value = rolActual;
+                modalRol.style.display = 'flex';
+            }
 
-        function mostrarEdicionHorario(miembroId, horarioActual) {
-            formCambiarHorario.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-horario';
-            selectHorario.value = horarioActual;
-            modalHorario.style.display = 'flex';
-        }
+            function mostrarEdicionHorario(miembroId, horarioActual) {
+                formCambiarHorario.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-horario';
+                selectHorario.value = horarioActual;
+                modalHorario.style.display = 'flex';
+            }
 
-        function mostrarEdicionUbicacion(miembroId, ubicacionActual) {
-            formCambiarUbicacion.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-ubicacion';
-            selectUbicacion.value = ubicacionActual;
-            modalUbicacion.style.display = 'flex';
-        }
+            function mostrarEdicionUbicacion(miembroId, ubicacionActual) {
+                formCambiarUbicacion.action = '/admin/servicios/miembros/' + miembroId + '/cambiar-ubicacion';
+                selectUbicacion.value = ubicacionActual;
+                modalUbicacion.style.display = 'flex';
+            }
 
-        function cerrarModales() {
-            modalRol.style.display = 'none';
-            modalHorario.style.display = 'none';
-            modalUbicacion.style.display = 'none';
-        }
+            function cerrarModales() {
+                modalRol.style.display = 'none';
+                modalHorario.style.display = 'none';
+                modalUbicacion.style.display = 'none';
+            }
 
-        modalRol.addEventListener('click', function (e) {
-            if (e.target === modalRol) cerrarModales();
-        });
-        modalHorario.addEventListener('click', function (e) {
-            if (e.target === modalHorario) cerrarModales();
-        });
-        modalUbicacion.addEventListener('click', function (e) {
-            if (e.target === modalUbicacion) cerrarModales();
-        });
-    </script>
+            modalRol.addEventListener('click', function (e) {
+                if (e.target === modalRol) cerrarModales();
+            });
+            modalHorario.addEventListener('click', function (e) {
+                if (e.target === modalHorario) cerrarModales();
+            });
+            modalUbicacion.addEventListener('click', function (e) {
+                if (e.target === modalUbicacion) cerrarModales();
+            });
+        </script>
 
 @functions {
     static string BadgeClass(RolMiembroGrupoServicio rol) => rol switch
