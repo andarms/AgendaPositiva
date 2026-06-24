@@ -1,0 +1,471 @@
+@using AgendaPositiva.Web.Features.Commons.Views;
+@using AgendaPositiva.Web.Features.Commons;
+@using AgendaPositiva.Web.Features.Inscripciones.Dominio;
+@using AgendaPositiva.Web.Features.Admin.Inscripciones.Views.ViewModels;
+@model DetalleViewModel
+@{
+    var ins = Model.Inscripcion;
+    var totalAbonado = ins.Abonos.Sum(a => a.Monto);
+    var precioCategoria = ins.CategoriaInscripcion?.Precio ?? 0;
+    var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
+}
+
+@section Styles {
+    <style>
+        .abonos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .abonos-header__info h1 {
+            font-size: 1.625rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .abonos-header__meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #6e6e73;
+            font-size: 0.8125rem;
+        }
+
+        .abonos-section-title {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .abonos-info-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .abonos-info-card h3 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 0.75rem;
+        }
+
+        .abonos-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: #86868b;
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar__fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .form-agregar-abono {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-agregar-abono h4 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+            margin-bottom: 1rem;
+        }
+
+        @@media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-wrapper {
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .admin-table thead {
+            background: #f5f5f5;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .admin-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            color: #1d1d1f;
+        }
+
+        .admin-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-date {
+            width: 150px;
+            color: #86868b;
+            font-size: 0.8125rem;
+        }
+
+        .form-control {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.375rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn--primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background: #0051D5;
+        }
+
+        .btn--secondary {
+            background: #e8e8ed;
+            color: #1d1d1f;
+        }
+
+        .btn--secondary:hover {
+            background: #d1d1d6;
+        }
+
+        .btn--danger {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .btn--danger:hover {
+            background: #ff1500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: #86868b;
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge--success {
+            background: #d1f3d8;
+            color: #107c10;
+        }
+
+        .badge--abono2 {
+            background: #fff4ce;
+            color: #9c6500;
+        }
+
+        .badge--abono1 {
+            background: #ffd9d5;
+            color: #c1291c;
+        }
+
+        .badge--warning {
+            background: #fce5e5;
+            color: #d1303b;
+        }
+    </style>
+}
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/inscripciones">Inscripciones</a>
+    <span class="breadcrumb__separator">/</span>
+    <span>Abonos</span>
+</nav>
+
+<div class="abonos-header">
+    <div class="abonos-header__info">
+        <h1>Gestión de Abonos</h1>
+        <div class="abonos-header__meta">
+            <span>@ins.Persona.NombreCompleto</span>
+            <span class="abonos-header__meta__separator">•</span>
+            <span>@ins.Persona.NumeroIdentificacion</span>
+            <span class="abonos-header__meta__separator">•</span>
+            <a href="/admin/inscripciones/@ins.Id" style="color: #007AFF; text-decoration: none;">Ver inscripción</a>
+        </div>
+    </div>
+</div>
+
+<!-- Información de Abonos -->
+@if (ins.CategoriaInscripcion != null)
+{
+    <div class="abonos-info-card">
+        <h3>Resumen de Pagos</h3>
+        <div class="abonos-stats">
+            <div class="stat-item">
+                <span class="stat-label">Precio de Inscripción</span>
+                <span class="stat-value">$@precioCategoria.ToString("N0")</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Abonado</span>
+                <span class="stat-value">$@totalAbonado.ToString("N0")</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Faltante</span>
+                <span class="stat-value">$@((precioCategoria - totalAbonado).ToString("N0"))</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Porcentaje</span>
+                <span class="stat-value">@(Math.Round(pctPago, 0))%</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+            <span class="badge @(pctPago >= 100 ? "badge--success" : pctPago >= 50 ? "badge--abono2" : pctPago > 0 ? "badge--abono1" : "badge--warning")">
+                @(pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({Math.Round(pctPago, 0)}%)" : "Pendiente")
+            </span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar__fill" style="width:@(Math.Min(pctPago, 100))%;@(pctPago >= 100 ? "background:#34c759;" : pctPago >= 50 ? "background:#ff9500;" : "background:#ff3b30;")"></div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="abonos-info-card" style="background: #fff9f0; border: 1px solid #ff9500;">
+        <h3 style="color: #9c6500; margin-bottom: 0.75rem;">⚠️ Categoría de inscripción requerida</h3>
+        <p style="color:#9c6500;font-size:0.875rem;margin-bottom:1rem;">Para agregar abonos, primero debes asignar una categoría de inscripción con su precio.</p>
+        
+        <form method="post" action="/admin/inscripciones/@ins.Id/asignar-categoria">
+            <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <label class="form-label">Seleccionar Categoría</label>
+                    <select name="categoriaInscripcionId" class="form-control" required>
+                        <option value="">— Selecciona una categoría —</option>
+                        @foreach (var cat in Model.CategoriasDisponibles)
+                        {
+                            <option value="@cat.Id">@cat.Nombre — $@cat.Precio.ToString("N0")</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn--primary">Asignar Categoría</button>
+            </div>
+        </form>
+    </div>
+}
+
+<!-- Formulario para agregar abono (solo si hay categoría) -->
+@if (ins.CategoriaInscripcion != null)
+{
+    @if (TempData["ErrorAbono"] is not null)
+    {
+        <div style="background: #fef5f5; border: 1px solid #ff3b30; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #c1291c; font-size: 0.875rem;">
+            <strong>Error:</strong> @TempData["ErrorAbono"]
+        </div>
+    }
+    <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono" class="form-agregar-abono">
+        <h4>➕ Agregar Nuevo Abono</h4>
+        <div class="form-grid">
+            <div>
+                <label class="form-label">Monto ($)</label>
+                <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+" placeholder="0"
+                       required class="form-control"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+            </div>
+        <div>
+            <label class="form-label">Observaciones</label>
+            <input type="text" name="observaciones" class="form-control" placeholder="Ej: Efectivo, Transferencia..." />
+        </div>
+        <div>
+            <button type="submit" class="btn btn--primary" style="width: 100%;">Registrar Abono</button>
+        </div>
+    </div>
+    </form>
+}
+
+<!-- Lista de abonos existentes (solo si hay categoría) -->
+@if (ins.CategoriaInscripcion != null)
+{
+    @if (ins.Abonos.Count > 0)
+    {
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Observaciones</th>
+                    <th>Registrado por</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var abono in ins.Abonos.OrderByDescending(a => a.FechaCreacion))
+                {
+                    <tr id="abono-row-@abono.Id">
+                        <td class="col-date">@abono.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>$@abono.Monto.ToString("N0")</td>
+                        <td>@(abono.Observaciones ?? "—")</td>
+                        <td>@abono.RegistradoPorUsuario</td>
+                        <td>
+                            <div style="display:flex;gap:0.25rem;justify-content:flex-end;">
+                                <button type="button" class="btn btn--secondary"
+                                        style="font-size:0.75rem;padding:0.2rem 0.5rem;"
+                                        onclick="document.getElementById('abono-edit-@abono.Id').style.display='table-row'; this.closest('tr').style.display='none';">
+                                    ✏️
+                                </button>
+                                <form method="post" action="/admin/inscripciones/@ins.Id/eliminar-abono/@abono.Id"
+                                      style="margin:0;"
+                                      onsubmit="return confirm('¿Eliminar este abono de $@abono.Monto.ToString("N0")?');">
+                                    <button type="submit" class="btn btn--danger"
+                                            style="font-size:0.75rem;padding:0.2rem 0.5rem;">
+                                        🗑
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="abono-edit-@abono.Id" style="display:none;">
+                        <td colspan="5">
+                            <form method="post" action="/admin/inscripciones/@ins.Id/editar-abono/@abono.Id"
+                                  style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;padding:0.75rem 1rem;">
+                                <div>
+                                    <label class="form-label">Monto</label>
+                                    <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
+                                           title="Solo se permiten números" required style="width:140px;"
+                                           value="@abono.Monto.ToString("0")"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
+                                </div>
+                                <div style="flex:1;min-width:150px;">
+                                    <label class="form-label">Observaciones</label>
+                                    <input type="text" name="observaciones" class="form-control"
+                                           value="@(abono.Observaciones ?? "")" placeholder="Opcional" />
+                                </div>
+                                <button type="submit" class="btn btn--primary" style="font-size:0.8125rem;">Guardar</button>
+                                <button type="button" class="btn btn--secondary" style="font-size:0.8125rem;"
+                                        onclick="document.getElementById('abono-row-@abono.Id').style.display=''; this.closest('tr').style.display='none';">Cancelar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text"><strong>Sin abonos registrados</strong></div>
+        <div class="empty-state-text" style="color: #c5c5ca;">Agrega el primer abono usando el formulario arriba</div>
+    </div>
+    }
+}

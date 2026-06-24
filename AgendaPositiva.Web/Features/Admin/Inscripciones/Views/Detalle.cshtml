@@ -327,7 +327,10 @@
 
                 @* ── Estado de pago ── *@
                 <div class="card" style="margin-top: 1.5rem;">
-                    <div class="detail-section-title">Estado de pago</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="detail-section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">Estado de pago</div>
+                        <a href="/admin/inscripciones/@ins.Id/abonos" style="font-size: 0.8125rem; color: #007AFF; text-decoration: none; font-weight: 500;">Gestionar abonos →</a>
+                    </div>
                     @if (ins.CategoriaInscripcion is not null)
                     {
                         <div style="display:flex;gap:2rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
@@ -382,7 +385,9 @@
                                             <td class="col-date">@abono.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
                                             <td>$@abono.Monto.ToString("N0")</td>
                                             <td>@(abono.Observaciones ?? "—")</td>
-                                            <td>@abono.RegistradoPorUsuario</td>
+                                            <td>
+                                                @abono.RegistradoPorUsuario
+                                            </td>
                                             @if (User.IsInRole("Administrador"))
                                             {
                                                 <td>
@@ -527,7 +532,31 @@
                     </div>
                 }
 
-                @* ── Acciones admin ── *@
+                @* ── Registrar abono ── *@
+                @if (User.IsInRole("Administrador"))
+                {
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="detail-section-title">Registrar abono</div>
+                        <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono"
+                              onkeydown="if(event.key==='Enter'){event.preventDefault();}">
+                            <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+                                <div>
+                                    <label class="form-label">Monto</label>
+                                    <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
+                                           title="Solo se permiten números" required style="width:140px;"
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
+                                </div>
+                                <div style="flex:1;min-width:150px;">
+                                    <label class="form-label">Observaciones</label>
+                                    <input type="text" name="observaciones" class="form-control" placeholder="Opcional" />
+                                </div>
+                                <button type="submit" class="btn btn--primary">Abonar</button>
+                            </div>
+                        </form>
+                    </div>
+                }
+
+                @* ── Acciones admin (solo administradores) ── *@
                 @if (User.IsInRole("Administrador"))
                 {
                     <div class="admin-actions-grid">
@@ -544,25 +573,6 @@
                                     }
                                 </select>
                                 <button type="submit" class="btn btn--primary">Guardar</button>
-                            </form>
-                        </div>
-                        <div class="admin-action-card">
-                            <h3>Registrar abono</h3>
-                            <form method="post" action="/admin/inscripciones/@ins.Id/agregar-abono"
-                                  onkeydown="if(event.key==='Enter'){event.preventDefault();}">
-                                <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
-                                    <div>
-                                        <label class="form-label">Monto</label>
-                                        <input type="text" name="monto" inputmode="numeric" pattern="[0-9]+"
-                                               title="Solo se permiten números" required style="width:140px;"
-                                               oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control" />
-                                    </div>
-                                    <div style="flex:1;min-width:150px;">
-                                        <label class="form-label">Observaciones</label>
-                                        <input type="text" name="observaciones" class="form-control" placeholder="Opcional" />
-                                    </div>
-                                    <button type="submit" class="btn btn--primary">Abonar</button>
-                                </div>
                             </form>
                         </div>
                         <div class="admin-action-card">

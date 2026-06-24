@@ -285,6 +285,31 @@ public class InscripcionesAdminController : Controller
         });
     }
 
+    [HttpGet("{id:int}/abonos")]
+    [Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
+    public async Task<IActionResult> Abonos(int id)
+    {
+        var inscripcion = store.Inscripciones
+            .Include(i => i.Persona)
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
+            .FirstOrDefault(i => i.Id == id && i.EventoId == evento.Id);
+
+        if (inscripcion is null) return NotFound();
+
+        var categorias = await store.CategoriasInscripcion
+            .Where(c => c.Activa)
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+
+        return View("~/Features/Admin/Inscripciones/Views/Abonos.cshtml", new Views.ViewModels.DetalleViewModel
+        {
+            Inscripcion = inscripcion,
+            Auditoria = [],
+            CategoriasDisponibles = categorias
+        });
+    }
+
     [HttpPost("{id:int}/cambiar-estado")]
     [Authorize(Roles = "Administrador")]
     public IActionResult CambiarEstado(int id, [FromForm] EstadoInscripcion nuevoEstado)
@@ -545,7 +570,7 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/asignar-categoria")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
     public async Task<IActionResult> AsignarCategoria(int id, [FromForm] int? categoriaInscripcionId)
     {
         var inscripcion = await store.Inscripciones
@@ -577,14 +602,35 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/agregar-abono")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
     public async Task<IActionResult> AgregarAbono(int id, [FromForm] decimal monto, [FromForm] string? observaciones)
     {
-        if (monto <= 0) return BadRequest("El monto debe ser mayor a 0.");
+        if (monto <= 0)
+        {
+            TempData["ErrorAbono"] = "El monto debe ser mayor a 0.";
+            return RedirectToAction(nameof(Abonos), new { id });
+        }
 
         var inscripcion = await store.Inscripciones
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
             .FirstOrDefaultAsync(i => i.Id == id && i.EventoId == evento.Id);
         if (inscripcion is null) return NotFound();
+
+        // Validar que tenga categoría asignada
+        if (inscripcion.CategoriaInscripcion == null)
+        {
+            TempData["ErrorAbono"] = "Debes asignar una categoría a esta inscripción antes de agregar abonos.";
+            return RedirectToAction(nameof(Abonos), new { id });
+        }
+
+        // Validar que el monto no supere el precio de la categoría
+        var totalAbonado = inscripcion.Abonos.Sum(a => a.Monto) + monto;
+        if (totalAbonado > inscripcion.CategoriaInscripcion.Precio)
+        {
+            TempData["ErrorAbono"] = $"El monto total no puede superar ${inscripcion.CategoriaInscripcion.Precio:N0} .";
+            return RedirectToAction(nameof(Abonos), new { id });
+        }
 
         var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
 
@@ -609,14 +655,38 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/editar-abono/{abonoId:int}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
     public async Task<IActionResult> EditarAbono(int id, int abonoId, [FromForm] decimal monto, [FromForm] string? observaciones)
     {
-        if (monto <= 0) return BadRequest("El monto debe ser mayor a 0.");
+        if (monto <= 0)
+        {
+            TempData["ErrorAbono"] = "El monto debe ser mayor a 0.";
+            return RedirectToAction(nameof(Abonos), new { id });
+        }
 
         var abono = await store.AbonosInscripcion
             .FirstOrDefaultAsync(a => a.Id == abonoId && a.InscripcionId == id);
         if (abono is null) return NotFound();
+
+        // Validar que el monto no supere el precio de la categoría
+        var inscripcion = await store.Inscripciones
+            .Include(i => i.CategoriaInscripcion)
+            .Include(i => i.Abonos)
+            .FirstOrDefaultAsync(i => i.Id == id);
+        if (inscripcion?.CategoriaInscripcion != null)
+        {
+            var totalAbonado = inscripcion.Abonos.Where(a => a.Id != abonoId).Sum(a => a.Monto) + monto;
+            if (totalAbonado > inscripcion.CategoriaInscripcion.Precio)
+            {
+                TempData["ErrorAbono"] = $"El monto total no puede superar ${inscripcion.CategoriaInscripcion.Precio:N0} .";
+                return RedirectToAction(nameof(Abonos), new { id });
+            }
+        }
+        else
+        {
+            TempData["ErrorAbono"] = "Esta inscripción no tiene categoría asignada.";
+            return RedirectToAction(nameof(Abonos), new { id });
+        }
 
         var usuario = User.FindFirstValue(ClaimTypes.Name) ?? "Desconocido";
         var montoAnterior = abono.Monto;
@@ -638,7 +708,7 @@ public class InscripcionesAdminController : Controller
     }
 
     [HttpPost("{id:int}/eliminar-abono/{abonoId:int}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Colaborador,ColaboradorYEditorDeServicios")]
     public async Task<IActionResult> EliminarAbono(int id, int abonoId)
     {
         var abono = await store.AbonosInscripcion
