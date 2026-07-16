@@ -20,10 +20,14 @@
     <div class="card" style="margin-bottom:1.5rem;">
         <div style="padding:1.25rem;">
             <!-- Filtros -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
                 <div>
                     <label class="form-label" style="font-size:0.85rem;">Buscar por nombre</label>
                     <input type="text" id="filtro-nombre" class="form-control" placeholder="Nombre o apellido..." />
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;">Buscar por documento</label>
+                    <input type="text" id="filtro-documento" class="form-control" placeholder="Número de documento..." />
                 </div>
                 <div>
                     <label class="form-label" style="font-size:0.85rem;">Filtrar por servicio de inscripción</label>
@@ -50,6 +54,7 @@
                             <th style="width:40px;"></th>
                             <th>Nombre</th>
                             <th>Documento</th>
+                            <th>Edad</th>
                             <th>Localidad</th>
                             <th>Servicio Inscripción</th>
                         </tr>
@@ -62,6 +67,7 @@
                             var yaEnGrupo = Model.IdsYaEnGrupo.Contains(ins.Id);
                             Model.GrupoDeOtros.TryGetValue(ins.Id, out var otroGrupo);
                             <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()"
+                                data-documento="@ins.Persona.NumeroIdentificacion"
                                 data-servicios="@serviciosData"
                                 data-otro-grupo="@(otroGrupo ?? "")"
                                 data-nombre-completo="@ins.Persona.NombreCompleto"
@@ -82,6 +88,7 @@
                                     }
                                 </td>
                                 <td>@ins.Persona.NumeroIdentificacion</td>
+                                <td>@((int)ins.Persona.Edad)</td>
                                 <td>@ins.Localidad</td>
                                 <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
                             </tr>
@@ -100,20 +107,24 @@
 
 <script>
     const filtroNombre = document.getElementById('filtro-nombre');
+    const filtroDocumento = document.getElementById('filtro-documento');
     const filtroServicio = document.getElementById('filtro-servicio');
     const filas = document.querySelectorAll('.fila-inscripcion');
 
     function filtrar() {
         const nombre = filtroNombre.value.toLowerCase();
+        const documento = filtroDocumento.value.toLowerCase();
         const servicio = filtroServicio.value;
         filas.forEach(fila => {
             const matchNombre = !nombre || fila.dataset.nombre.includes(nombre);
+            const matchDocumento = !documento || fila.dataset.documento.toLowerCase().includes(documento);
             const matchServicio = !servicio || fila.dataset.servicios.split(',').includes(servicio);
-            fila.style.display = (matchNombre && matchServicio) ? '' : 'none';
+            fila.style.display = (matchNombre && matchDocumento && matchServicio) ? '' : 'none';
         });
     }
 
     filtroNombre.addEventListener('input', filtrar);
+    filtroDocumento.addEventListener('input', filtrar);
     filtroServicio.addEventListener('change', filtrar);
 
     function actualizarConteo() {
