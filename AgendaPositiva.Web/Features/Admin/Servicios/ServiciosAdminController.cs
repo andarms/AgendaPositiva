@@ -740,7 +740,7 @@ public class ServiciosAdminController : Controller
 
         // Hoja 2: Grupos de servicio con miembros
         var ws2 = workbook.Worksheets.Add("Grupos de Servicio");
-        var headers2 = new[] { "Servicio", "Horario", "Ubicación", "Grupo", "Miembro", "Rol", "Documento", "Teléfono", "Departamento", "Ciudad", "Servicio Inscripción" };
+        var headers2 = new[] { "Servicio", "Horario", "Ubicación", "Grupo", "Miembro", "Edad", "Rol", "Documento", "Teléfono", "Departamento", "Ciudad", "Servicio Inscripción" };
         for (int i = 0; i < headers2.Length; i++)
         {
             ws2.Cell(1, i + 1).Value = headers2[i];
@@ -776,12 +776,13 @@ public class ServiciosAdminController : Controller
                         ws2.Cell(row2, 3).Value = m.UbicacionServicio?.Nombre ?? "—";
                         ws2.Cell(row2, 4).Value = g.Nombre;
                         ws2.Cell(row2, 5).Value = m.Inscripcion.Persona.NombreCompleto;
-                        ws2.Cell(row2, 6).Value = m.Rol.NombreParaMostrar();
-                        ws2.Cell(row2, 7).Value = m.Inscripcion.Persona.NumeroIdentificacion;
-                        ws2.Cell(row2, 8).Value = m.Inscripcion.Persona.Telefono;
-                        ws2.Cell(row2, 9).Value = m.Inscripcion.Departamento;
-                        ws2.Cell(row2, 10).Value = m.Inscripcion.Ciudad;
-                        ws2.Cell(row2, 11).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
+                        ws2.Cell(row2, 6).Value = (int)m.Inscripcion.Persona.Edad;
+                        ws2.Cell(row2, 7).Value = m.Rol.NombreParaMostrar();
+                        ws2.Cell(row2, 8).Value = m.Inscripcion.Persona.NumeroIdentificacion;
+                        ws2.Cell(row2, 9).Value = m.Inscripcion.Persona.Telefono;
+                        ws2.Cell(row2, 10).Value = m.Inscripcion.Departamento;
+                        ws2.Cell(row2, 11).Value = m.Inscripcion.Ciudad;
+                        ws2.Cell(row2, 12).Value = string.Join(", ", m.Inscripcion.Servicios.Select(sv => sv.Descripcion()));
                         row2++;
                     }
                 }
