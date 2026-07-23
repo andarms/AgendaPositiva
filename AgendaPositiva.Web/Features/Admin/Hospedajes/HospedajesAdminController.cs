@@ -241,10 +241,15 @@ public class HospedajesAdminController : Controller
         if (evento is null) return View("~/Features/Admin/Hospedajes/Views/Asignaciones.cshtml",
             new AsignacionesViewModel());
 
-        // Base query: inscritos que requieren hospedaje
+        // Base query
         var query = store.Inscripciones
             .Include(i => i.Persona)
-            .Where(i => i.EventoId == evento.Id && i.RequiereHospedaje && i.Estado != EstadoInscripcion.NoVaAsistir);
+            .Where(i => i.EventoId == evento.Id && i.Estado != EstadoInscripcion.NoVaAsistir);
+
+        if (tab == "no-requiere")
+            query = query.Where(i => !i.RequiereHospedaje);
+        else
+            query = query.Where(i => i.RequiereHospedaje);
 
         // Filtros aditivos
         if (!string.IsNullOrWhiteSpace(nombre))
@@ -266,26 +271,40 @@ public class HospedajesAdminController : Controller
         else if (tab == "asignados")
             query = query.Where(i => idsAsignados.Contains(i.Id));
 
-        // Orden: necesidades especiales primero, luego nombre
-        var ordenada = query
-            .OrderByDescending(i => i.NecesidadesEspeciales != null && i.NecesidadesEspeciales != "")
-            .ThenBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos);
-
         // Paginación
         var allowedSizes = new[] { 10, 50, 100 };
         if (!allowedSizes.Contains(porPagina)) porPagina = 50;
-        var total = await ordenada.CountAsync();
+        var total = await query.CountAsync();
         var totalPaginas = (int)Math.Ceiling(total / (double)porPagina);
         if (pagina < 1) pagina = 1;
         if (pagina > totalPaginas && totalPaginas > 0) pagina = totalPaginas;
 
-        var inscripciones = await ordenada.Skip((pagina - 1) * porPagina).Take(porPagina).ToListAsync();
+        var todasInscripciones = await query.ToListAsync();
 
-        var asignaciones = await store.AsignacionesHospedaje
+        var todasAsignaciones = await store.AsignacionesHospedaje
             .Include(a => a.Casa)
             .Include(a => a.HabitacionHotel).ThenInclude(h => h!.Hotel)
-            .Where(a => inscripciones.Select(i => i.Id).Contains(a.InscripcionId))
+            .Where(a => todasInscripciones.Select(i => i.Id).Contains(a.InscripcionId))
             .ToDictionaryAsync(a => a.InscripcionId);
+
+        // Orden: sin asignar primero, luego agrupados por asignación (casa/hotel)
+        var inscripcionesOrdenadas = todasInscripciones
+            .OrderBy(i => todasAsignaciones.ContainsKey(i.Id) ? 1 : 0)
+            .ThenBy(i =>
+            {
+                if (!todasAsignaciones.TryGetValue(i.Id, out var a)) return "";
+                if (a.Casa is not null) return $"casa:{a.CasaId}";
+                if (a.HabitacionHotel is not null) return $"hotel:{a.HabitacionHotel.HotelId}:{a.HabitacionHotelId}";
+                return "";
+            })
+            .ThenBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos)
+            .ToList();
+
+        var inscripciones = inscripcionesOrdenadas.Skip((pagina - 1) * porPagina).Take(porPagina).ToList();
+
+        var asignaciones = todasAsignaciones
+            .Where(kv => inscripciones.Any(i => i.Id == kv.Key))
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
 
         var casas = await store.Casas.Where(c => c.Activa).Include(c => c.Asignaciones).ToListAsync();
         var hoteles = await store.Hoteles.Where(h => h.Activo)
@@ -463,6 +482,32 @@ public class HospedajesAdminController : Controller
             row++;
         }
         ws.Columns().AdjustToContents();
+
+        // Hoja: No requiere hospedaje
+        var noRequieren = await store.Inscripciones
+            .Include(i => i.Persona)
+            .Where(i => i.EventoId == evento.Id && !i.RequiereHospedaje && i.Estado != EstadoInscripcion.NoVaAsistir)
+            .OrderBy(i => i.Persona.Nombres).ThenBy(i => i.Persona.Apellidos)
+            .ToListAsync();
+
+        var ws2 = wb.Worksheets.Add("No requiere hospedaje");
+        var headers2 = new[] { "Nombre", "Documento", "Edad", "Género", "Teléfono" };
+        for (int c = 0; c < headers2.Length; c++)
+            ws2.Cell(1, c + 1).Value = headers2[c];
+        ws2.Row(1).Style.Font.Bold = true;
+
+        int row2 = 2;
+        foreach (var insc in noRequieren)
+        {
+            var p = insc.Persona;
+            ws2.Cell(row2, 1).Value = p.NombreCompleto;
+            ws2.Cell(row2, 2).Value = p.NumeroIdentificacion;
+            ws2.Cell(row2, 3).Value = (int)p.Edad;
+            ws2.Cell(row2, 4).Value = p.Genero.ToString();
+            ws2.Cell(row2, 5).Value = p.Telefono;
+            row2++;
+        }
+        ws2.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
         wb.SaveAs(ms);
