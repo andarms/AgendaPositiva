@@ -293,6 +293,7 @@
                            class="@(path.StartsWith("/admin/categorias") ? "active" : "")">Categorías</a>
                         <a href="/admin/servicios" class="@(path.StartsWith("/admin/servicios") ? "active" : "")">Servicios</a>
                         <a href="/admin/auditoria" class="@(path.StartsWith("/admin/auditoria") ? "active" : "")">Auditoría</a>
+                        <a href="/admin/reportes" class="@(path.StartsWith("/admin/reportes") ? "active" : "")">Reportes</a>
                     }
                 @if (User.IsInRole("EditorDeServicios") || User.IsInRole("ColaboradorYEditorDeServicios"))
                 {
