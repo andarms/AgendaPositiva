@@ -14,7 +14,8 @@
 
 @if (TempData["Error"] is string error)
 {
-    <div style="background:#FED7D7;color:#9B2C2C;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;border:1px solid #FEB2B2;">
+    <div
+        style="background:#FED7D7;color:#9B2C2C;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;border:1px solid #FEB2B2;">
         <strong>Error:</strong> @error
     </div>
 }
@@ -23,7 +24,8 @@
     <a href="/admin/hospedajes/asignaciones/exportar" class="btn btn--secondary btn--lg">Exportar Excel</a>
 </div>
 
-<form method="get" action="/admin/hospedajes/asignaciones" class="card filter-form" style="margin-bottom:1rem;max-width:100%;">
+<form method="get" action="/admin/hospedajes/asignaciones" class="card filter-form"
+      style="margin-bottom:1rem;max-width:100%;">
     <h4 style="margin-bottom: 14px;">Búsqueda</h4>
     @if (Model.Tab != "todos")
     {
@@ -70,7 +72,8 @@
         </div>
         <div class="filter-actions">
             <button type="submit" class="btn btn--primary">Buscar</button>
-            <a href="/admin/hospedajes/asignaciones@(Model.Tab != "todos" ? $"?tab={Model.Tab}" : "")" class="btn btn--secondary">Limpiar</a>
+            <a href="/admin/hospedajes/asignaciones@(Model.Tab != "todos" ? $"?tab={Model.Tab}" : "")"
+               class="btn btn--secondary">Limpiar</a>
         </div>
     </div>
 </form>
@@ -81,11 +84,15 @@
     {
         var qs = new Dictionary<string, string?>
         {
-            ["nombre"] = Model.Nombre, ["documento"] = Model.Documento,
-            ["genero"] = Model.Genero, ["departamento"] = Model.Departamento,
-            ["ciudad"] = Model.Ciudad, ["tab"] = t == "todos" ? null : t
+            ["nombre"] = Model.Nombre,
+            ["documento"] = Model.Documento,
+            ["genero"] = Model.Genero,
+            ["departamento"] = Model.Departamento,
+            ["ciudad"] = Model.Ciudad,
+            ["tab"] = t == "todos" ? null : t
         };
-        var query = string.Join("&", qs.Where(kv => !string.IsNullOrEmpty(kv.Value)).Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value!)}"));
+        var query = string.Join("&", qs.Where(kv => !string.IsNullOrEmpty(kv.Value)).Select(kv =>
+$"{kv.Key}={Uri.EscapeDataString(kv.Value!)}"));
         return "/admin/hospedajes/asignaciones" + (query.Length > 0 ? "?" + query : "");
     }
 }
@@ -134,156 +141,159 @@ else
                         <td>
                             @if (insc.GrupoFamiliarId is not null)
                             {
-                                <a href="/admin/inscripciones/grupo/@insc.GrupoFamiliarId" target="_blank">Grupo @insc.GrupoFamiliarId</a>
-                            }
-                        </td>
-                        <td>
-                            @if (asig is not null)
-                            {
-                                if (asig.Casa is not null)
-                                {
-                                    <span>@asig.Casa.Nombre (@asig.TipoCupoCasa)</span>
+                                <a href="/admin/inscripciones/grupo/@insc.GrupoFamiliarId" target="_blank">Grupo
+                                    @insc.GrupoFamiliarId</a>
                                 }
-                                else if (asig.HabitacionHotel is not null)
+                            </td>
+                            <td>
+                                @if (asig is not null)
                                 {
-                                    <span>@asig.HabitacionHotel.Hotel.Nombre — @asig.HabitacionHotel.Nombre</span>
+                                    if (asig.Casa is not null)
+                                    {
+                                        <span>@asig.Casa.Nombre (@asig.TipoCupoCasa)</span>
+                                    }
+                                    else if (asig.HabitacionHotel is not null)
+                                    {
+                                        <span>@asig.HabitacionHotel.Hotel.Nombre — @asig.HabitacionHotel.Nombre</span>
+                                    }
+                                    <form method="post" action="/admin/hospedajes/asignaciones/@asig.Id/desasignar"
+                                          style="display:inline;margin-left:0.5rem;">
+                                        <button type="submit" class="btn btn--danger"
+                                                style="font-size:0.75rem;padding:0.2rem 0.5rem;">Quitar</button>
+                                    </form>
                                 }
-                                <form method="post" action="/admin/hospedajes/asignaciones/@asig.Id/desasignar"
-                                      style="display:inline;margin-left:0.5rem;">
-                                    <button type="submit" class="btn btn--danger"
-                                            style="font-size:0.75rem;padding:0.2rem 0.5rem;">Quitar</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <span style="color:#A0AEC0;">Sin asignar</span>
-                            }
-                        </td>
-                    </tr>
-                    <tr style="@(tieneNecesidades ? "background:#FFFBEB;" : "")">
-                        <td colspan="7" style="padding-top:0;border-top:none;">
-                            @if (tieneNecesidades)
-                            {
-                                <div style="margin-bottom:0.4rem;">
-                                    <strong>Necesidad especial:</strong> @insc.NecesidadesEspeciales
-                                </div>
-                            }
-                            <form method="post" action="/admin/hospedajes/asignaciones/asignar"
-                                  style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                                <input type="hidden" name="inscripcionId" value="@insc.Id" />
-                                <select name="destino" class="form-control" style="font-size:0.8rem;max-width:320px;"
-                                        onchange="actualizarDestino(this)">
-                                    <option value="">— Seleccionar —</option>
-                                    <optgroup label="Casas">
-                                        @foreach (var c in Model.Casas)
-                                        {
-                                            var solteros = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltero);
-                                            var solteras = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltera);
-                                            var parejas = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Pareja);
-                                            <option value="casa:@c.Id" data-tipo="casa">
-                                                @c.Nombre (S:@(c.CuposSolteros - solteros) | M:@(c.CuposSolteras - solteras) | P:@(c.CuposParejas * 2 - parejas))
-                                            </option>
-                                        }
-                                    </optgroup>
-                                    <optgroup label="Hoteles">
-                                        @foreach (var h in Model.Hoteles)
-                                        {
-                                            foreach (var hab in h.Habitaciones)
+                                else
+                                {
+                                    <span style="color:#A0AEC0;">Sin asignar</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr style="@(tieneNecesidades ? "background:#FFFBEB;" : "")">
+                            <td colspan="7" style="padding-top:0;border-top:none;">
+                                @if (tieneNecesidades)
+                                {
+                                    <div style="margin-bottom:0.4rem;">
+                                        <strong>Necesidad especial:</strong> @insc.NecesidadesEspeciales
+                                    </div>
+                                }
+                                <form method="post" action="/admin/hospedajes/asignaciones/asignar"
+                                      style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                                    <input type="hidden" name="inscripcionId" value="@insc.Id" />
+                                    <select name="destino" class="form-control" style="font-size:0.8rem;max-width:320px;"
+                                            onchange="actualizarDestino(this)">
+                                        <option value="">— Seleccionar —</option>
+                                        <optgroup label="Casas">
+                                            @foreach (var c in Model.Casas)
                                             {
-                                                var libre = hab.Capacidad - hab.Asignaciones.Count;
-                                                <option value="habitacion:@hab.Id" data-tipo="hotel" @(libre <= 0 ? "disabled" : "")>
-                                                    @h.Nombre — @hab.Nombre (@libre libres)
+                                                var solteros = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltero);
+                                                var solteras = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltera);
+                                                var parejas = c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Pareja);
+                                                <option value="casa:@c.Id" data-tipo="casa">
+                                                    @c.Nombre (S:@(c.CuposSolteros - solteros) | M:@(c.CuposSolteras - solteras) |
+                                                    P:@(c.CuposParejas * 2 - parejas))
                                                 </option>
                                             }
-                                        }
-                                    </optgroup>
-                                </select>
-                                <select name="tipoCupo" class="form-control tipo-cupo-select"
-                                        style="font-size:0.8rem;display:none;max-width:150px;">
-                                    <option value="">— Tipo cupo —</option>
-                                    <option value="Soltero">Soltero</option>
-                                    <option value="Soltera">Soltera</option>
-                                    <option value="Pareja">Pareja</option>
-                                </select>
-                                <input type="hidden" name="casaId" class="hidden-casa-id" />
-                                <input type="hidden" name="habitacionHotelId" class="hidden-hab-id" />
-                                <button type="submit" class="btn btn--primary"
-                                        style="font-size:0.8rem;padding:0.3rem 0.6rem;">Asignar</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                                        </optgroup>
+                                        <optgroup label="Hoteles">
+                                            @foreach (var h in Model.Hoteles)
+                                            {
+                                                foreach (var hab in h.Habitaciones)
+                                                {
+                                                    var libre = hab.Capacidad - hab.Asignaciones.Count;
+                                                    <option value="habitacion:@hab.Id" data-tipo="hotel" @(libre <= 0 ? "disabled" : "")>
+                                                        @h.Nombre — @hab.Nombre (@libre libres)
+                                                    </option>
+                                                }
+                                            }
+                                        </optgroup>
+                                    </select>
+                                    <select name="tipoCupo" class="form-control tipo-cupo-select"
+                                            style="font-size:0.8rem;display:none;max-width:150px;">
+                                        <option value="">— Tipo cupo —</option>
+                                        <option value="Soltero">Soltero</option>
+                                        <option value="Soltera">Soltera</option>
+                                        <option value="Pareja">Pareja</option>
+                                    </select>
+                                    <input type="hidden" name="casaId" class="hidden-casa-id" />
+                                    <input type="hidden" name="habitacionHotelId" class="hidden-hab-id" />
+                                    <button type="submit" class="btn btn--primary"
+                                            style="font-size:0.8rem;padding:0.3rem 0.6rem;">Asignar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <div class="pagination">
-        <div class="pagination__info">
-            Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina, Model.Total)) de @Model.Total
-        </div>
-        <div class="pagination__controls">
-            @if (Model.Pagina > 1)
-            {
-                <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
-            }
-            <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
-            @if (Model.Pagina < Model.TotalPaginas)
-            {
-                <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
-            }
-        </div>
-        <div class="pagination__size">
-            @foreach (var size in new[] { 10, 50, 100 })
-            {
-                if (size == Model.PorPagina)
+        <div class="pagination">
+            <div class="pagination__info">
+                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina, Model.Total))
+                de @Model.Total
+            </div>
+            <div class="pagination__controls">
+                @if (Model.Pagina > 1)
                 {
-                    <span class="btn btn--primary">@size</span>
+                    <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
                 }
-                else
+                <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
+                @if (Model.Pagina < Model.TotalPaginas)
                 {
-                    <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                    <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
                 }
-            }
+            </div>
+            <div class="pagination__size">
+                @foreach (var size in new[] { 10, 50, 100 })
+                {
+                    if (size == Model.PorPagina)
+                    {
+                        <span class="btn btn--primary">@size</span>
+                    }
+                    else
+                    {
+                        <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                    }
+                }
+            </div>
         </div>
-    </div>
-}
-
-<script>
-    function actualizarDestino(select) {
-        const form = select.closest('form');
-        const val = select.value;
-        const tipoCupoSelect = form.querySelector('.tipo-cupo-select');
-        const casaInput = form.querySelector('.hidden-casa-id');
-        const habInput = form.querySelector('.hidden-hab-id');
-        casaInput.value = '';
-        habInput.value = '';
-        if (val.startsWith('casa:')) {
-            casaInput.value = val.split(':')[1];
-            tipoCupoSelect.style.display = '';
-        } else if (val.startsWith('habitacion:')) {
-            habInput.value = val.split(':')[1];
-            tipoCupoSelect.style.display = 'none';
-        } else {
-            tipoCupoSelect.style.display = 'none';
-        }
     }
 
-    document.getElementById('filtroDepartamento').addEventListener('change', async function () {
-        const municipioSelect = document.getElementById('filtroMunicipio');
-        municipioSelect.innerHTML = '<option value="">Todos</option>';
+    <script>
+        function actualizarDestino(select) {
+            const form = select.closest('form');
+            const val = select.value;
+            const tipoCupoSelect = form.querySelector('.tipo-cupo-select');
+            const casaInput = form.querySelector('.hidden-casa-id');
+            const habInput = form.querySelector('.hidden-hab-id');
+            casaInput.value = '';
+            habInput.value = '';
+            if (val.startsWith('casa:')) {
+                casaInput.value = val.split(':')[1];
+                tipoCupoSelect.style.display = '';
+            } else if (val.startsWith('habitacion:')) {
+                habInput.value = val.split(':')[1];
+                tipoCupoSelect.style.display = 'none';
+            } else {
+                tipoCupoSelect.style.display = 'none';
+            }
+        }
 
-        const departamento = this.value;
-        if (!departamento) return;
+        document.getElementById('filtroDepartamento').addEventListener('change', async function () {
+            const municipioSelect = document.getElementById('filtroMunicipio');
+            municipioSelect.innerHTML = '<option value="">Todos</option>';
 
-        const response = await fetch(`/api/ubicacion/ciudades?departamento=${encodeURIComponent(departamento)}`);
-        if (!response.ok) return;
+            const departamento = this.value;
+            if (!departamento) return;
 
-        const ciudades = await response.json();
-        ciudades.forEach(ciudad => {
-            const option = document.createElement('option');
-            option.value = ciudad;
-            option.textContent = ciudad;
-            municipioSelect.appendChild(option);
+            const response = await fetch(`/api/ubicacion/ciudades?departamento=${encodeURIComponent(departamento)}`);
+            if (!response.ok) return;
+
+            const ciudades = await response.json();
+            ciudades.forEach(ciudad => {
+                const option = document.createElement('option');
+                option.value = ciudad;
+                option.textContent = ciudad;
+                municipioSelect.appendChild(option);
+            });
         });
-    });
-</script>
+    </script>
