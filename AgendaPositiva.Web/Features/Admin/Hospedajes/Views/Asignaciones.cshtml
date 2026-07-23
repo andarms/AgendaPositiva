@@ -70,6 +70,14 @@
                 }
             </select>
         </div>
+        <div>
+            <label class="form-label">Necesidades Especiales</label>
+            <select name="necesidades" class="form-control">
+                <option value="">Todos</option>
+                <option value="si" selected="@(Model.Necesidades == "si")">Con necesidades</option>
+                <option value="no" selected="@(Model.Necesidades == "no")">Sin necesidades</option>
+            </select>
+        </div>
         <div class="filter-actions">
             <button type="submit" class="btn btn--primary">Buscar</button>
             <a href="/admin/hospedajes/asignaciones@(Model.Tab != "todos" ? $"?tab={Model.Tab}" : "")"
@@ -89,6 +97,7 @@
             ["genero"] = Model.Genero,
             ["departamento"] = Model.Departamento,
             ["ciudad"] = Model.Ciudad,
+            ["necesidades"] = Model.Necesidades,
             ["tab"] = t == "todos" ? null : t
         };
         var query = string.Join("&", qs.Where(kv => !string.IsNullOrEmpty(kv.Value)).Select(kv =>

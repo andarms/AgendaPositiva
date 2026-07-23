@@ -235,7 +235,7 @@ public class HospedajesAdminController : Controller
 
     // ── Asignaciones ───────────────────────────────────────────────
     [HttpGet("asignaciones")]
-    public async Task<IActionResult> Asignaciones(string? nombre, string? documento, string? genero, string? departamento, string? ciudad, string? tab, int pagina = 1, int porPagina = 50)
+    public async Task<IActionResult> Asignaciones(string? nombre, string? documento, string? genero, string? departamento, string? ciudad, string? necesidades, string? tab, int pagina = 1, int porPagina = 50)
     {
         var evento = await store.Eventos.FirstOrDefaultAsync(e => e.Activo);
         if (evento is null) return View("~/Features/Admin/Hospedajes/Views/Asignaciones.cshtml",
@@ -262,6 +262,10 @@ public class HospedajesAdminController : Controller
             query = query.Where(i => i.Departamento == departamento);
         if (!string.IsNullOrWhiteSpace(ciudad))
             query = query.Where(i => i.Ciudad == ciudad);
+        if (necesidades == "si")
+            query = query.Where(i => i.NecesidadesEspeciales != null && i.NecesidadesEspeciales != "");
+        else if (necesidades == "no")
+            query = query.Where(i => i.NecesidadesEspeciales == null || i.NecesidadesEspeciales == "");
 
         // Tab filter
         var idsAsignados = await store.AsignacionesHospedaje.Select(a => a.InscripcionId).ToListAsync();
@@ -331,6 +335,7 @@ public class HospedajesAdminController : Controller
             Genero = genero,
             Departamento = departamento,
             Ciudad = ciudad,
+            Necesidades = necesidades,
             Tab = tab ?? "todos",
             Pagina = pagina,
             PorPagina = porPagina,
@@ -446,7 +451,7 @@ public class HospedajesAdminController : Controller
 
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Hospedajes");
-        var headers = new[] { "Nombre", "Documento", "Edad", "Género", "Teléfono", "Necesidades Especiales", "Lugar Asignado", "Tipo/Habitación" };
+        var headers = new[] { "Nombre", "Documento", "Edad", "Género", "Teléfono", "Lugar Asignado", "Tipo/Habitación", "Necesidades Especiales" };
         for (int c = 0; c < headers.Length; c++)
             ws.Cell(1, c + 1).Value = headers[c];
         ws.Row(1).Style.Font.Bold = true;
@@ -460,25 +465,25 @@ public class HospedajesAdminController : Controller
             ws.Cell(row, 3).Value = (int)p.Edad;
             ws.Cell(row, 4).Value = p.Genero.ToString();
             ws.Cell(row, 5).Value = p.Telefono;
-            ws.Cell(row, 6).Value = insc.NecesidadesEspeciales ?? "";
 
             if (asignaciones.TryGetValue(insc.Id, out var asig))
             {
                 if (asig.Casa is not null)
                 {
-                    ws.Cell(row, 7).Value = asig.Casa.Nombre;
-                    ws.Cell(row, 8).Value = asig.TipoCupoCasa?.ToString() ?? "";
+                    ws.Cell(row, 6).Value = asig.Casa.Nombre;
+                    ws.Cell(row, 7).Value = asig.TipoCupoCasa?.ToString() ?? "";
                 }
                 else if (asig.HabitacionHotel is not null)
                 {
-                    ws.Cell(row, 7).Value = asig.HabitacionHotel.Hotel.Nombre;
-                    ws.Cell(row, 8).Value = asig.HabitacionHotel.Nombre;
+                    ws.Cell(row, 6).Value = asig.HabitacionHotel.Hotel.Nombre;
+                    ws.Cell(row, 7).Value = asig.HabitacionHotel.Nombre;
                 }
             }
             else
             {
-                ws.Cell(row, 7).Value = "Sin asignar";
+                ws.Cell(row, 6).Value = "Sin asignar";
             }
+            ws.Cell(row, 8).Value = insc.NecesidadesEspeciales ?? "";
             row++;
         }
         ws.Columns().AdjustToContents();
@@ -585,6 +590,7 @@ public class AsignacionesViewModel
     public string? Genero { get; set; }
     public string? Departamento { get; set; }
     public string? Ciudad { get; set; }
+    public string? Necesidades { get; set; }
     public string Tab { get; set; } = "todos";
     public int Pagina { get; set; } = 1;
     public int PorPagina { get; set; } = 50;
@@ -603,6 +609,7 @@ public class AsignacionesViewModel
             ["genero"] = Genero,
             ["departamento"] = Departamento,
             ["ciudad"] = Ciudad,
+            ["necesidades"] = Necesidades,
             ["tab"] = Tab == "todos" ? null : Tab,
             ["pagina"] = pagina.ToString(),
             ["porPagina"] = (porPaginaOverride ?? PorPagina).ToString()
