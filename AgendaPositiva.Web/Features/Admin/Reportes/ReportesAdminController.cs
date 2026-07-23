@@ -28,13 +28,14 @@ public class ReportesAdminController : Controller
     public IActionResult ExportarNinos()
     {
         var fechaCorte = DateOnly.FromDateTime(DateTime.Today).AddYears(-11);
+        var corteBebe = DateOnly.FromDateTime(DateTime.Today).AddYears(-3);
 
         var inscripciones = store.Inscripciones
             .Include(i => i.Persona)
             .Include(i => i.GrupoFamiliar).ThenInclude(g => g!.Inscripciones).ThenInclude(i => i.Persona)
             .Where(i => i.EventoId == evento.Id)
             .Where(i => i.Estado != EstadoInscripcion.NoVaAsistir)
-            .Where(i => i.Persona.FechaNacimiento > fechaCorte)
+            .Where(i => i.Persona.FechaNacimiento > fechaCorte && i.Persona.FechaNacimiento <= corteBebe)
             .OrderBy(i => i.Departamento)
             .ThenBy(i => i.Ciudad)
             .ToList();
