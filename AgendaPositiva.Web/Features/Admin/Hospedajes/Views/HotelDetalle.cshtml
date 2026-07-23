@@ -1,0 +1,58 @@
+@using AgendaPositiva.Web.Features.Admin.Hospedajes.Dominio
+@model Hotel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/hospedajes">Hospedajes</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@Model.Nombre</span>
+</nav>
+
+<h1>@Model.Nombre — Habitaciones</h1>
+<p style="color:#718096;">@Model.Direccion &nbsp;|&nbsp; @Model.Telefono</p>
+
+<div class="action-bar" style="margin-bottom:1rem;">
+    <a href="/admin/hospedajes/hoteles/@Model.Id/habitaciones/nueva" class="btn btn--primary">+ Nueva Habitación</a>
+</div>
+
+@if (Model.Habitaciones.Count == 0)
+{
+    <p>No hay habitaciones registradas.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Camas Sencillas</th>
+                    <th>Camas Dobles</th>
+                    <th>Capacidad</th>
+                    <th>Ocupación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model.Habitaciones.OrderBy(x => x.Nombre))
+                {
+                    <tr>
+                        <td>@h.Nombre</td>
+                        <td>@h.CamasSencillas</td>
+                        <td>@h.CamasDobles</td>
+                        <td>@h.Capacidad</td>
+                        <td>@h.Asignaciones.Count / @h.Capacidad</td>
+                        <td style="display:flex;gap:0.5rem;">
+                            <a href="/admin/hospedajes/habitaciones/@h.Id/editar" class="btn btn--secondary">Editar</a>
+                            <form method="post" action="/admin/hospedajes/habitaciones/@h.Id/eliminar" style="display:inline;"
+                                  onsubmit="return confirm('¿Eliminar esta habitación?');">
+                                <button type="submit" class="btn btn--danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

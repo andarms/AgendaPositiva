@@ -1,0 +1,36 @@
+@using AgendaPositiva.Web.Features.Admin.Hospedajes
+@model HotelFormularioViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/hospedajes">Hospedajes</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.Id is > 0 ? "Editar Hotel" : "Nuevo Hotel")</span>
+</nav>
+
+<h1>@(Model.Id is > 0 ? "Editar Hotel" : "Nuevo Hotel")</h1>
+
+<div class="card">
+    <form method="post" action="/admin/hospedajes/hoteles/guardar">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Nombre del hotel</label>
+            <input type="text" name="Nombre" value="@Model.Nombre" class="form-control" required />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Dirección</label>
+            <input type="text" name="Direccion" value="@Model.Direccion" class="form-control" />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="Telefono" value="@Model.Telefono" class="form-control" />
+        </div>
+
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Guardar</button>
+            <a href="/admin/hospedajes" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

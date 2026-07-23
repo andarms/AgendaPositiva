@@ -1,0 +1,42 @@
+@using AgendaPositiva.Web.Features.Admin.Hospedajes
+@model HabitacionFormularioViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/hospedajes">Hospedajes</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/hospedajes/hoteles/@Model.HotelId">@Model.HotelNombre</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.Id is > 0 ? "Editar Habitación" : "Nueva Habitación")</span>
+</nav>
+
+<h1>@(Model.Id is > 0 ? "Editar Habitación" : "Nueva Habitación")</h1>
+
+<div class="card">
+    <form method="post" action="/admin/hospedajes/habitaciones/guardar">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="HotelId" value="@Model.HotelId" />
+
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Nombre / Número</label>
+            <input type="text" name="Nombre" value="@Model.Nombre" class="form-control" required
+                   placeholder="Ej: Hab. 101" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+                <label class="form-label">Camas Sencillas</label>
+                <input type="number" name="CamasSencillas" value="@Model.CamasSencillas" class="form-control" min="0" />
+            </div>
+            <div>
+                <label class="form-label">Camas Dobles</label>
+                <input type="number" name="CamasDobles" value="@Model.CamasDobles" class="form-control" min="0" />
+            </div>
+        </div>
+
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Guardar</button>
+            <a href="/admin/hospedajes/hoteles/@Model.HotelId" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

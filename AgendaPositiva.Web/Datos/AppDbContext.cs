@@ -1,5 +1,7 @@
 using AgendaPositiva.Web.Features.Admin.Auth.Domain;
 using AgendaPositiva.Web.Features.Admin.Auditoria;
+using AgendaPositiva.Web.Features.Admin.Hospedajes;
+using AgendaPositiva.Web.Features.Admin.Hospedajes.Dominio;
 using AgendaPositiva.Web.Features.Admin.Regiones.Dominio;
 using AgendaPositiva.Web.Features.Admin.Servicios;
 using AgendaPositiva.Web.Features.Admin.Servicios.Dominio;
@@ -29,6 +31,10 @@ public class AppDbContext : DbContext
     public DbSet<GrupoServicio> GruposServicio => Set<GrupoServicio>();
     public DbSet<MiembroGrupoServicio> MiembrosGrupoServicio => Set<MiembroGrupoServicio>();
     public DbSet<UbicacionServicio> UbicacionesServicio => Set<UbicacionServicio>();
+    public DbSet<Casa> Casas => Set<Casa>();
+    public DbSet<Hotel> Hoteles => Set<Hotel>();
+    public DbSet<HabitacionHotel> HabitacionesHotel => Set<HabitacionHotel>();
+    public DbSet<AsignacionHospedaje> AsignacionesHospedaje => Set<AsignacionHospedaje>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +54,10 @@ public class AppDbContext : DbContext
         modelBuilder.ConfigurarGruposServicio();
         modelBuilder.ConfigurarMiembrosGrupoServicio();
         modelBuilder.ConfigurarUbicacionesServicio();
+        modelBuilder.ConfigurarCasas();
+        modelBuilder.ConfigurarHoteles();
+        modelBuilder.ConfigurarHabitacionesHotel();
+        modelBuilder.ConfigurarAsignacionesHospedaje();
 
         modelBuilder.Entity<AuditoriaAdmin>(e =>
         {

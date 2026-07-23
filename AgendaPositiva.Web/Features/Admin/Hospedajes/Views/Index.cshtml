@@ -1,0 +1,110 @@
+@using AgendaPositiva.Web.Features.Admin.Hospedajes
+@using AgendaPositiva.Web.Features.Admin.Hospedajes.Dominio
+@model DashboardViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">Hospedajes</span>
+</nav>
+
+<h1>Hospedajes</h1>
+
+<div class="action-bar" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <a href="/admin/hospedajes/casas/nueva" class="btn btn--primary btn--lg">+ Nueva Casa</a>
+    <a href="/admin/hospedajes/hoteles/nuevo" class="btn btn--primary btn--lg">+ Nuevo Hotel</a>
+    <a href="/admin/hospedajes/asignaciones" class="btn btn--secondary btn--lg">Asignar Hospedajes</a>
+</div>
+
+<h2>Casas</h2>
+@if (Model.Casas.Count == 0)
+{
+    <p>No hay casas registradas.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Responsable</th>
+                    <th>Solteros</th>
+                    <th>Solteras</th>
+                    <th>Parejas</th>
+                    <th>Ocupación</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Casas)
+                {
+                    var ocupados = c.Asignaciones.Count;
+                    <tr>
+                        <td>@c.Nombre</td>
+                        <td>@c.NombreResponsable</td>
+                        <td>@c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltero) / @c.CuposSolteros</td>
+                        <td>@c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Soltera) / @c.CuposSolteras</td>
+                        <td>@c.Asignaciones.Count(a => a.TipoCupoCasa == TipoCupoCasa.Pareja) / @(c.CuposParejas * 2)</td>
+                        <td>@ocupados / @c.CapacidadTotal</td>
+                        <td>
+                            <span class="badge @(c.Activa ? "badge--success" : "badge--danger")">
+                                @(c.Activa ? "Activa" : "Inactiva")
+                            </span>
+                        </td>
+                        <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <a href="/admin/hospedajes/casas/@c.Id/editar" class="btn btn--secondary">Editar</a>
+                            <form method="get" action="/admin/hospedajes/casas/@c.Id/toggle" style="display:inline;">
+                                <button type="submit" class="btn @(c.Activa ? "btn--danger" : "btn--success")">
+                                    @(c.Activa ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<h2 style="margin-top:2rem;">Hoteles</h2>
+@if (Model.Hoteles.Count == 0)
+{
+    <p>No hay hoteles registrados.</p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Habitaciones</th>
+                    <th>Capacidad Total</th>
+                    <th>Ocupación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model.Hoteles)
+                {
+                    var cap = h.Habitaciones.Sum(hab => hab.Capacidad);
+                    var ocu = h.Habitaciones.Sum(hab => hab.Asignaciones.Count);
+                    <tr>
+                        <td><a href="/admin/hospedajes/hoteles/@h.Id">@h.Nombre</a></td>
+                        <td>@h.Direccion</td>
+                        <td>@h.Habitaciones.Count</td>
+                        <td>@cap</td>
+                        <td>@ocu / @cap</td>
+                        <td style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <a href="/admin/hospedajes/hoteles/@h.Id/editar" class="btn btn--secondary">Editar</a>
+                            <a href="/admin/hospedajes/hoteles/@h.Id" class="btn btn--secondary">Habitaciones</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,117 @@
+@using AgendaPositiva.Web.Features.Admin.Hospedajes
+@model CasaFormularioViewModel
+
+<nav class="breadcrumb">
+    <a href="/admin">Admin</a>
+    <span class="breadcrumb__separator">/</span>
+    <a href="/admin/hospedajes">Hospedajes</a>
+    <span class="breadcrumb__separator">/</span>
+    <span class="breadcrumb__current">@(Model.Id is > 0 ? "Editar Casa" : "Nueva Casa")</span>
+</nav>
+
+<h1>@(Model.Id is > 0 ? "Editar Casa" : "Nueva Casa")</h1>
+
+<div class="card">
+    <form method="post" action="/admin/hospedajes/casas/guardar">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Nombre de la casa</label>
+            <input type="text" name="Nombre" value="@Model.Nombre" class="form-control" required />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Dirección</label>
+            <input type="text" name="Direccion" value="@Model.Direccion" class="form-control" />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label class="form-label">Teléfono de contacto</label>
+            <input type="text" name="Telefono" value="@Model.Telefono" class="form-control" />
+        </div>
+
+        <fieldset style="border:1px solid #E2E8F0;border-radius:8px;padding:1rem;margin-bottom:1rem;">
+            <legend style="font-weight:600;font-size:0.9rem;">Responsable</legend>
+            <input type="hidden" name="ResponsablePersonaId" id="responsable-persona-id"
+                   value="@Model.ResponsablePersonaId" />
+            <div style="margin-bottom:0.75rem;">
+                <label class="form-label">Nombre del responsable</label>
+                <input type="text" name="NombreResponsable" id="nombre-responsable" value="@Model.NombreResponsable"
+                       class="form-control" />
+            </div>
+            <div style="margin-bottom:0.75rem;">
+                <label class="form-label">Teléfono del responsable</label>
+                <input type="text" name="TelefonoResponsable" id="telefono-responsable"
+                       value="@Model.TelefonoResponsable" class="form-control" />
+            </div>
+            <div style="border-top:1px solid #E2E8F0;padding-top:0.75rem;">
+                <label class="form-label">Cargar datos desde un inscrito</label>
+                <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+                    <input type="text" id="buscar-responsable" class="form-control" placeholder="Nombre o documento..." autocomplete="off" />
+                    <button type="button" id="btn-buscar-responsable" class="btn btn--secondary">Buscar</button>
+                </div>
+                <div id="resultados-responsable" style="border:1px solid #E2E8F0;border-radius:4px;max-height:180px;overflow-y:auto;display:none;"></div>
+            </div>
+        </fieldset>
+
+        <fieldset style="border:1px solid #E2E8F0;border-radius:8px;padding:1rem;margin-bottom:1rem;">
+            <legend style="font-weight:600;font-size:0.9rem;">Cupos</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
+                <div>
+                    <label class="form-label">Solteros</label>
+                    <input type="number" name="CuposSolteros" value="@Model.CuposSolteros" class="form-control"
+                           min="0" />
+                </div>
+                <div>
+                    <label class="form-label">Solteras</label>
+                    <input type="number" name="CuposSolteras" value="@Model.CuposSolteras" class="form-control"
+                           min="0" />
+                </div>
+                <div>
+                    <label class="form-label">Parejas</label>
+                    <input type="number" name="CuposParejas" value="@Model.CuposParejas" class="form-control" min="0" />
+                </div>
+            </div>
+        </fieldset>
+
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Guardar</button>
+            <a href="/admin/hospedajes" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById('buscar-responsable');
+        const btn = document.getElementById('btn-buscar-responsable');
+        const resultados = document.getElementById('resultados-responsable');
+
+        async function buscar() {
+            const q = input.value.trim();
+            if (q.length < 2) { resultados.style.display = 'none'; return; }
+            const res = await fetch('/admin/hospedajes/api/buscar-personas?q=' + encodeURIComponent(q));
+            const data = await res.json();
+            if (data.length === 0) {
+                resultados.innerHTML = '<div style="padding:0.5rem;color:#A0AEC0;">Sin resultados</div>';
+                resultados.style.display = 'block';
+                return;
+            }
+            resultados.innerHTML = data.map(p =>
+                `<div style="padding:0.5rem;cursor:pointer;border-bottom:1px solid #eee;" data-id="${p.id}" data-nombre="${p.nombre}" data-telefono="${p.telefono}"><strong>${p.nombre}</strong> — ${p.telefono}</div>`
+            ).join('');
+            resultados.style.display = 'block';
+        }
+
+        btn.addEventListener('click', buscar);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); buscar(); } });
+
+        resultados.addEventListener('click', function (e) {
+            const el = e.target.closest('[data-id]');
+            if (!el) return;
+            document.getElementById('responsable-persona-id').value = el.dataset.id;
+            document.getElementById('nombre-responsable').value = el.dataset.nombre;
+            document.getElementById('telefono-responsable').value = el.dataset.telefono;
+            resultados.style.display = 'none';
+            input.value = '';
+        });
+    })();
+</script>
