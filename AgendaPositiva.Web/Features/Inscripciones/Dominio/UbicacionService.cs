@@ -16,7 +16,9 @@ public class UbicacionService
         "EE.UU",
         "Bolivia",
         "Brasil",
-        "Chile"
+        "Chile",
+        "Guatemala",
+        "Replublica Dominicana",
     ];
 
     public List<DepartamentoInfo> Departamentos { get; }

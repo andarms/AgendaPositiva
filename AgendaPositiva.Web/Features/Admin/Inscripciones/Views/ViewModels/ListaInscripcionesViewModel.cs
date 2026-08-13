@@ -25,6 +25,7 @@ public class ListaInscripcionesViewModel
     public required List<string> Departamentos { get; init; }
     public List<string> Ciudades { get; init; } = [];
     public CupoInfoViewModel? CupoInfo { get; init; }
+    public Dictionary<int, string> ServiciosAsignados { get; init; } = [];
 
     // Filtros
     public string? FiltroNombre { get; init; }

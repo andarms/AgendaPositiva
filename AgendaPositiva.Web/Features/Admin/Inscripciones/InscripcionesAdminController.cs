@@ -221,11 +221,22 @@ public class InscripcionesAdminController : Controller
             .Take(porPagina)
             .ToList();
 
+        var inscripcionIds = inscripciones.Select(i => i.Id).ToList();
+        var serviciosAsignados = await store.MiembrosGrupoServicio
+            .Include(m => m.GrupoServicio).ThenInclude(g => g.Servicio)
+            .Where(m => inscripcionIds.Contains(m.InscripcionId))
+            .GroupBy(m => m.InscripcionId)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => string.Join(", ", g.Select(m => $"{m.GrupoServicio.Servicio.Nombre} → {m.GrupoServicio.Nombre}"))
+            );
+
         var vm = new ListaInscripcionesViewModel
         {
             Evento = evento,
             Inscripciones = inscripciones,
             TotalInscripciones = total,
+            ServiciosAsignados = serviciosAsignados,
             Departamentos = EsAdministrador
                 ? ubicacionService.ObtenerNombresDepartamentos()
                 : DepartamentosAsignados,

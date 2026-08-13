@@ -167,6 +167,7 @@
                         </th>
                         <th>Estado</th>
                         <th>Hospedaje</th>
+                        <th>Servicio</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -195,6 +196,12 @@
                                 }
                             </td>
                             <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
+                            <td>
+                                @if (Model.ServiciosAsignados.TryGetValue(inscripcion.Id, out var servicio))
+                                {
+                                    <span class="badge badge--info">@servicio</span>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
