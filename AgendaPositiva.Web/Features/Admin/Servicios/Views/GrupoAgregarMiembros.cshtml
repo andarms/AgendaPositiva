@@ -27,7 +27,8 @@
                 </div>
                 <div>
                     <label class="form-label" style="font-size:0.85rem;">Buscar por documento</label>
-                    <input type="text" id="filtro-documento" class="form-control" placeholder="Número de documento..." />
+                    <input type="text" id="filtro-documento" class="form-control"
+                           placeholder="Número de documento..." />
                 </div>
                 <div>
                     <label class="form-label" style="font-size:0.85rem;">Filtrar por servicio de inscripción</label>
@@ -67,10 +68,8 @@
                             var yaEnGrupo = Model.IdsYaEnGrupo.Contains(ins.Id);
                             Model.GrupoDeOtros.TryGetValue(ins.Id, out var otroGrupo);
                             <tr class="fila-inscripcion" data-nombre="@ins.Persona.NombreCompleto.ToLower()"
-                                data-documento="@ins.Persona.NumeroIdentificacion"
-                                data-servicios="@serviciosData"
-                                data-otro-grupo="@(otroGrupo ?? "")"
-                                data-nombre-completo="@ins.Persona.NombreCompleto"
+                                data-documento="@ins.Persona.NumeroIdentificacion" data-servicios="@serviciosData"
+                                data-otro-grupo="@(otroGrupo ?? "")" data-nombre-completo="@ins.Persona.NombreCompleto"
                                 style="@(yaEnGrupo ? "opacity:0.55;" : "")">
                                 <td>
                                     <input type="checkbox" name="miembrosIds" value="@ins.Id" class="cb-miembro"
@@ -80,79 +79,80 @@
                                     @ins.Persona.NombreCompleto
                                     @if (yaEnGrupo)
                                     {
-                                        <span style="font-size:0.75rem;color:#718096;margin-left:0.35rem;">(ya en este grupo)</span>
-                                    }
+                                        <span style="font-size:0.75rem;color:#718096;margin-left:0.35rem;">(ya en este
+                                            grupo)</span>
+                                        }
                                     else if (otroGrupo != null)
-                                    {
-                                        <span style="font-size:0.75rem;color:#d97706;margin-left:0.35rem;">⚠️ @otroGrupo</span>
-                                    }
-                                </td>
-                                <td>@ins.Persona.NumeroIdentificacion</td>
-                                <td>@((int)ins.Persona.Edad)</td>
-                                <td>@ins.Localidad</td>
-                                <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                        {
+                                            <span style="font-size:0.75rem;color:#d97706;margin-left:0.35rem;">⚠️ @otroGrupo</span>
+                                        }
+                                    </td>
+                                    <td>@ins.Persona.NumeroIdentificacion</td>
+                                    <td>@((int)ins.Persona.Edad)</td>
+                                    <td>@ins.Localidad</td>
+                                    <td>@(string.IsNullOrEmpty(servicios) ? "—" : servicios)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div style="display:flex;gap:0.5rem;">
-        <button type="submit" class="btn btn--primary">Agregar Seleccionados</button>
-        <a href="/admin/servicios/grupos/@Model.GrupoId" class="btn btn--secondary">Cancelar</a>
-    </div>
-</form>
+        <div style="display:flex;gap:0.5rem;">
+            <button type="submit" class="btn btn--primary">Agregar Seleccionados</button>
+            <a href="/admin/servicios/grupos/@Model.GrupoId" class="btn btn--secondary">Cancelar</a>
+        </div>
+    </form>
 
-<script>
-    const filtroNombre = document.getElementById('filtro-nombre');
-    const filtroDocumento = document.getElementById('filtro-documento');
-    const filtroServicio = document.getElementById('filtro-servicio');
-    const filas = document.querySelectorAll('.fila-inscripcion');
+    <script>
+        const filtroNombre = document.getElementById('filtro-nombre');
+        const filtroDocumento = document.getElementById('filtro-documento');
+        const filtroServicio = document.getElementById('filtro-servicio');
+        const filas = document.querySelectorAll('.fila-inscripcion');
 
-    function filtrar() {
-        const nombre = filtroNombre.value.toLowerCase();
-        const documento = filtroDocumento.value.toLowerCase();
-        const servicio = filtroServicio.value;
-        filas.forEach(fila => {
-            const matchNombre = !nombre || fila.dataset.nombre.includes(nombre);
-            const matchDocumento = !documento || fila.dataset.documento.toLowerCase().includes(documento);
-            const matchServicio = !servicio || fila.dataset.servicios.split(',').includes(servicio);
-            fila.style.display = (matchNombre && matchDocumento && matchServicio) ? '' : 'none';
+        function filtrar() {
+            const nombre = filtroNombre.value.toLowerCase();
+            const documento = filtroDocumento.value.toLowerCase();
+            const servicio = filtroServicio.value;
+            filas.forEach(fila => {
+                const matchNombre = !nombre || fila.dataset.nombre.includes(nombre);
+                const matchDocumento = !documento || fila.dataset.documento.toLowerCase().includes(documento);
+                const matchServicio = !servicio || fila.dataset.servicios.split(',').includes(servicio);
+                fila.style.display = (matchNombre && matchDocumento && matchServicio) ? '' : 'none';
+            });
+        }
+
+        filtroNombre.addEventListener('input', filtrar);
+        filtroDocumento.addEventListener('input', filtrar);
+        filtroServicio.addEventListener('change', filtrar);
+
+        function actualizarConteo() {
+            const count = document.querySelectorAll('.cb-miembro:checked').length;
+            document.getElementById('conteo-seleccionados').textContent = count + ' seleccionados';
+        }
+
+        function toggleAll() {
+            const visibles = Array.from(filas).filter(f => f.style.display !== 'none');
+            const allChecked = visibles.every(f => f.querySelector('.cb-miembro').checked);
+            visibles.forEach(f => f.querySelector('.cb-miembro').checked = !allChecked);
+            actualizarConteo();
+        }
+
+        // Confirmación al enviar si hay personas ya asignadas a otro grupo
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const conflictos = [];
+            document.querySelectorAll('.cb-miembro:checked').forEach(cb => {
+                const fila = cb.closest('tr');
+                const otroGrupo = fila.dataset.otroGrupo;
+                const nombre = fila.dataset.nombreCompleto;
+                if (otroGrupo) conflictos.push(`• ${nombre} (${otroGrupo})`);
+            });
+            if (conflictos.length === 0) return;
+            e.preventDefault();
+            const mensaje = 'Las siguientes personas ya están asignadas a otro grupo de servicio:\n\n'
+                + conflictos.join('\n')
+                + '\n\n¿Desea agregarlas de todas formas?';
+            if (confirm(mensaje)) this.submit();
         });
-    }
-
-    filtroNombre.addEventListener('input', filtrar);
-    filtroDocumento.addEventListener('input', filtrar);
-    filtroServicio.addEventListener('change', filtrar);
-
-    function actualizarConteo() {
-        const count = document.querySelectorAll('.cb-miembro:checked').length;
-        document.getElementById('conteo-seleccionados').textContent = count + ' seleccionados';
-    }
-
-    function toggleAll() {
-        const visibles = Array.from(filas).filter(f => f.style.display !== 'none');
-        const allChecked = visibles.every(f => f.querySelector('.cb-miembro').checked);
-        visibles.forEach(f => f.querySelector('.cb-miembro').checked = !allChecked);
-        actualizarConteo();
-    }
-
-    // Confirmación al enviar si hay personas ya asignadas a otro grupo
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const conflictos = [];
-        document.querySelectorAll('.cb-miembro:checked').forEach(cb => {
-            const fila = cb.closest('tr');
-            const otroGrupo = fila.dataset.otroGrupo;
-            const nombre = fila.dataset.nombreCompleto;
-            if (otroGrupo) conflictos.push(`• ${nombre} (${otroGrupo})`);
-        });
-        if (conflictos.length === 0) return;
-        e.preventDefault();
-        const mensaje = 'Las siguientes personas ya están asignadas a otro grupo de servicio:\n\n'
-            + conflictos.join('\n')
-            + '\n\n¿Desea agregarlas de todas formas?';
-        if (confirm(mensaje)) this.submit();
-    });
-</script>
+    </script>

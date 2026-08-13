@@ -23,56 +23,66 @@
             border-radius: 12px;
             padding: 1rem 1.5rem;
             margin-bottom: 1rem;
-            border: 1px solid rgba(0,0,0,0.06);
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
+
         .cupo-header-card__title {
             font-size: 0.8125rem;
             font-weight: 600;
             color: #1d1d1f;
             margin-bottom: 0.75rem;
         }
+
         .cupo-header-card__stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 0.75rem 1rem;
             align-items: start;
         }
+
         .cupo-stat-item {
             text-align: center;
         }
+
         .cupo-stat-item__value {
             font-size: 1.25rem;
             font-weight: 700;
             color: #1d1d1f;
             line-height: 1;
         }
+
         .cupo-stat-item__label {
             font-size: 0.625rem;
             color: #86868b;
             margin-top: 0.15rem;
         }
+
         .cupo-header-card__bar {
             margin-top: 0.75rem;
             width: 100%;
             height: 6px;
-            background: rgba(0,0,0,0.06);
+            background: rgba(0, 0, 0, 0.06);
             border-radius: 3px;
             overflow: hidden;
         }
+
         .cupo-header-card__regions {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
             margin-top: 0.75rem;
         }
+
         @@media (max-width: 480px) {
             .cupo-header-card {
                 padding: 0.75rem 1rem;
             }
+
             .cupo-header-card__stats {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.625rem 0.5rem;
             }
+
             .cupo-stat-item__value {
                 font-size: 1.0625rem;
             }
@@ -105,7 +115,8 @@
             @if (User.IsInRole("Administrador"))
             {
                 <div class="cupo-stat-item">
-                    <div class="cupo-stat-item__value" style="color:#007aff;">@(cupo.TotalAdolescentes + cupo.TotalAdultos)</div>
+                    <div class="cupo-stat-item__value" style="color:#007aff;">@(cupo.TotalAdolescentes + cupo.TotalAdultos)
+                    </div>
                     <div class="cupo-stat-item__label">Cupo Salón</div>
                 </div>
             }
@@ -114,19 +125,20 @@
                 <div class="cupo-stat-item__label">Cupo total</div>
             </div>
             <div class="cupo-stat-item">
-                <div class="cupo-stat-item__value" style="color:@(cupo.CupoDisponible <= 0 ? "#ff3b30" : "#1d1d1f");">@cupo.CupoDisponible</div>
-                <div class="cupo-stat-item__label">Disponible</div>
+                <div class="cupo-stat-item__value" style="color:@(cupo.CupoDisponible <= 0 ? "#ff3b30" : "#1d1d1f");">
+                    @cupo.CupoDisponible</div>
+                    <div class="cupo-stat-item__label">Disponible</div>
+                </div>
             </div>
-        </div>
-        <div class="cupo-header-card__bar">
-            <div class="@barClass"
-                 style="height:100%;border-radius:3px;width:@(Math.Min(pct, 100))%;@(pct >= 100 ? "background:#ff3b30;" : pct >= 80 ? "background:#ff9500;" : "background:#34c759;")">
+            <div class="cupo-header-card__bar">
+                <div class="@barClass"
+                     style="height:100%;border-radius:3px;width:@(Math.Min(pct, 100))%;@(pct >= 100 ? "background:#ff3b30;" : pct >= 80 ? "background:#ff9500;" : "background:#34c759;")">
+                </div>
             </div>
-        </div>
-        @if (cupo.Regiones.Count > 1)
-        {
-            <div class="cupo-header-card__regions">
-                @foreach (var r in cupo.Regiones)
+            @if (cupo.Regiones.Count > 1)
+            {
+                <div class="cupo-header-card__regions">
+                    @foreach (var r in cupo.Regiones)
                     {
                         <span style="background:rgba(0,0,0,0.04);padding:0.15rem 0.5rem;border-radius:100px;color:#1d1d1f;">
                             @r.Nombre: @r.TotalInscritos/@r.Cupo
@@ -177,7 +189,8 @@
                         var totalAbonado = inscripcion.Abonos.Sum(a => a.Monto);
                         var precioCategoria = inscripcion.CategoriaInscripcion?.Precio ?? 0;
                         var pctPago = precioCategoria > 0 ? (double)(totalAbonado / precioCategoria) * 100 : 0;
-                        var badgePago = pctPago >= 100 ? "badge--success" : pctPago >= 50 ? "badge--abono2" : pctPago > 0 ? "badge--abono1" : "badge--warning";
+                        var badgePago = pctPago >= 100 ? "badge--success" : pctPago >= 50 ? "badge--abono2" : pctPago > 0 ?
+        "badge--abono1" : "badge--warning";
                         var textoPago = pctPago >= 100 ? "Completado" : pctPago > 0 ? $"Abono ({pctPago:F0}%)" : "Pendiente";
                         <tr>
                             <td class="col-index">@(offset + index + 1)</td>
@@ -188,119 +201,122 @@
                             <td>@inscripcion.Localidad</td>
                             <td>
                                 <span class="badge @badgePago">@textoPago</span>
-                                @if (User.IsInRole("Administrador") || User.IsInRole("Colaborador") || User.IsInRole("ColaboradorYEditorDeServicios"))
+                                @if (User.IsInRole("Administrador") || User.IsInRole("Colaborador") ||
+                    User.IsInRole("ColaboradorYEditorDeServicios"))
                                 {
                                     <div style="margin-top: 0.375rem;">
-                                        <a href="/admin/inscripciones/@inscripcion.Id/abonos" style="font-size: 0.75rem; color: #007AFF; text-decoration: none; font-weight: 500;">Gestionar abonos →</a>
-                                    </div>
-                                }
-                            </td>
-                            <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
-                            <td>
-                                @if (Model.ServiciosAsignados.TryGetValue(inscripcion.Id, out var servicio))
-                                {
-                                    <span class="badge badge--info">@servicio</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                                        <a href="/admin/inscripciones/@inscripcion.Id/abonos"
+                                           style="font-size: 0.75rem; color: #007AFF; text-decoration: none; font-weight: 500;">Gestionar
+                                            abonos →</a>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@(inscripcion.RequiereHospedaje ? "Sí" : "No")</td>
+                                <td>
+                                    @if (Model.ServiciosAsignados.TryGetValue(inscripcion.Id, out var servicio))
+                                    {
+                                        <span class="badge badge--info">@servicio</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-        <div class="pagination">
-            <div class="pagination__info">
-                Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
-                                                                                                                                                                Model.TotalInscripciones)) de @Model.TotalInscripciones
-            </div>
-            <div class="pagination__controls">
-                @if (Model.Pagina > 1)
-                {
-                    <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
-                }
-                <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
-                @if (Model.Pagina < Model.TotalPaginas)
-                {
-                    <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
-                }
-            </div>
-            <div class="pagination__size">
-                @foreach (var size in new[] { 10, 50, 100 })
-                {
-                    if (size == Model.PorPagina)
+            <div class="pagination">
+                <div class="pagination__info">
+                    Mostrando @((Model.Pagina - 1) * Model.PorPagina + 1)–@(Math.Min(Model.Pagina * Model.PorPagina,
+                                                                                                                                                                                    Model.TotalInscripciones)) de @Model.TotalInscripciones
+                </div>
+                <div class="pagination__controls">
+                    @if (Model.Pagina > 1)
                     {
-                        <span class="btn btn--primary">@size</span>
+                        <a href="@Model.BuildPageUrl(Model.Pagina - 1)" class="btn btn--secondary">← Anterior</a>
                     }
-                    else
+                    <span class="pagination__current">Página @Model.Pagina de @Model.TotalPaginas</span>
+                    @if (Model.Pagina < Model.TotalPaginas)
                     {
-                        <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                        <a href="@Model.BuildPageUrl(Model.Pagina + 1)" class="btn btn--secondary">Siguiente →</a>
                     }
-                }
+                </div>
+                <div class="pagination__size">
+                    @foreach (var size in new[] { 10, 50, 100 })
+                    {
+                        if (size == Model.PorPagina)
+                        {
+                            <span class="btn btn--primary">@size</span>
+                        }
+                        else
+                        {
+                            <a href="@Model.BuildPageUrl(1, size)" class="btn btn--secondary">@size</a>
+                        }
+                    }
+                </div>
             </div>
-        </div>
-    }
-
-    <form method="get" action="/admin/inscripciones" class="card filter-form" style="margin-top:1rem;">
-        <h4 style="margin-bottom: 14px;">Busqueda</h4>
-        @if (!string.IsNullOrEmpty(Model.SortLocalidad))
-        {
-            <input type="hidden" name="sortLocalidad" value="@Model.SortLocalidad" />
         }
-        <div class="filter-grid">
-            <div>
-                <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" value="@Model.FiltroNombre" placeholder="Buscar por nombre..."
-                       class="form-control" />
-            </div>
-            <div>
-                <label class="form-label">Nº Documento</label>
-                <input type="text" name="documento" value="@Model.FiltroDocumento" placeholder="Buscar por documento..."
-                       class="form-control" />
-            </div>
-            <div>
-                <label class="form-label">Localidad</label>
-                <select name="departamento" id="filtroDepartamento" class="form-control">
-                    <option value="">Todos</option>
-                    @foreach (var dep in Model.Departamentos)
-                    {
-                        <option value="@dep" selected="@(Model.FiltroDepartamento == dep)">@dep</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <label class="form-label">Municipio</label>
-                <select name="municipio" id="filtroMunicipio" class="form-control">
-                    <option value="">Todos</option>
-                    @foreach (var ciudad in Model.Ciudades)
-                    {
-                        <option value="@ciudad" selected="@(Model.FiltroMunicipio == ciudad)">@ciudad</option>
-                    }
-                </select>
-            </div>
-            <div class="filter-actions">
-                <button type="submit" class="btn btn--primary">Buscar</button>
-                <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
-            </div>
-        </div>
-    </form>
 
-<script>
-    document.getElementById('filtroDepartamento').addEventListener('change', async function () {
-        const municipioSelect = document.getElementById('filtroMunicipio');
-        municipioSelect.innerHTML = '<option value="">Todos</option>';
+        <form method="get" action="/admin/inscripciones" class="card filter-form" style="margin-top:1rem;">
+            <h4 style="margin-bottom: 14px;">Busqueda</h4>
+            @if (!string.IsNullOrEmpty(Model.SortLocalidad))
+            {
+                <input type="hidden" name="sortLocalidad" value="@Model.SortLocalidad" />
+            }
+            <div class="filter-grid">
+                <div>
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="nombre" value="@Model.FiltroNombre" placeholder="Buscar por nombre..."
+                           class="form-control" />
+                </div>
+                <div>
+                    <label class="form-label">Nº Documento</label>
+                    <input type="text" name="documento" value="@Model.FiltroDocumento" placeholder="Buscar por documento..."
+                           class="form-control" />
+                </div>
+                <div>
+                    <label class="form-label">Localidad</label>
+                    <select name="departamento" id="filtroDepartamento" class="form-control">
+                        <option value="">Todos</option>
+                        @foreach (var dep in Model.Departamentos)
+                        {
+                            <option value="@dep" selected="@(Model.FiltroDepartamento == dep)">@dep</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Municipio</label>
+                    <select name="municipio" id="filtroMunicipio" class="form-control">
+                        <option value="">Todos</option>
+                        @foreach (var ciudad in Model.Ciudades)
+                        {
+                            <option value="@ciudad" selected="@(Model.FiltroMunicipio == ciudad)">@ciudad</option>
+                        }
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn--primary">Buscar</button>
+                    <a href="/admin/inscripciones" class="btn btn--secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
 
-        const departamento = this.value;
-        if (!departamento) return;
+        <script>
+            document.getElementById('filtroDepartamento').addEventListener('change', async function () {
+                const municipioSelect = document.getElementById('filtroMunicipio');
+                municipioSelect.innerHTML = '<option value="">Todos</option>';
 
-        const response = await fetch(`/api/ubicacion/ciudades?departamento=${encodeURIComponent(departamento)}`);
-        if (!response.ok) return;
+                const departamento = this.value;
+                if (!departamento) return;
 
-        const ciudades = await response.json();
-        ciudades.forEach(ciudad => {
-            const option = document.createElement('option');
-            option.value = ciudad;
-            option.textContent = ciudad;
-            municipioSelect.appendChild(option);
-        });
-    });
-</script>
+                const response = await fetch(`/api/ubicacion/ciudades?departamento=${encodeURIComponent(departamento)}`);
+                if (!response.ok) return;
+
+                const ciudades = await response.json();
+                ciudades.forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.value = ciudad;
+                    option.textContent = ciudad;
+                    municipioSelect.appendChild(option);
+                });
+            });
+        </script>
